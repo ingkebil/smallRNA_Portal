@@ -47,8 +47,8 @@ foreach my $line (@lines) { ### Building lookup table [%]
                     foreach my $value (split /,/, $values) {
                         push @{ $parents_of{ $feature } }, $value;
                     }
+                    next KEY;
                 };
-                next KEY;
             }
         }
     }
