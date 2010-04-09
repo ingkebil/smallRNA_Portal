@@ -176,3 +176,5 @@ VALUES ($annotation_id, $coord->{ start }, $coord->{ stop }, $type);
 }
 
 1;
+
+__END__
