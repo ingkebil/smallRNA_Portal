@@ -12,7 +12,6 @@ use DBI;
 # only run when modulino is used as a script and not a module
 &run() unless caller;
 
-
 =head1 
 public static void main string args ;)
 =cut
