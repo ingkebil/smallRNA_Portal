@@ -14,6 +14,26 @@ use warnings;
 use Smart::Comments;
 use Data::Dumper;
 
+=head1
+The constructor.
+Invoke like:
+=head2 new();
+Will return a __PACKAGE__ object.
+
+=head2 new(\@lines);
+Will return a __PACKAGE__ object with the \@lines parsed into a @{ $self->{ par_lines } }.
+
+=head2 new(\@lines, \&lines_callback);
+Will return a __PACKAGE__ object with \@lines parsed and put through the \&lines_callback.
+The parsed lines are available in @{ $self->par_lines } }.
+The \&lines_callback should have { elements => \@els, attributes => \%attr_pairs } as signature.
+
+=head2 new(\@lines, \&lines_callback | undef, \&return_callback);
+Will return a __PACKAGE__ object with \@lines parsed and put through the \&lines_callback, if it exists.
+Instead of putting the parsed lines by default into an array structure, each line is given to a return_callback who decised what to do with the parsed line. Parsed lines are not available through $self->{ par_lines }, unless the \&return_callback specifies this.
+The \&return_callback has $line as signature. What the structure of $line is, is up to the lines_callback.
+
+=cut
 sub new {
     my $inv   = shift;
     my $class = ref($inv) || $inv;

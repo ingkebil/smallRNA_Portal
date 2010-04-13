@@ -8,8 +8,9 @@ can_ok($package, 'init_gene');
 can_ok($package, 'get_next_id');
 can_ok($package, 'get_cur_id');
 can_ok($package, 'make_SQL');
+can_ok($package, 'get_features');
 
-my @lines = <DATA>;
+my @lines = <DATA>; # read from the bottom of this file, from __DATA__ on
 my $ath2srna = new GFF::Ath2sRNA;
 isa_ok($ath2srna, 'GFF::Ath2sRNA');
 
@@ -216,104 +217,130 @@ is_deeply($ath2srna->{ genes },
             }
         ]
     },
+    'AT3TE67050' => {
+        start => 16540351,
+        stop => 16541285,
+        strand => q{+},
+        type => 'transposable_element',
+        'chr' => 'Chr3',
+        seq => q{},
+        coords => [
+            {
+                start => 16540351,
+                stop  => 16541285,
+                type  => q{},
+            }
+        ]
+    },
 });
 
+# to test if the output is correct, I simply c/p what the script outputs in here everytime I make a change to the belowmentioned GFF
 my @sql = (
-"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES (1 'AT2G19425', '1', '8412516', '8412618', '-', 'Chr2', 'miRNA');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (1, 'AT2G19425', '1', '8412516', '8412618', '-', 'Chr2', 'miRNA', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (1, 8412516, 8412618, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 1, 8412516, 8412618, 'Y');
 ",
-"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES (2 'AT2G17295', '1', '7520942', '7521021', '+', 'Chr2', 'snoRNA');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (2, 'AT2G17295', '1', '7520942', '7521021', '+', 'Chr2', 'snoRNA', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (2, 7520942, 7521021, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 2, 7520942, 7521021, 'Y');
 ",
-"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES (3 'AT2G01010', '1', '3706', '5513', '+', 'Chr2', 'rRNA');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (3, 'AT2G01010', '1', '3706', '5513', '+', 'Chr2', 'rRNA', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (3, 3706, 5513, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 3, 3706, 5513, 'Y');
 ",
-"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES (4 'AT1G03420', '1', '846664', '847739', '+', 'Chr1', 'mRNA_TE_gene');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (4, 'AT1G03420', '1', '846664', '847739', '+', 'Chr1', 'mRNA_TE_gene', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (4, 846664, 847739, \'Y\');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 4, 846664, 847739, 'Y');
 ",
-"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES (5 'AT1G02136', '1', '402693', '402961', '-', 'Chr1', 'pseudogenic_transcript');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (5, 'AT1G02136', '1', '402693', '402961', '-', 'Chr1', 'pseudogenic_transcript', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (5, 402886, 402961, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 5, 402886, 402961, 'Y');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (5, 402693, 402808, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 5, 402693, 402808, 'Y');
 ",
-"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES (6 'AT2G07742', '1', '3239657', '3239728', '-', 'Chr2', 'tRNA');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (6, 'AT2G07742', '1', '3239657', '3239728', '-', 'Chr2', 'tRNA', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (6, 3239657, 3239728, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 6, 3239657, 3239728, 'Y');
 ",
-"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES (7 'AT1G08115', '1', '2538076', '2538237', '-', 'Chr1', 'snRNA');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (7, 'AT1G08115', '1', '2538076', '2538237', '-', 'Chr1', 'snRNA', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (7, 2538076, 2538237, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 7, 2538076, 2538237, 'Y');
 ",
-"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES (8 'AT2G04852', '1', '1705148', '1706465', '-', 'Chr2', 'ncRNA');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (8, 'AT3TE67050', '1', '16540351', '16541285', '+', 'Chr3', 'transposable_element', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (8, 1706420, 1706465, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 8, 16540351, 16541285, 'Y');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (8, 1705716, 1705798, 'Y');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (9, 'AT2G04852', '1', '1705148', '1706465', '-', 'Chr2', 'ncRNA', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (8, 1705148, 1705618, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 9, 1706420, 1706465, 'Y');
 ",
-"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES (9 'AT1G01060', '4', '33666', '37780', '-', 'Chr1', 'mRNA');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 9, 1705716, 1705798, 'Y');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 37569, 37780, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 9, 1705148, 1705618, 'Y');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 37373, 37398, 'Y');
+"INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (10, 'AT1G01060', '4', '33666', '37780', '-', 'Chr1', 'mRNA', '1', NULL, NULL, '1');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 37062, 37203, 'Y');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 37569, 37780, 'Y');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 37023, 37061, 'N');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 37373, 37398, 'Y');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 36810, 36921, 'N');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 37062, 37203, 'Y');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 36624, 36685, 'N');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 37023, 37061, 'N');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 35730, 35963, 'N');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 36810, 36921, 'N');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 35567, 35647, 'N');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 36624, 36685, 'N');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 34401, 35471, 'N');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 35730, 35963, 'N');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 33992, 34327, 'N');
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 35567, 35647, 'N');
 ",
-"INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES (9, 33666, 33991, 'Y');
-");
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 34401, 35471, 'N');
+",
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 33992, 34327, 'N');
+",
+"INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (NULL, 10, 33666, 33991, 'Y');
+",
+);
 
-my @sort_ath_sql = sort { $a cmp $b } @{ $ath2srna->make_SQL };
+# test the SQL format
+# run the make_SQL with source_id 1 and species_id 1
+my @made_sql = @{ $ath2srna->make_SQL(1, 1) };
+my @sort_ath_sql = sort { $a cmp $b } grep { /INSERT/ } @made_sql;
 my @sort_sql     = sort { $a cmp $b } @sql;
 
 is_deeply(
@@ -321,6 +348,56 @@ is_deeply(
     \@sort_sql
 );
 
+# test if we make the correct ALTER TABLE
+# (Well, kind of, as we should only get this alter table when a type is added.)
+my @alter_table = grep { /ALTER TABLE/ } @made_sql;
+if (@alter_table) {
+    is(@alter_table[0], q{ALTER TABLE annotations MODIFY type enum('transposable_element','mRNA_TE_gene','mRNA','snRNA','rRNA','snoRNA','miRNA','pseudogenic_transcript','tRNA','ncRNA');
+});
+}
+
+# now test the CSV format
+$ath2srna->run_parser(\@lines);
+my $results = $ath2srna->make_CSV(1, 1);
+my @annotations = (
+    "1	'AT2G19425'	'1'	'8412516'	'8412618'	'-'	'Chr2'	'miRNA'	'1'	NULL	NULL	'1'",
+    "2	'AT2G17295'	'1'	'7520942'	'7521021'	'+'	'Chr2'	'snoRNA'	'1'	NULL	NULL	'1'",
+    "3	'AT2G01010'	'1'	'3706'	'5513'	'+'	'Chr2'	'rRNA'	'1'	NULL	NULL	'1'",
+    "4	'AT1G03420'	'1'	'846664'	'847739'	'+'	'Chr1'	'mRNA_TE_gene'	'1'	NULL	NULL	'1'",
+    "5	'AT1G02136'	'1'	'402693'	'402961'	'-'	'Chr1'	'pseudogenic_transcript'	'1'	NULL	NULL	'1'",
+    "6	'AT2G07742'	'1'	'3239657'	'3239728'	'-'	'Chr2'	'tRNA'	'1'	NULL	NULL	'1'",
+    "7	'AT1G08115'	'1'	'2538076'	'2538237'	'-'	'Chr1'	'snRNA'	'1'	NULL	NULL	'1'",
+    "8	'AT3TE67050'	'1'	'16540351'	'16541285'	'+'	'Chr3'	'transposable_element'	'1'	NULL	NULL	'1'",
+    "9	'AT2G04852'	'1'	'1705148'	'1706465'	'-'	'Chr2'	'ncRNA'	'1'	NULL	NULL	'1'",
+    "10	'AT1G01060'	'4'	'33666'	'37780'	'-'	'Chr1'	'mRNA'	'1'	NULL	NULL	'1'",
+);
+my @structures = (
+    "NULL	1	8412516	8412618	'Y'",
+    "NULL	2	7520942	7521021	'Y'",
+    "NULL	3	3706	5513	'Y'",
+    "NULL	4	846664	847739	'Y'",
+    "NULL	5	402886	402961	'Y'",
+    "NULL	5	402693	402808	'Y'",
+    "NULL	6	3239657	3239728	'Y'",
+    "NULL	7	2538076	2538237	'Y'",
+    "NULL	8	16540351	16541285	'Y'",
+    "NULL	9	1706420	1706465	'Y'",
+    "NULL	9	1705716	1705798	'Y'",
+    "NULL	9	1705148	1705618	'Y'",
+    "NULL	10	37569	37780	'Y'",
+    "NULL	10	37373	37398	'Y'",
+    "NULL	10	37062	37203	'Y'",
+    "NULL	10	37023	37061	'N'",
+    "NULL	10	36810	36921	'N'",
+    "NULL	10	36624	36685	'N'",
+    "NULL	10	35730	35963	'N'",
+    "NULL	10	35567	35647	'N'",
+    "NULL	10	34401	35471	'N'",
+    "NULL	10	33992	34327	'N'",
+    "NULL	10	33666	33991	'Y'",
+);
+
+is_deeply($results, { annotations => \@annotations, structures => \@structures, sql => \@alter_table });
 
 __DATA__
 
@@ -381,4 +458,7 @@ Chr2	TAIR9	exon	7520942	7521021	.	+	.	Parent=AT2G17295.1
 Chr2	TAIR9	gene	8412516	8412618	.	-	.	ID=AT2G19425;Note=miRNA;Name=AT2G19425
 Chr2	TAIR9	miRNA	8412516	8412618	.	-	.	ID=AT2G19425.1;Parent=AT2G19425;Name=AT2G19425.1;Index=1
 Chr2	TAIR9	exon	8412516	8412618	.	-	.	Parent=AT2G19425.1
+
+Chr3	TAIR9	transposable_element	16540351	16541285	.	+	.	ID=AT3TE67050;Name=AT3TE67050;Alias=ATREP4
+Chr3	TAIR9	transposon_fragment	16540351	16541285	.	+	.	Parent=AT3TE67050
 

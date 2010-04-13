@@ -8,22 +8,70 @@ use Data::Dumper;
 use GFF q/:GFF_SLOTS/;
 use GFF::Parser;
 use DBI;
+use Getopt::Long;
+use Pod::Usage;
 
 # only run when modulino is used as a script and not a module
 &run() unless caller;
 
+our $path = q{}; # put as a global so we can test
+
 =head1 
 public static void main string args ;)
+
 =cut
 sub run {
-    open F, '<', $ARGV[0] or die "Usage: $0 gfffile\n";
-    my @lines = <F>;
+    my $gfffile = q{};
+    my ($source_id, $species_id, $csv) = 0;
+    my ($species_name, $source_name) = q{};
+
+    my $opts = GetOptions(
+        'sourceid:i' => \$source_id,
+        'sourcename:s' => \$source_name,
+        'speciesid:i' => \$species_id,
+        'speciesname:s' => \$species_name,
+        'path:s' => \$path,
+    );
+
+    pod2usage(2) if (! $source_id && ! $source_name);
+    pod2usage(2) if (! $species_id && ! $species_name);
+
+    open F, '<', $ARGV[0] or pod2usage(3);
+    my @lines = <F>; ### Reading file [%]
     close F;
 
     my $ath2srna = __PACKAGE__->new;
+    $source_id = $ath2srna->check_source($source_id, $source_name);
+    $species_id = $ath2srna->check_species($species_id, $species_name);
     $ath2srna->run_parser(\@lines);
 
-    print @{ $ath2srna->make_SQL };
+    if ($path) { # if we want CSV
+        my $results = $ath2srna->make_CSV($source_id, $species_id);
+        $path .= q{/} if substr($path, -1, 1) ne q{/};
+
+        $ath2srna->fprint($path . 'annotations.csv', join( "\n", @{ $results->{ annotations } }));
+        $ath2srna->fprint($path . 'structures.csv', join( "\n", @{ $results->{ structures } }));
+        $ath2srna->fprint($path . 'ath.sql',        join( "\n", @{ $results->{ sql } }));
+    }
+    else { # no, we want plain old slow SQL!
+        print "SET foreign_key_constraints=0;\n";
+        print @{ $ath2srna->make_SQL($source_id, $species_id) };
+        print "SET foreign_key_constraints=1;\n";
+    }
+}
+
+sub fprint {
+    my $self = shift;
+    my $file = shift;
+    my $content = shift;
+
+    if (open(F, '>', $file)) {
+        print F $content;
+        close F;
+    }
+    else {
+        warn "Failed to write to $file!";
+    }
 }
 
 sub new {
@@ -31,7 +79,7 @@ sub new {
     my $class = ref $inv || $inv;
 
     my $gff = new GFF::Parser();
-    my $dbh = DBI->connect('dbi:mysql:database=ssdb_nostruct', 'kebil', 'kebil') or die "Could not connect to DB\n";
+    my $dbh = DBI->connect('dbi:mysql:database=smallrna', 'kebil', 'kebil') or die "Could not connect to DB\n";
 
     my $self = {
         parser => $gff,
@@ -44,9 +92,52 @@ sub new {
     return bless $self, $class;
 }
 
+sub check_source {
+    my $self = shift;
+    my ($sid, $sname) = @_;
+
+    if ($sid) {
+        my $q_sid   = $self->{ dbh }->quote($sid);
+        my $count = $self->{ dbh }->selectcol_arrayref(qq{SELECT count(*) FROM `sources` WHERE id = $q_sid})->[0];
+
+        warn "Sources ID '$sid' is not found in the DB. Make sure you've already added it or foreign key constraints will tair the galaxy part!" if ! $count;
+    }
+    elsif ($sname) {
+        my $q_sname = $self->{ dbh }->quote(qq{%$sname%});
+        $sid = $self->{ dbh }->selectcol_arrayref(qq{SELECT id FROM `sources` WHERE name LIKE $q_sname})->[0];
+
+        die "'$sname' is not found in the DB. The program needs a correct name to look up the source ID so we can link the annotation to the right source!" if ! $sid;
+    }
+
+    return $sid;
+}
+
+sub check_species {
+    my $self = shift;
+    my ($sid, $sname) = @_;
+
+    if ($sid) {
+        my $q_sid   = $self->{ dbh }->quote($sid);
+        my $count = $self->{ dbh }->selectcol_arrayref(qq{SELECT count(*) FROM `species` WHERE id = $q_sid})->[0];
+
+        warn "Species ID '$sid' is not found in the DB. Make sure you've already added it or foreign key constraints will tair the galaxy part!" if ! $count;
+    }
+    elsif ($sname) {
+        my $q_sname = $self->{ dbh }->quote(qq{%$sname%});
+        $sid = $self->{ dbh }->selectcol_arrayref(qq{SELECT id FROM `species` WHERE full_name LIKE $q_sname})->[0];
+
+        die "'$sname' is not found in the DB. The program needs a correct name to look up the species ID so we can link the annotation to the right species!" if ! $sid;
+    }
+
+    return $sid;
+}
+
 sub run_parser {
     my $self = shift;
     my $lines = shift;
+
+    # well, if we parsed already, don't do it again!
+    return $self->{ genes } if (%{ $self->{ genes } });
 
     my $process_line = sub {
         my $els  = $_[0]->{ elements   };
@@ -57,8 +148,8 @@ sub run_parser {
 
         # get an ID, either from the ID, or from the Parent attr
         my $ID   = exists $attr->{ ID }
-                         ? $attr->{ ID }
-                         : $attr->{ Parent };
+        ? $attr->{ ID }
+        : $attr->{ Parent };
         if ($ID =~ /(.*),/) { # multi value Parents, only take the first one
             $ID = $1;
         }
@@ -124,56 +215,217 @@ sub init_gene {
     };
 }
 
+{
+
+# because the make subs were so similar with the exception on how they add data to certain structures
+# I decided to make this complex setup with add-subs and return-subs.
+
+my @annotations = ();
+my @sql = ();
+my @structures = ();
+
+
+## The adders
+sub add_annotation {
+    push @annotations, join("\t", @_);
+}
+
+sub add_sql {
+    push @sql, $_[0];
+}
+
+sub add_annotation_sql {
+    push @sql, 'INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+VALUES (' . join(q{, }, @_) . ');
+';
+}
+
+sub add_structure_sql {
+    push @sql, 'INSERT INTO `structures` (id, annotation_id, start, stop, utr)
+VALUES (' . join(q{, }, @_) . ');
+';
+}
+
+sub add_structure {
+    push @structures, join("\t", @_);
+}
+
+## the returners
+sub return_sql {
+    return \@sql;
+}
+
+sub return_csv {
+    return { annotations => \@annotations, structures => \@structures, sql => \@sql };
+}
+
+## the actual functions 
+
+sub reset_make {
+    @annotations = ();
+    @structures  = ();
+    @sql = ();
+}
+
+sub make_CSV {
+    my $self = shift;
+
+    $self->reset_make;
+
+    return $self->make_output({
+            annotation_adder => \&add_annotation,
+            structure_adder  => \&add_structure,
+            sql_adder        => \&add_sql,
+            returner         => \&return_csv,
+        }, @_);
+}
+
 sub make_SQL {
     my $self = shift;
-    my @result = ();
+
+    $self->reset_make;
+    
+    return $self->make_output({
+            annotation_adder => \&add_annotation_sql,
+            structure_adder  => \&add_structure_sql,
+            sql_adder        => \&add_sql,
+            returner         => \&return_sql,
+
+        }, @_);
+}
+
+## don't call this directly, use the make_CSV and make_SQL functions
+sub make_output {
+    my $self = shift;
+    my $handlers = shift;
+    my $sid  = shift;
+    my $soid  = shift;
+
+    my $features = $self->get_features();
 
     while (my ($acc_model_nr, $gene) = each %{ $self->{ genes } }) {
         my ($acc_nr, $model_nr) = split /\./, $acc_model_nr;
         $gene->{ acc_nr } = $acc_nr;
-        $gene->{ model_nr } = $model_nr;
-        my $coords = $gene->{ coords };
+        $gene->{ model_nr } = $model_nr || 1;
+        $gene->{ source_id } = $sid;
+        $gene->{ species_id } = $soid;
 
-        foreach my $key (keys %$gene) {
-            $gene->{ $key } = $self->{ dbh }->quote($gene->{ $key });
+        # check if the feature exists
+        if (! exists $features->{ $gene->{ type } }) {
+            $features->{ $gene->{ type } } = 1;
         }
-        
-        my $annotation_id = $self->get_next_id;
-        push @result, <<"";
-INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`)
-VALUES ($annotation_id $gene->{ acc_nr }, $gene->{ model_nr }, $gene->{ start }, $gene->{ stop }, $gene->{ strand }, $gene->{ 'chr' }, $gene->{ type });
 
-        foreach my $coord ( @{ $coords }) {
+        # quote for the DB
+        my $g = {};
+        foreach my $key (keys %$gene) {
+            $g->{ $key } = $self->{ dbh }->quote($gene->{ $key });
+        }
+        my $undef = $self->{ dbh }->quote(undef);
+
+        # if we want to reuse the $genes, we add the $annotation_id 
+        # to its hash to prevent inc'ing the id after each call
+        my $annotation_id = exists $gene->{ id } ? $gene->{ id } : $self->get_next_id;
+        $gene->{ id } = $annotation_id;
+
+        $handlers->{ annotation_adder }(
+            $annotation_id,
+            $g->{ acc_nr },
+            $g->{ model_nr },
+            $g->{ start },
+            $g->{ stop },
+            $g->{ strand },
+            $g->{ 'chr' },
+            $g->{ type },
+            $g->{ species_id },
+            $undef,
+            $undef,
+            $g->{ source_id }
+        );
+
+        foreach my $coord ( @{ $gene->{ coords } }) {
             my $type = $coord->{ type } eq q{cds} ? 'N' : 'Y';
             $type = $self->{ dbh }->quote($type);
-            push @result, <<"";
-INSERT INTO `structures` (annotation_id, start, stop, utr)
-VALUES ($annotation_id, $coord->{ start }, $coord->{ stop }, $type);
-
+            $handlers->{ structure_adder }(
+                $undef,
+                $annotation_id,
+                $coord->{ start },
+                $coord->{ stop },
+                $type
+            );
         }
     }
-    
-    return \@result;
+
+    # check if the feature set differs compared to the original
+    my $ori_features = $self->get_features();
+    if (grep ! exists $ori_features->{ $_ }, keys %$features) {
+        my $feats = join q{','}, keys %$features;
+        $feats = q{'} . $feats . q{'};  
+        $handlers->{ sql_adder }("ALTER TABLE annotations MODIFY type enum($feats);\n");
+    }
+
+    return &{ $handlers->{ returner } };
+}
+
+}
+
+sub get_features {
+    my $self = shift;
+
+    my %features = map { s/enum\('|'\)//g; $_, 1 }
+    split /','/,
+    $self->{ dbh }->selectrow_hashref("SHOW columns FROM annotations WHERE field = 'type'")->{Type};
+
+    return \%features;
 }
 
 { 
-    my $last_insert_id = 0;
+my $last_insert_id = 0;
 
-    sub get_next_id {
-        my $self = shift;
+sub get_next_id {
+    my $self = shift;
 
-        if (!$last_insert_id) {
-            $last_insert_id = $self->{ dbh }->selectrow_arrayref(q{SELECT LAST_INSERT_ID()})->[0];
-        }
-
-        return ++$last_insert_id;
+    if (!$last_insert_id) {
+        $last_insert_id = $self->{ dbh }->selectrow_arrayref(q{SELECT LAST_INSERT_ID()})->[0];
     }
 
-    sub get_cur_id {
-        return $last_insert_id;
-    }
+    return ++$last_insert_id;
+}
+
+sub get_cur_id {
+    return $last_insert_id;
+}
 }
 
 1;
 
 __END__
+
+=head1 NAME
+
+Ath2sRNA - Parsing GFF files into SQL/CSV statements for the smallRNA database;
+
+=head1 SYNOPSIS
+
+Ath2sRNA [options] GFFfile
+
+By default, the parser will output SQL statements. To output CSV add the --path parameter.
+
+Required parameters: 
+
+  --sourceid <id> | --sourcename <name>: The ID or the name of the source as provided in the DB, table 'sources'.
+  --speciesid <id>| --speciesname <name>: The ID or the name of the species as provided in the DB, table 'species'.
+
+Optional:
+
+  --path <path>: specify a path where to put output files. This will also put the parser into CSV mode and output three files:
+                    * annotations.csv
+                    * structures.csv
+                    * ath.sql : containing possible table alterations.
+   Import the table alterations with: mysql -u <username> -p smallrna < ath.sql
+   Import the CSV with: mysqlimport -u <username> -p --fields-enclosed-by \' -L smallrna annotations.csv 
+
+
+=head1 AUTHOR
+
+Kenny Billiau
+
