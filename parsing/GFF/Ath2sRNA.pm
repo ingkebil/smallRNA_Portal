@@ -7,6 +7,7 @@ use Smart::Comments;
 use Data::Dumper;
 use GFF q/:GFF_SLOTS/;
 use GFF::Parser;
+use FASTA::Reader;
 use DBI;
 use Getopt::Long;
 use Pod::Usage;
@@ -18,12 +19,11 @@ our $path = q{}; # put as a global so we can test
 
 =head1 
 public static void main string args ;)
-
 =cut
 sub run {
     my $gfffile = q{};
     my ($source_id, $species_id, $csv) = 0;
-    my ($species_name, $source_name) = q{};
+    my ($species_name, $source_name, $fasta_file, $fasta_id_regex) = q{};
 
     my $opts = GetOptions(
         'sourceid:i' => \$source_id,
@@ -31,6 +31,8 @@ sub run {
         'speciesid:i' => \$species_id,
         'speciesname:s' => \$species_name,
         'path:s' => \$path,
+        'fasta:s' => \$fasta_file,
+        'fasta_id_regex:s' => \$fasta_id_regex,
     );
 
     pod2usage(2) if (! $source_id && ! $source_name);
@@ -43,6 +45,7 @@ sub run {
     my $ath2srna = __PACKAGE__->new;
     $source_id = $ath2srna->check_source($source_id, $source_name);
     $species_id = $ath2srna->check_species($species_id, $species_name);
+
     $ath2srna->run_parser(\@lines);
 
     if ($path) { # if we want CSV
@@ -78,6 +81,8 @@ sub new {
     my $inv = shift;
     my $class = ref $inv || $inv;
 
+    my ($fasta_file, $fasta_id_regex) = @_;
+
     my $gff = new GFF::Parser();
     my $dbh = DBI->connect('dbi:mysql:database=smallrna', 'kebil', 'kebil') or die "Could not connect to DB\n";
 
@@ -88,6 +93,15 @@ sub new {
         # { acc_nr.model_nr => { strand, chr, type, seq, start, stop, struct, coords => [{ start, stop, type => 5', 3', cds, '' }] } }
         genes   => {},
     };
+
+    if ($fasta_file) {
+        $fasta_id_regex = $fasta_id_regex || '>(.*)';
+
+        my $freader = new FASTA::Reader($fasta_file, $fasta_id_regex);
+        $self->{ freader        } = $freader;
+        $self->{ fasta_file     } = $fasta_file;
+        $self->{ fasta_id_regex } = $fasta_id_regex;
+    }
 
     return bless $self, $class;
 }
@@ -315,6 +329,15 @@ sub make_output {
             $features->{ $gene->{ type } } = 1;
         }
 
+        # get the seq
+        my $seq = undef;
+        if (exists $self->{ freader }) {
+            my $freader = $self->{ freader };
+            $seq = $freader->get_seq($self->{ fasta_file }, $gene->{ 'chr' }); 
+            $seq = substr($seq, $gene->{ start }, $gene->{ stop } - $gene->{ start });
+        }
+        $gene->{ seq } = $seq ? $seq : undef;
+
         # quote for the DB
         my $g = {};
         foreach my $key (keys %$gene) {
@@ -337,7 +360,7 @@ sub make_output {
             $g->{ 'chr' },
             $g->{ type },
             $g->{ species_id },
-            $undef,
+            $g->{ seq },
             $undef,
             $g->{ source_id }
         );
@@ -412,12 +435,15 @@ By default, the parser will output SQL statements. To output CSV add the --path 
 
 Required parameters: 
 
-  --sourceid <id> | --sourcename <name>: The ID or the name of the source as provided in the DB, table 'sources'.
-  --speciesid <id>| --speciesname <name>: The ID or the name of the species as provided in the DB, table 'species'.
+  --sourceid <id> | --sourcename <name>: The ID or the name of the source as provided in the DB, table 'sources'. When giving the sourcename a DB lookup is done to get the sourceid.
+  --speciesid <id>| --speciesname <name>: The ID or the name of the species as provided in the DB, table 'species'. When giving the speciesname a DB lookup is done to get the speciesid.
+
 
 Optional:
 
-  --path <path>: specify a path where to put output files. This will also put the parser into CSV mode and output three files:
+  --fasta <file>: The FASTA file where to cut the sequences out.
+  --fasta_id_regex <regex>: The regex to extract the id from the FASTA file. Default takes the whole line without the leading '>'.
+  --path <path>: Specify a path where to put output files. This will also put the parser into CSV mode and output three files:
                     * annotations.csv
                     * structures.csv
                     * ath.sql : containing possible table alterations.

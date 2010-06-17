@@ -71,11 +71,19 @@ sub parse {
         }
         my $attributes = pop @els;
 
-        my %split_attr =
-            grep { /.+/ }     # only keep the elements that have some content
-            map { chomp; $_ } # remove trailing whitespace
-            split /;|=/,      # split the attr
-            $attributes;
+        my @split_attrs = split /;|=/, $attributes;
+        my %split_attr = ();
+        if (scalar(@split_attrs) % 2 == 0) { # name=value pairs
+            %split_attr =
+                grep { /.+/ }     # only keep the elements that have some content
+                map { chomp; $_ } # remove trailing whitespace
+                @split_attrs;
+        }
+        else { # single value pairs
+            %split_attr = 
+                map { chomp; $_ => 1 } # remove trailing whitespace and make it into a hashpair
+                @split_attrs;
+        }
 
          &$return_cb(
             &$lines_cb(

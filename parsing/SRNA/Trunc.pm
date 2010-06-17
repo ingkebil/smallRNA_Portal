@@ -23,6 +23,7 @@ sub run {
 
     pod2usage(2) if (!$user || !$pass || !$db || !$host);
 
+    print "$pass\n";
     my $dbh = DBI->connect("dbi:mysql:database=$db;host=$host", $user, $pass);
 
     if (! scalar @tables) {
