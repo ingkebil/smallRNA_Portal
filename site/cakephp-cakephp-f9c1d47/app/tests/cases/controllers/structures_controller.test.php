@@ -1,5 +1,5 @@
 <?php
-/* Structures Test cases generated on: 2010-04-09 15:04:20 : 1270820240*/
+/* Structures Test cases generated on: 2010-06-22 11:06:04 : 1277197744*/
 App::import('Controller', 'Structures');
 
 class TestStructuresController extends StructuresController {
@@ -11,7 +11,7 @@ class TestStructuresController extends StructuresController {
 }
 
 class StructuresControllerTestCase extends CakeTestCase {
-	var $fixtures = array('app.structure', 'app.annotation', 'app.species', 'app.experiment', 'app.snra', 'app.sequence', 'app.type', 'app.source');
+	var $fixtures = array('app.structure', 'app.annotation', 'app.species', 'app.source', 'app.experiment', 'app.srna', 'app.sequence', 'app.type', 'app.types');
 
 	function startTest() {
 		$this->Structures =& new TestStructuresController();

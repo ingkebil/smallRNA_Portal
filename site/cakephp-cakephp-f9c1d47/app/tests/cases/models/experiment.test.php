@@ -1,9 +1,9 @@
 <?php
-/* Experiment Test cases generated on: 2010-04-09 15:04:57 : 1270819437*/
+/* Experiment Test cases generated on: 2010-06-22 11:06:52 : 1277197612*/
 App::import('Model', 'Experiment');
 
 class ExperimentTestCase extends CakeTestCase {
-	var $fixtures = array('app.experiment', 'app.species', 'app.snra');
+	var $fixtures = array('app.experiment', 'app.species', 'app.srna');
 
 	function startTest() {
 		$this->Experiment =& ClassRegistry::init('Experiment');

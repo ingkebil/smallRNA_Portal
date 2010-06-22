@@ -1,5 +1,5 @@
 <?php
-/* Species Test cases generated on: 2010-04-09 15:04:28 : 1270820188*/
+/* Species Test cases generated on: 2010-06-22 11:06:02 : 1277197862*/
 App::import('Controller', 'Species');
 
 class TestSpeciesController extends SpeciesController {
@@ -11,7 +11,7 @@ class TestSpeciesController extends SpeciesController {
 }
 
 class SpeciesControllerTestCase extends CakeTestCase {
-	var $fixtures = array('app.species', 'app.annotation', 'app.source', 'app.structure', 'app.experiment', 'app.snra', 'app.sequence', 'app.type');
+	var $fixtures = array('app.species', 'app.annotation', 'app.source', 'app.structure', 'app.experiment', 'app.srna', 'app.sequence', 'app.type', 'app.types');
 
 	function startTest() {
 		$this->Species =& new TestSpeciesController();

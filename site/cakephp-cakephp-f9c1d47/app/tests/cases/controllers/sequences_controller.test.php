@@ -1,5 +1,5 @@
 <?php
-/* Sequences Test cases generated on: 2010-04-09 15:04:14 : 1270819454*/
+/* Sequences Test cases generated on: 2010-06-22 11:06:25 : 1277197645*/
 App::import('Controller', 'Sequences');
 
 class TestSequencesController extends SequencesController {
@@ -11,7 +11,7 @@ class TestSequencesController extends SequencesController {
 }
 
 class SequencesControllerTestCase extends CakeTestCase {
-	var $fixtures = array('app.sequence', 'app.snra');
+	var $fixtures = array('app.sequence', 'app.srna', 'app.experiment', 'app.species', 'app.types');
 
 	function startTest() {
 		$this->Sequences =& new TestSequencesController();

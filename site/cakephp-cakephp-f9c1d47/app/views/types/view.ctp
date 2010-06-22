@@ -16,17 +16,17 @@
 <div class="actions">
 	<h3><?php __('Actions'); ?></h3>
 	<ul>
-		<li><?php echo $this->Html->link(sprintf(__('Edit %s', true), __('Type', true)), array('action' => 'edit', $type['Type']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('Delete %s', true), __('Type', true)), array('action' => 'delete', $type['Type']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $type['Type']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Types', true)), array('action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Type', true)), array('action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Snras', true)), array('controller' => 'snras', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Snra', true)), array('controller' => 'snras', 'action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('Edit Type', true), array('action' => 'edit', $type['Type']['id'])); ?> </li>
+		<li><?php echo $this->Html->link(__('Delete Type', true), array('action' => 'delete', $type['Type']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $type['Type']['id'])); ?> </li>
+		<li><?php echo $this->Html->link(__('List Types', true), array('action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('New Type', true), array('action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('List Srnas', true), array('controller' => 'srnas', 'action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('New Srna', true), array('controller' => 'srnas', 'action' => 'add')); ?> </li>
 	</ul>
 </div>
 <div class="related">
-	<h3><?php printf(__('Related %s', true), __('Snras', true));?></h3>
-	<?php if (!empty($type['Snra'])):?>
+	<h3><?php __('Related Srnas');?></h3>
+	<?php if (!empty($type['Srna'])):?>
 	<table cellpadding = "0" cellspacing = "0">
 	<tr>
 		<th><?php __('Id'); ?></th>
@@ -44,28 +44,28 @@
 	</tr>
 	<?php
 		$i = 0;
-		foreach ($type['Snra'] as $snra):
+		foreach ($type['Srna'] as $srna):
 			$class = null;
 			if ($i++ % 2 == 0) {
 				$class = ' class="altrow"';
 			}
 		?>
 		<tr<?php echo $class;?>>
-			<td><?php echo $snra['id'];?></td>
-			<td><?php echo $snra['name'];?></td>
-			<td><?php echo $snra['start'];?></td>
-			<td><?php echo $snra['stop'];?></td>
-			<td><?php echo $snra['strand'];?></td>
-			<td><?php echo $snra['sequence_id'];?></td>
-			<td><?php echo $snra['score'];?></td>
-			<td><?php echo $snra['type_id'];?></td>
-			<td><?php echo $snra['abundance'];?></td>
-			<td><?php echo $snra['nomalized_abundance'];?></td>
-			<td><?php echo $snra['experiment_id'];?></td>
+			<td><?php echo $srna['id'];?></td>
+			<td><?php echo $srna['name'];?></td>
+			<td><?php echo $srna['start'];?></td>
+			<td><?php echo $srna['stop'];?></td>
+			<td><?php echo $srna['strand'];?></td>
+			<td><?php echo $srna['sequence_id'];?></td>
+			<td><?php echo $srna['score'];?></td>
+			<td><?php echo $srna['type_id'];?></td>
+			<td><?php echo $srna['abundance'];?></td>
+			<td><?php echo $srna['nomalized_abundance'];?></td>
+			<td><?php echo $srna['experiment_id'];?></td>
 			<td class="actions">
-				<?php echo $this->Html->link(__('View', true), array('controller' => 'snras', 'action' => 'view', $snra['id'])); ?>
-				<?php echo $this->Html->link(__('Edit', true), array('controller' => 'snras', 'action' => 'edit', $snra['id'])); ?>
-				<?php echo $this->Html->link(__('Delete', true), array('controller' => 'snras', 'action' => 'delete', $snra['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $snra['id'])); ?>
+				<?php echo $this->Html->link(__('View', true), array('controller' => 'srnas', 'action' => 'view', $srna['id'])); ?>
+				<?php echo $this->Html->link(__('Edit', true), array('controller' => 'srnas', 'action' => 'edit', $srna['id'])); ?>
+				<?php echo $this->Html->link(__('Delete', true), array('controller' => 'srnas', 'action' => 'delete', $srna['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $srna['id'])); ?>
 			</td>
 		</tr>
 	<?php endforeach; ?>
@@ -74,7 +74,7 @@
 
 	<div class="actions">
 		<ul>
-			<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Snra', true)), array('controller' => 'snras', 'action' => 'add'));?> </li>
+			<li><?php echo $this->Html->link(__('New Srna', true), array('controller' => 'srnas', 'action' => 'add'));?> </li>
 		</ul>
 	</div>
 </div>

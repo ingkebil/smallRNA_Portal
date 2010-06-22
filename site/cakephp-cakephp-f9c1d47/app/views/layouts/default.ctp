@@ -39,6 +39,7 @@
 			<h1><?php echo $this->Html->link(__('Small RNA, Big DB', true), '/'); ?></h1>
 		</div>
 		<div id="content">
+            <div id="menu"><?php echo $this->element('menu'); ?></div>
 
 			<?php echo $this->Session->flash(); ?>
 

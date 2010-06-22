@@ -21,16 +21,16 @@
 <div class="actions">
 	<h3><?php __('Actions'); ?></h3>
 	<ul>
-		<li><?php echo $this->Html->link(sprintf(__('Edit %s', true), __('Source', true)), array('action' => 'edit', $source['Source']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('Delete %s', true), __('Source', true)), array('action' => 'delete', $source['Source']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $source['Source']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Sources', true)), array('action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Source', true)), array('action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Annotations', true)), array('controller' => 'annotations', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Annotation', true)), array('controller' => 'annotations', 'action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('Edit Source', true), array('action' => 'edit', $source['Source']['id'])); ?> </li>
+		<li><?php echo $this->Html->link(__('Delete Source', true), array('action' => 'delete', $source['Source']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $source['Source']['id'])); ?> </li>
+		<li><?php echo $this->Html->link(__('List Sources', true), array('action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('New Source', true), array('action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('List Annotations', true), array('controller' => 'annotations', 'action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('New Annotation', true), array('controller' => 'annotations', 'action' => 'add')); ?> </li>
 	</ul>
 </div>
 <div class="related">
-	<h3><?php printf(__('Related %s', true), __('Annotations', true));?></h3>
+	<h3><?php __('Related Annotations');?></h3>
 	<?php if (!empty($source['Annotation'])):?>
 	<table cellpadding = "0" cellspacing = "0">
 	<tr>
@@ -81,7 +81,7 @@
 
 	<div class="actions">
 		<ul>
-			<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Annotation', true)), array('controller' => 'annotations', 'action' => 'add'));?> </li>
+			<li><?php echo $this->Html->link(__('New Annotation', true), array('controller' => 'annotations', 'action' => 'add'));?> </li>
 		</ul>
 	</div>
 </div>

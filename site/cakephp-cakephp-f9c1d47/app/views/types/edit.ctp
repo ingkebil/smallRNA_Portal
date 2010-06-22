@@ -1,7 +1,7 @@
 <div class="types form">
 <?php echo $this->Form->create('Type');?>
 	<fieldset>
- 		<legend><?php printf(__('Edit %s', true), __('Type', true)); ?></legend>
+ 		<legend><?php __('Edit Type'); ?></legend>
 	<?php
 		echo $this->Form->input('id');
 		echo $this->Form->input('name');
@@ -14,8 +14,8 @@
 	<ul>
 
 		<li><?php echo $this->Html->link(__('Delete', true), array('action' => 'delete', $this->Form->value('Type.id')), null, sprintf(__('Are you sure you want to delete # %s?', true), $this->Form->value('Type.id'))); ?></li>
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Types', true)), array('action' => 'index'));?></li>
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Snras', true)), array('controller' => 'snras', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Snra', true)), array('controller' => 'snras', 'action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('List Types', true), array('action' => 'index'));?></li>
+		<li><?php echo $this->Html->link(__('List Srnas', true), array('controller' => 'srnas', 'action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('New Srna', true), array('controller' => 'srnas', 'action' => 'add')); ?> </li>
 	</ul>
 </div>

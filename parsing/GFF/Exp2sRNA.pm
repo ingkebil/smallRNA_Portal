@@ -32,15 +32,22 @@ sub run {
         'fasta_id_regex:s' => \$fasta_id_regex,
     );
 
-    pod2usage(2) if (! $exp_id && ! $type);
+    pod2usage(2) if (! $exp_id && ! $type && !$ARGV[0]);
 
-    open F, '<', $ARGV[0] or pod2usage(3);
-    my @lines = <F>; ### Reading file [%]
+    print 'Reading GFF ... ';
+    open F, '<', $ARGV[0] or die "$ARGV[0] not found!\n";
+    my @lines = <F>; ### Reading GFF [%]
     close F;
+    print "done.\n";
     my $exp2srna = __PACKAGE__->new($fasta_file, $fasta_id_regex);
 
-    $exp2srna->fprint("$path/srnas.csv", join("\n", @{ $exp2srna->run_parser(\@lines, $exp_id, $type) }));
-    $exp2srna->fprint("$path/sequences.sql", join(";\n", @{ $exp2srna->{ return }->{ sql } }));
+    print 'Parsing GFF ... ';
+    $exp2srna->run_parser(\@lines, $exp_id, $type);
+    print "done.\n";
+
+    while (my ($outputtype, $results) = each %{ $exp2srna->{ return }->{ csv } }) {
+        $exp2srna->fprint("$path/$outputtype.csv", join("\n", @{ $results }));
+    }
 }
 
 sub fprint {
@@ -69,18 +76,20 @@ sub new {
     my $self = {
         parser => $gff,
         dbh    => $dbh,
-        rnas   => {},
-        return => { sql => [], csv => [] },
+        return => { csv => { srnas => [], sequences => [], types => [] } },
         type   => $type,
     };
 
     if ($fasta_file) {
+        print 'Reading FASTA ... ';
         $fasta_id_regex = $fasta_id_regex || '>(.*)';
 
         my $freader = new FASTA::Reader({ filename => $fasta_file, id_regex => $fasta_id_regex});
         $self->{ freader        } = $freader;
         $self->{ fasta_file     } = $fasta_file;
         $self->{ fasta_id_regex } = $fasta_id_regex;
+
+        print "done.\n";
     }
 
     return bless $self, $class;
@@ -93,11 +102,11 @@ sub run_parser {
     my $type = shift;
 
     # well, if we parsed already, don't do it again!
-    return $self->{ rnas } if (%{ $self->{ rnas } });
+    return $self->{ return }->{ csv }->{ srnas } if (@{ $self->{ return }->{ csv }->{ srnas } });
 
     my $els = $self->{ parser }->parse($lines);
 
-    return $self->make_output($els, $exp_id, $type);
+    return $self->{ return }->{ csv }->{ srnas } = $self->make_output($els, $exp_id, $type);
 }
 
 sub make_output {
@@ -106,9 +115,8 @@ sub make_output {
     my $exp_id = shift;
     my $type = shift;
 
-
     my @lines = ();
-    foreach my $el (@{ $els }) {
+    foreach my $el (@{ $els }) { ### Generating output [%]
         my $line = q{};
         my $id = $self->get_next_id;
 
@@ -165,20 +173,29 @@ sub make_output {
     return \@lines;
 }
 
-sub seq_sql_adder {
+#sub seq_sql_adder {
+#    my $self = shift;
+#
+#    @_ = map { $self->{ dbh }->quote($_) } @_;
+#    
+#    push @{ $self->{ return }->{ sql }->{ seq } }, "INSERT INTO `sequences` (id, seq) VALUES ($_[0], $_[1])";
+#}
+#
+#sub type_sql_adder {
+#    my $self = shift;
+#
+#    @_ = map { $self->{ dbh }->quote($_) } @_;
+#    
+#    push @{ $self->{ return }->{ sql }->{ type } }, "INSERT INTO `types` (id, name) VALUES ($_[0], $_[1])";
+#}
+
+sub csv_adder {
     my $self = shift;
+    my $type = shift;
 
-    @_ = map { $self->{ dbh }->quote($_) } @_;
-    
-    push @{ $self->{ return }->{ sql } }, "INSERT INTO `sequences` (id, seq) VALUES ($_[0], $_[1])";
-}
-
-sub type_sql_adder {
-    my $self = shift;
-
-    @_ = map { $self->{ dbh }->quote($_) } @_;
-    
-    push @{ $self->{ return }->{ sql } }, "INSERT INTO `types` (id, name) VALUES ($_[0], $_[1])";
+    push @{ $self->{ return }->{ csv }->{ $type } },
+        join qq{\t},
+        map { $self->{ dbh }->quote($_); } @_;
 }
 
 {
@@ -196,7 +213,7 @@ sub type_sql_adder {
                     $last_insert_id = $self->{ dbh }->selectrow_arrayref(q{SELECT MAX(id) FROM `sequences`})->[0];
                 }
 
-                $self->seq_sql_adder(++$last_insert_id, $seq);
+                $self->csv_adder('sequences', ++$last_insert_id, $seq);
 
                 $seqs{ $seq } = $last_insert_id;
             }
@@ -224,7 +241,7 @@ sub type_sql_adder {
                     $last_insert_id = $self->{ dbh }->selectrow_arrayref(q{SELECT MAX(id) FROM `types`})->[0];
                 }
 
-                $self->type_sql_adder(++$last_insert_id, $type);
+                $self->csv_adder('types', ++$last_insert_id, $type);
 
                 $types{ $type } = $last_insert_id;
             }
@@ -267,6 +284,24 @@ Exp2sRNA - Parsing GFF files into CSV statements for the smallRNA database;
 =head1 SYNOPSIS
 
 Usage: Exp2sRNA [options] gfffile
+
+Exp2sRNA parses a smallRNA GFF file into a CSV. Two files will be generated:
+srnas.csv and types.cvs. The latter will containt the new entries for the types
+table.  If a fasta file is provided with the --fasta param, a sequences.csv
+file will also be generated.
+
+    Options:
+        --experiment_id: The id of the experiment as stored in the database. This id will be used in the generation of the CSV.
+        --type: The name of the smallRNA type. If this does not exist in the DB, a types.csv file will be generated.
+        --path: The output directory to place the CSV files.
+            * srnas.csv
+            * sequences.csv
+            * types.csv
+        --fasta: The fasta file. If provided, a sequence.csv file will be generated.
+        --fasta_id_regex: The regex to extract an ID from the fasta file headers. The ID should be surrounded by round brackets () in the regex. Defaults to '>(.*)'.
+        
+To upload the CSV files into the DB use following command:
+mysqlimport -u <username> -p -L --fields-enclosed-by \' <filename.csv>
 
 =head1 AUTHOR
 

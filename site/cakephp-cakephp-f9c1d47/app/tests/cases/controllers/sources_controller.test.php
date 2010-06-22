@@ -1,5 +1,5 @@
 <?php
-/* Sources Test cases generated on: 2010-04-09 15:04:26 : 1270819466*/
+/* Sources Test cases generated on: 2010-06-22 11:06:31 : 1277197651*/
 App::import('Controller', 'Sources');
 
 class TestSourcesController extends SourcesController {
@@ -11,7 +11,7 @@ class TestSourcesController extends SourcesController {
 }
 
 class SourcesControllerTestCase extends CakeTestCase {
-	var $fixtures = array('app.source', 'app.annotation', 'app.species', 'app.structure');
+	var $fixtures = array('app.source', 'app.annotation', 'app.species', 'app.structure', 'app.experiment', 'app.srna', 'app.types');
 
 	function startTest() {
 		$this->Sources =& new TestSourcesController();

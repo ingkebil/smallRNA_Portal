@@ -10,7 +10,7 @@ class TypesController extends AppController {
 
 	function view($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'type'));
+			$this->Session->setFlash(__('Invalid type', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		$this->set('type', $this->Type->read(null, $id));
@@ -20,25 +20,25 @@ class TypesController extends AppController {
 		if (!empty($this->data)) {
 			$this->Type->create();
 			if ($this->Type->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'type'));
+				$this->Session->setFlash(__('The type has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'type'));
+				$this->Session->setFlash(__('The type could not be saved. Please, try again.', true));
 			}
 		}
 	}
 
 	function edit($id = null) {
 		if (!$id && empty($this->data)) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'type'));
+			$this->Session->setFlash(__('Invalid type', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		if (!empty($this->data)) {
 			if ($this->Type->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'type'));
+				$this->Session->setFlash(__('The type has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'type'));
+				$this->Session->setFlash(__('The type could not be saved. Please, try again.', true));
 			}
 		}
 		if (empty($this->data)) {
@@ -48,14 +48,14 @@ class TypesController extends AppController {
 
 	function delete($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid id for %s', true), 'type'));
+			$this->Session->setFlash(__('Invalid id for type', true));
 			$this->redirect(array('action'=>'index'));
 		}
 		if ($this->Type->delete($id)) {
-			$this->Session->setFlash(sprintf(__('%s deleted', true), 'Type'));
+			$this->Session->setFlash(__('Type deleted', true));
 			$this->redirect(array('action'=>'index'));
 		}
-		$this->Session->setFlash(sprintf(__('%s was not deleted', true), 'Type'));
+		$this->Session->setFlash(__('Type was not deleted', true));
 		$this->redirect(array('action' => 'index'));
 	}
 }

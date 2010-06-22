@@ -1,7 +1,7 @@
 <div class="annotations form">
 <?php echo $this->Form->create('Annotation');?>
 	<fieldset>
- 		<legend><?php printf(__('Add %s', true), __('Annotation', true)); ?></legend>
+ 		<legend><?php __('Add Annotation'); ?></legend>
 	<?php
 		echo $this->Form->input('accession_nr');
 		echo $this->Form->input('model_nr');
@@ -22,12 +22,12 @@
 	<h3><?php __('Actions'); ?></h3>
 	<ul>
 
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Annotations', true)), array('action' => 'index'));?></li>
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Species', true)), array('controller' => 'species', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Species', true)), array('controller' => 'species', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Sources', true)), array('controller' => 'sources', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Source', true)), array('controller' => 'sources', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('List %s', true), __('Structures', true)), array('controller' => 'structures', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(sprintf(__('New %s', true), __('Structure', true)), array('controller' => 'structures', 'action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('List Annotations', true), array('action' => 'index'));?></li>
+		<li><?php echo $this->Html->link(__('List Species', true), array('controller' => 'species', 'action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('New Species', true), array('controller' => 'species', 'action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('List Sources', true), array('controller' => 'sources', 'action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('New Source', true), array('controller' => 'sources', 'action' => 'add')); ?> </li>
+		<li><?php echo $this->Html->link(__('List Structures', true), array('controller' => 'structures', 'action' => 'index')); ?> </li>
+		<li><?php echo $this->Html->link(__('New Structure', true), array('controller' => 'structures', 'action' => 'add')); ?> </li>
 	</ul>
 </div>

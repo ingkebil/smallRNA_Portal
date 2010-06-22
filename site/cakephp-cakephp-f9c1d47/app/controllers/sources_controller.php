@@ -10,7 +10,7 @@ class SourcesController extends AppController {
 
 	function view($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'source'));
+			$this->Session->setFlash(__('Invalid source', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		$this->set('source', $this->Source->read(null, $id));
@@ -20,25 +20,25 @@ class SourcesController extends AppController {
 		if (!empty($this->data)) {
 			$this->Source->create();
 			if ($this->Source->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'source'));
+				$this->Session->setFlash(__('The source has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'source'));
+				$this->Session->setFlash(__('The source could not be saved. Please, try again.', true));
 			}
 		}
 	}
 
 	function edit($id = null) {
 		if (!$id && empty($this->data)) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'source'));
+			$this->Session->setFlash(__('Invalid source', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		if (!empty($this->data)) {
 			if ($this->Source->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'source'));
+				$this->Session->setFlash(__('The source has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'source'));
+				$this->Session->setFlash(__('The source could not be saved. Please, try again.', true));
 			}
 		}
 		if (empty($this->data)) {
@@ -48,14 +48,14 @@ class SourcesController extends AppController {
 
 	function delete($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid id for %s', true), 'source'));
+			$this->Session->setFlash(__('Invalid id for source', true));
 			$this->redirect(array('action'=>'index'));
 		}
 		if ($this->Source->delete($id)) {
-			$this->Session->setFlash(sprintf(__('%s deleted', true), 'Source'));
+			$this->Session->setFlash(__('Source deleted', true));
 			$this->redirect(array('action'=>'index'));
 		}
-		$this->Session->setFlash(sprintf(__('%s was not deleted', true), 'Source'));
+		$this->Session->setFlash(__('Source was not deleted', true));
 		$this->redirect(array('action' => 'index'));
 	}
 }

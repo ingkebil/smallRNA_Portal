@@ -10,7 +10,7 @@ class SpeciesController extends AppController {
 
 	function view($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'species'));
+			$this->Session->setFlash(__('Invalid species', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		$this->set('species', $this->Species->read(null, $id));
@@ -20,25 +20,25 @@ class SpeciesController extends AppController {
 		if (!empty($this->data)) {
 			$this->Species->create();
 			if ($this->Species->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'species'));
+				$this->Session->setFlash(__('The species has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'species'));
+				$this->Session->setFlash(__('The species could not be saved. Please, try again.', true));
 			}
 		}
 	}
 
 	function edit($id = null) {
 		if (!$id && empty($this->data)) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'species'));
+			$this->Session->setFlash(__('Invalid species', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		if (!empty($this->data)) {
 			if ($this->Species->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'species'));
+				$this->Session->setFlash(__('The species has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'species'));
+				$this->Session->setFlash(__('The species could not be saved. Please, try again.', true));
 			}
 		}
 		if (empty($this->data)) {
@@ -48,14 +48,14 @@ class SpeciesController extends AppController {
 
 	function delete($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid id for %s', true), 'species'));
+			$this->Session->setFlash(__('Invalid id for species', true));
 			$this->redirect(array('action'=>'index'));
 		}
 		if ($this->Species->delete($id)) {
-			$this->Session->setFlash(sprintf(__('%s deleted', true), 'Species'));
+			$this->Session->setFlash(__('Species deleted', true));
 			$this->redirect(array('action'=>'index'));
 		}
-		$this->Session->setFlash(sprintf(__('%s was not deleted', true), 'Species'));
+		$this->Session->setFlash(__('Species was not deleted', true));
 		$this->redirect(array('action' => 'index'));
 	}
 }

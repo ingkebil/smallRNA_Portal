@@ -10,7 +10,7 @@ class SequencesController extends AppController {
 
 	function view($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'sequence'));
+			$this->Session->setFlash(__('Invalid sequence', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		$this->set('sequence', $this->Sequence->read(null, $id));
@@ -20,25 +20,25 @@ class SequencesController extends AppController {
 		if (!empty($this->data)) {
 			$this->Sequence->create();
 			if ($this->Sequence->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'sequence'));
+				$this->Session->setFlash(__('The sequence has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'sequence'));
+				$this->Session->setFlash(__('The sequence could not be saved. Please, try again.', true));
 			}
 		}
 	}
 
 	function edit($id = null) {
 		if (!$id && empty($this->data)) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'sequence'));
+			$this->Session->setFlash(__('Invalid sequence', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		if (!empty($this->data)) {
 			if ($this->Sequence->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'sequence'));
+				$this->Session->setFlash(__('The sequence has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'sequence'));
+				$this->Session->setFlash(__('The sequence could not be saved. Please, try again.', true));
 			}
 		}
 		if (empty($this->data)) {
@@ -48,14 +48,14 @@ class SequencesController extends AppController {
 
 	function delete($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid id for %s', true), 'sequence'));
+			$this->Session->setFlash(__('Invalid id for sequence', true));
 			$this->redirect(array('action'=>'index'));
 		}
 		if ($this->Sequence->delete($id)) {
-			$this->Session->setFlash(sprintf(__('%s deleted', true), 'Sequence'));
+			$this->Session->setFlash(__('Sequence deleted', true));
 			$this->redirect(array('action'=>'index'));
 		}
-		$this->Session->setFlash(sprintf(__('%s was not deleted', true), 'Sequence'));
+		$this->Session->setFlash(__('Sequence was not deleted', true));
 		$this->redirect(array('action' => 'index'));
 	}
 }

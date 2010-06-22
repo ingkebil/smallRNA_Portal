@@ -1,5 +1,5 @@
 <?php
-/* Annotations Test cases generated on: 2010-04-09 15:04:58 : 1270819078*/
+/* Annotations Test cases generated on: 2010-06-22 11:06:39 : 1277197599*/
 App::import('Controller', 'Annotations');
 
 class TestAnnotationsController extends AnnotationsController {
@@ -11,7 +11,7 @@ class TestAnnotationsController extends AnnotationsController {
 }
 
 class AnnotationsControllerTestCase extends CakeTestCase {
-	var $fixtures = array('app.annotation', 'app.species', 'app.source', 'app.structure');
+	var $fixtures = array('app.annotation', 'app.species', 'app.source', 'app.structure', 'app.experiment', 'app.types');
 
 	function startTest() {
 		$this->Annotations =& new TestAnnotationsController();

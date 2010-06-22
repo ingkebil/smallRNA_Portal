@@ -10,7 +10,7 @@ class AnnotationsController extends AppController {
 
 	function view($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'annotation'));
+			$this->Session->setFlash(__('Invalid annotation', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		$this->set('annotation', $this->Annotation->read(null, $id));
@@ -20,10 +20,10 @@ class AnnotationsController extends AppController {
 		if (!empty($this->data)) {
 			$this->Annotation->create();
 			if ($this->Annotation->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'annotation'));
+				$this->Session->setFlash(__('The annotation has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'annotation'));
+				$this->Session->setFlash(__('The annotation could not be saved. Please, try again.', true));
 			}
 		}
 		$species = $this->Annotation->Species->find('list');
@@ -33,15 +33,15 @@ class AnnotationsController extends AppController {
 
 	function edit($id = null) {
 		if (!$id && empty($this->data)) {
-			$this->Session->setFlash(sprintf(__('Invalid %s', true), 'annotation'));
+			$this->Session->setFlash(__('Invalid annotation', true));
 			$this->redirect(array('action' => 'index'));
 		}
 		if (!empty($this->data)) {
 			if ($this->Annotation->save($this->data)) {
-				$this->Session->setFlash(sprintf(__('The %s has been saved', true), 'annotation'));
+				$this->Session->setFlash(__('The annotation has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
-				$this->Session->setFlash(sprintf(__('The %s could not be saved. Please, try again.', true), 'annotation'));
+				$this->Session->setFlash(__('The annotation could not be saved. Please, try again.', true));
 			}
 		}
 		if (empty($this->data)) {
@@ -54,14 +54,14 @@ class AnnotationsController extends AppController {
 
 	function delete($id = null) {
 		if (!$id) {
-			$this->Session->setFlash(sprintf(__('Invalid id for %s', true), 'annotation'));
+			$this->Session->setFlash(__('Invalid id for annotation', true));
 			$this->redirect(array('action'=>'index'));
 		}
 		if ($this->Annotation->delete($id)) {
-			$this->Session->setFlash(sprintf(__('%s deleted', true), 'Annotation'));
+			$this->Session->setFlash(__('Annotation deleted', true));
 			$this->redirect(array('action'=>'index'));
 		}
-		$this->Session->setFlash(sprintf(__('%s was not deleted', true), 'Annotation'));
+		$this->Session->setFlash(__('Annotation was not deleted', true));
 		$this->redirect(array('action' => 'index'));
 	}
 }

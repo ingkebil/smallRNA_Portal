@@ -1,5 +1,5 @@
 <?php
-/* Species Fixture generated on: 2010-04-09 15:04:24 : 1270820064 */
+/* Species Fixture generated on: 2010-06-22 11:06:36 : 1277197656 */
 class SpeciesFixture extends CakeTestFixture {
 	var $name = 'Species';
 

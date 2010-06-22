@@ -1,5 +1,5 @@
 <?php
-/* Annotation Fixture generated on: 2010-04-09 15:04:55 : 1270819075 */
+/* Annotation Fixture generated on: 2010-06-22 11:06:38 : 1277197598 */
 class AnnotationFixture extends CakeTestFixture {
 	var $name = 'Annotation';
 

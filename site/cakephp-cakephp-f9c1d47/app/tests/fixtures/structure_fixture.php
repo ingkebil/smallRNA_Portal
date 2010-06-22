@@ -1,5 +1,5 @@
 <?php
-/* Structure Fixture generated on: 2010-04-09 15:04:17 : 1270820237 */
+/* Structure Fixture generated on: 2010-06-22 11:06:58 : 1277197678 */
 class StructureFixture extends CakeTestFixture {
 	var $name = 'Structure';
 
