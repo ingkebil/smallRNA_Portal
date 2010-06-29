@@ -2,18 +2,45 @@
 class SpeciesController extends AppController {
 
 	var $name = 'Species';
+    var $components = array('RequestHandler');
 
 	function index() {
 		$this->Species->recursive = 0;
 		$this->set('species', $this->paginate());
+        if ($this->RequestHandler->isAjax()) {
+            $this->layout = 'ajax';
+        }
 	}
+
+    function annotations($id = null) {
+		if (!$id) {
+			$this->Session->setFlash(__('Invalid species', true));
+			$this->redirect(array('action' => 'index'));
+		}
+        if (! is_numeric($id)) {
+            $id = $this->Species->find('first', array('conditions' => array('short_name' => $id), 'contain' => false));
+            if (! empty($id)) {
+                $id = $id['Species']['id'];
+            }
+        }
+        $this->set('annotations', $this->paginate($this->Species->Annotation, array('species_id' => $id)));
+    }
 
 	function view($id = null) {
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid species', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		$this->set('species', $this->Species->read(null, $id));
+        if (! is_numeric($id)) {
+            $id = $this->Species->find('first', array('conditions' => array('short_name' => $id), 'contain' => false));
+            if (! empty($id)) {
+                $id = $id['Species']['id'];
+            }
+        }
+        $species = $this->Species->find('first', array('conditions' => array('id' => $id), 'contain' => array('Experiment')));
+        $this->set('species', $species);
+        $this->set('species_id', $species['Species']['id']);
+        $this->set('annotations', $this->paginate($this->Species->Annotation, array('species_id' => $id)));
 	}
 
 	function add() {

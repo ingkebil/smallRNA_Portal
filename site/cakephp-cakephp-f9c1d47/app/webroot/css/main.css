@@ -23,8 +23,8 @@
 
 /** General Style Info **/
 body {
-	background: #003d4c;
-	color: #fff;
+	background: #FFF;
+	color: #333;
 	font-family:'lucida grande',verdana,helvetica,arial,sans-serif;
 	font-size:90%;
 	margin: 0;
@@ -75,37 +75,78 @@ ul, li {
 }
 
 #header{
-	padding: 10px 20px;
+	padding: 30px 0px 0px 0px;
+    background: #FFF url('../img/bg_header.jpg') repeat-x 0px 75px;
+    margin: 0 auto;
+    text-align: center;
 }
-#header h1 {
-	line-height:20px;
-	background: #003d4c url('../img/cake.icon.png') no-repeat left;
-	color: #fff;
+#header div {
+    text-align: left;
+}
+#header div h1 {
+    height: 30px;
+    font-size: 30px;
 	padding: 0px 30px;
+    font-variant: small-caps;
+	color: #117086;
 }
 #header h1 a {
-	color: #fff;
-	background: #003d4c;
 	font-weight: normal;
 	text-decoration: none;
 }
-#header h1 a:hover {
-	color: #fff;
-	background: #003d4c;
-	text-decoration: underline;
-}
 #content{
 	background: #fff;
-	clear: both;
 	color: #333;
 	padding: 10px 20px 40px 20px;
 	overflow: auto;
 }
 #footer {
 	clear: both;
-	padding: 6px 10px;
+    margin-top: 10px;
+	padding: 6px 10px 80px 10px;
 	text-align: right;
+    background: url('../img/bg_footer.jpg') repeat-x;
 }
+#menu {
+    width: 220px;
+    padding: 10px 0px 0px 0px;
+    float: left;
+    border-right: 1px dotted #BBB;
+}
+#menu a {
+    color: #003d4c;
+    text-decoration: none;
+    display: block;
+    padding: 2px 2px 2px 20px;
+}
+#menu a:hover {
+    color: #fff;
+    display: block;
+    text-decoration: none;
+    background: #117086;
+}
+#menu ul {
+    list-style-type: none; 
+    margin: 0px;
+    padding: 0px;
+}
+#menu li {
+    margin: 0px;
+    padding: 0px;
+}
+#menu li li {
+    margin: 0px 0px 0px 10px;
+    padding: 0px;
+}
+#menu h1 {
+    font-size: 120%;
+}
+#menu li li li {
+    padding: 1px;
+    margin: 0px 0px 0px -10px;
+}
+
+
 
 /** containers **/
 div.form,

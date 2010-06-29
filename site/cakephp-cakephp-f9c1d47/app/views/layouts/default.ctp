@@ -28,7 +28,7 @@
 	<?php
 		echo $this->Html->meta('icon');
 
-		echo $this->Html->css('cake.generic');
+		echo $this->Html->css('main');
 
 		echo $scripts_for_layout;
 	?>
@@ -36,16 +36,14 @@
 <body>
 	<div id="container">
 		<div id="header">
-			<h1><?php echo $this->Html->link(__('Small RNA, Big DB', true), '/'); ?></h1>
+			<div><h1>smallRNA, big DB</h1></div><?php echo $this->Html->link($html->image('/img/header-home.jpg'), '/', array('escape' => false)); ?>
 		</div>
-		<div id="content">
-            <div id="menu"><?php echo $this->element('menu'); ?></div>
+        <div id="menu"><?php echo $this->element('menu'); ?></div>
+	    <div id="content">
+	    	<?php echo $this->Session->flash(); ?>
 
-			<?php echo $this->Session->flash(); ?>
-
-			<?php echo $content_for_layout; ?>
-
-		</div>
+	    	<?php echo $content_for_layout; ?>
+	    </div>
 		<div id="footer">
 			<?php echo $this->Html->link(
 					$this->Html->image('cake.power.gif', array('alt'=> __('CakePHP: the rapid development php framework', true), 'border' => '0')),

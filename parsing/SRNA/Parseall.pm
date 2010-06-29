@@ -35,8 +35,8 @@ sub run {
     ($ARGV[0] && $ARGV[1]) || pod2usage(3);
 
     my $conds = {
-        #smallrna  => [ qw/ P P+3h N N+3h FN FN2 C2 C303 C3h5 / ],
-        degradome => [ qw/ DFN D-N D-P D-P12 / ],
+        smallrna  => [ qw/ P P+3h N N+3h FN FN2 C2 C303 C3h5 / ],
+        #degradome => [ qw/ DFN D-N D-P D-P12 / ],
     };
 
     # run the Exp2sRNA script for the genome mapping (needs a gff and a fasta file)

@@ -58,14 +58,17 @@ class Species extends AppModel {
 
 
     /**
-     * Returns a [species_name]=>[srna_types]=>[experiment_name] structure. 
+     * Returns a 
+     *   ['Arabidopsis Thaliana'] => 
+     *      ['short_name'] => 'arath',
+     *      ['srna_types'] => [srna_types] => [experiment_name]
+     * structure. 
      * This is very handy for generation of the menu.
-     *
      */
 
     function find_species_types_exps() {
         $exp_type_q = '
-            SELECT DISTINCT Species.full_name, Experiment.name, Type.name
+            SELECT DISTINCT Species.full_name, Species.short_name, Experiment.name, Type.name
             FROM experiments AS Experiment
             JOIN srnas         ON srnas.experiment_id = Experiment.id
             JOIN types AS Type ON Type.id = srnas.type_id
@@ -74,13 +77,20 @@ class Species extends AppModel {
 
         $species = array();
         foreach ($exps as $exp) {
-            if (! array_key_exists($exp['Species']['full_name'], $species)) {
-                $species[  $exp['Species']['full_name']  ] = array();
+            $sp_full_name  = $exp['Species']['full_name'];
+            $sp_short_name = $exp['Species']['short_name'];
+            $ty_name       = $exp['Type']['name'];
+            if (! array_key_exists($sp_full_name, $species)) {
+                $species[  $sp_full_name  ] = array('short_name' => array(), 'srna_types' => array());
             }
-            if (! array_key_exists($exp['Type']['name'], $species[ $exp['Species']['full_name'] ])) {
-                $species[  $exp['Species']['full_name']  ][  $exp['Type']['name']  ] = array();
+            $s_f_n =& $species[ $sp_full_name ];
+            if (! array_key_exists($sp_short_name, $s_f_n['short_name'])) {
+                $s_f_n['short_name'] = $sp_short_name;
             }
-            $species[  $exp['Species']['full_name']  ][  $exp['Type']['name']  ][] = $exp['Experiment']['name'];
+            if (! array_key_exists($ty_name, $s_f_n['srna_types'])) {
+                $s_f_n['srna_types'][ $ty_name ] = array();
+            }
+            $s_f_n['srna_types'][ $ty_name ][] = $exp['Experiment']['name'];
         }
         return $species;
     }

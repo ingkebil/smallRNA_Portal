@@ -1,3 +1,4 @@
+<?php $this->Jquery->paginate('#content'); ?>
 <div class="species index">
 	<h2><?php __('Species');?></h2>
 	<table cellpadding="0" cellspacing="0">
@@ -51,3 +52,4 @@
 		<li><?php echo $this->Html->link(__('New Experiment', true), array('controller' => 'experiments', 'action' => 'add')); ?> </li>
 	</ul>
 </div>
+<?php echo $this->Js->writeBuffer(); ?>

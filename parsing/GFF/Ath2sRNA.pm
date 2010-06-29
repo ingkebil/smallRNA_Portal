@@ -42,7 +42,7 @@ sub run {
     my @lines = <F>; ### Reading file [%]
     close F;
 
-    my $ath2srna = __PACKAGE__->new;
+    my $ath2srna = __PACKAGE__->new($fasta_file, $fasta_id_regex);
     $source_id = $ath2srna->check_source($source_id, $source_name);
     $species_id = $ath2srna->check_species($species_id, $species_name);
 
@@ -97,7 +97,7 @@ sub new {
     if ($fasta_file) {
         $fasta_id_regex = $fasta_id_regex || '>(.*)';
 
-        my $freader = new FASTA::Reader($fasta_file, $fasta_id_regex);
+        my $freader = new FASTA::Reader({ filename => $fasta_file, id_regex => $fasta_id_regex });
         $self->{ freader        } = $freader;
         $self->{ fasta_file     } = $fasta_file;
         $self->{ fasta_id_regex } = $fasta_id_regex;
