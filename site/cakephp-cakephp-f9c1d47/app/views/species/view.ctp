@@ -26,8 +26,7 @@
 		<li><?php echo $this->Html->link(__('New Experiment', true), array('controller' => 'experiments', 'action' => 'add')); ?> </li>
 	</ul>
 </div>
-<?php $this->Jquery->paginate('#related_annots', array('url' => array('controller' => 'species', 'action' => 'annotations' , $species['Species']['id']))); ?>
-<?php echo $this->Element('../species/annotations'); ?>
+<?php echo $this->Jquery->page('../species/annotations', compact('annotations'), array('url' => array('controller' => 'species', 'action' => 'annotations' , $species['Species']['id']))); ?>
 <div class="related">
 	<h3><?php __('Related Experiments');?></h3>
 	<?php if (!empty($species['Experiment'])):?>
@@ -70,4 +69,3 @@
 		</ul>
 	</div>
 </div>
-<?php echo $this->Js->writeBuffer(); ?>

@@ -2,6 +2,7 @@
 class AnnotationsController extends AppController {
 
 	var $name = 'Annotations';
+    var $helpers = array('Jquery');
 
 	function index() {
 		$this->Annotation->recursive = 0;
@@ -13,7 +14,10 @@ class AnnotationsController extends AppController {
 			$this->Session->setFlash(__('Invalid annotation', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		$this->set('annotation', $this->Annotation->read(null, $id));
+        $annot = $this->Annotation->read(null, $id);
+        $srnas = $this->paginate($this->Annotation->Species->Experiment->Srna, array('Srna.start >=' => $annot['Annotation']['start'], 'Srna.stop <=' => $annot['Annotation']['stop']));
+        $this->set('srnas', $srnas);
+		$this->set('annotation', $annot);
 	}
 
 	function add() {

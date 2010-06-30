@@ -1,5 +1,5 @@
-<?php $this->Jquery->paginate('#related_annots'); ?>
-<div class="related" id="related_annots" >
+<?php echo $this->Jquery->paginate('related_annots'); ?>
+<div class="related">
 	<h3><?php __('Related Annotations');?></h3>
 	<?php if (!empty($annotations)):?>
 	<table cellpadding = "0" cellspacing = "0">
@@ -50,7 +50,7 @@
 	<p>
 	<?php
 	echo $this->Paginator->counter(array(
-	'format' => __('Page %page% of ~%pages%, showing %current% records out of an estimate %count% total, starting on record %start%, ending on %end%', true)
+	'format' => __('Page %page% of an estimated %pages%, showing %current% records out of an estimated %count% total, starting on record %start%, ending on %end%', true)
 	));
 	?>	</p>
 
@@ -68,4 +68,4 @@
 		</ul>
 	</div>
 </div>
-<?php echo $this->Js->writeBuffer(); ?>
+<?php echo $this->Jquery->end_paginate(); ?>

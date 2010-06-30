@@ -51,5 +51,7 @@ class Experiment extends AppModel {
 		)
 	);
 
+    var $actsAs = array('containable');
+
 }
 ?>

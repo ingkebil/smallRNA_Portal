@@ -98,5 +98,7 @@ class Srna extends AppModel {
 			'order' => ''
 		)
 	);
+
+    var $actsAs = array('containable');
 }
 ?>
