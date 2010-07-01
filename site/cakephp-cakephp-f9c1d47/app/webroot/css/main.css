@@ -109,11 +109,11 @@ ul, li {
 }
 #menu {
     width: 220px;
-    padding: 10px 0px 0px 0px;
+    padding: 10px 0px 0px 20px;
     float: left;
     border-right: 1px dotted #BBB;
 }
-#menu a {
+#menu li li a {
     color: #003d4c;
     text-decoration: none;
     display: block;
@@ -152,15 +152,17 @@ ul, li {
 div.form,
 div.index,
 div.view {
-	float:right;
+/*	float:right;*/
 	width:76%;
-	border-left:1px solid #666;
+/*	border-left:1px solid #666;*/
 	padding:10px 2%;
 }
 div.actions {
 	float:left;
 	width:16%;
 	padding:10px 1.5%;
+    display: none;
+    visibility: none;
 }
 div.actions h3 {
 	padding-top:0;

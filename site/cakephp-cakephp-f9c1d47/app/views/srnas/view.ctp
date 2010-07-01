@@ -73,3 +73,5 @@
 		<li><?php echo $this->Html->link(__('New Experiment', true), array('controller' => 'experiments', 'action' => 'add')); ?> </li>
 	</ul>
 </div>
+<h3>Related Annotations</h3>
+<?php echo $this->Jquery->page('../annotations/between', compact('annotations'), array('url' => array('controller' => 'annotations', 'action' => 'between', $srna['Srna']['start'], $srna['Srna']['stop']))); ?>

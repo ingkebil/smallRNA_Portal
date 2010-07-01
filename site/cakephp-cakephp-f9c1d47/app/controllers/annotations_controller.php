@@ -2,7 +2,8 @@
 class AnnotationsController extends AppController {
 
 	var $name = 'Annotations';
-    var $helpers = array('Jquery');
+    var $helpers = array('Jquery', 'Ajax');
+    var $components = array('RequestHandler');
 
 	function index() {
 		$this->Annotation->recursive = 0;
@@ -15,10 +16,23 @@ class AnnotationsController extends AppController {
 			$this->redirect(array('action' => 'index'));
 		}
         $annot = $this->Annotation->read(null, $id);
+        $this->paginate = array('Srna' => array('recursive' => -1));
         $srnas = $this->paginate($this->Annotation->Species->Experiment->Srna, array('Srna.start >=' => $annot['Annotation']['start'], 'Srna.stop <=' => $annot['Annotation']['stop']));
         $this->set('srnas', $srnas);
 		$this->set('annotation', $annot);
 	}
+
+    function between($start = 0, $stop = 0) {
+        if ($this->RequestHandler->isAjax()) {
+            $this->layout = 'ajax';
+        }
+        $this->paginate = array('Annotation' => array('recursive' => -1));
+        $annotations = $this->paginate($this->Annotation, array('Annotation.start <=' => $start, 'Annotation.stop >=' => $stop));
+        if (isset($this->params['requested'])){
+            return $annotations;
+        }
+        $this->set('annotations', $annotations);
+    }
 
 	function add() {
 		if (!empty($this->data)) {

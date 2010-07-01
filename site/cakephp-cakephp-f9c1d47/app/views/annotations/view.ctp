@@ -120,4 +120,5 @@
 		</ul>
 	</div>
 </div>
+<h3>Related small RNAs</h3>
 <?php echo $this->Jquery->page('../srnas/between', compact('srnas'), array('url' => array('controller' => 'srnas', 'action' => 'between', $annotation['Annotation']['start'], $annotation['Annotation']['stop']))); ?>

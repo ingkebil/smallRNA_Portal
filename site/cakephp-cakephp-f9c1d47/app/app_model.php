@@ -66,15 +66,32 @@ class AppModel extends Model {
         return $this->query($q);
     }
 
-    function paginateCount($conditions = null, $recursive = 0, $extra = array()) {
-        $schema = $this->findInformationSchema($this->useTable);
+#    function paginateCount($conditions = null, $recursive = 0, $extra = array()) {
+#        if (!$conditions) {
+#            $schema = $this->findInformationSchema($this->useTable);
+#
+#            if ($schema[0]['Schema']['Engine'] == 'InnoDB') {
+#                return $schema[0]['Schema']['Rows'];
+#            }
+#        }
+#        return parent::paginateCount($conditions, $recursive, $extra);
+#    }
 
-        if ($schema[0]['Schema']['Engine'] == 'InnoDB') {
-            return $schema[0]['Schema']['Rows'];
-        }
-        else {
-            parent::paginateCount($conditions, $recursive, $extra);
-        }
+#    function paginateCount($conditions = null, $recursive = 0, $extra = array()) {
+#        $this->recursive = $recursive;
+#        $rs = $this->find('all', array('conditions' => $conditions, 'fields' => $this->name . '.id'), 'contain' => false);
+#        
+#        return count($rs);
+#    }
+
+    /**
+     * Makes the smallest possible count queryving out all joins and thus taking advantage of the indexes
+     *
+     */
+    function paginateCount($conditions = null, $recursive = 0, $extra = array()) {
+        $this->recursive = -1;
+        return $this->find('count', array('conditions' => $conditions));
     }
+
 }
 ?>

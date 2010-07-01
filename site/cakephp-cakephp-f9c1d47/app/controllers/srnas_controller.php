@@ -14,7 +14,7 @@ class SrnasController extends AppController {
     }
 
     function experiment($id) {
-        $this->set('srnas', $this->paginate($this->Srna, array('Experiment.id' => $id)));
+        $this->set('srnas', $this->paginate($this->Srna, array('Experiment_id' => $id)));
     }
 
 	function view($id = null) {
@@ -22,13 +22,18 @@ class SrnasController extends AppController {
 			$this->Session->setFlash(__('Invalid srna', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		$this->set('srna', $this->Srna->read(null, $id));
+        $srna = $this->Srna->read(null, $id);
+        $this->paginate = array('Annotation' => array('recursive' => -1));
+        $annotations = $this->paginate($this->Srna->Experiment->Species->Annotation, array('Annotation.start <=' => $srna['Srna']['start'], 'Annotation.stop >=' => $srna['Srna']['stop']));
+        $this->set('annotations', $annotations);
+		$this->set('srna', $srna);
 	}
 
     function between($start = 0, $stop = 0) {
         if ($this->RequestHandler->isAjax()) {
             $this->layout = 'ajax';
         }
+        $this->paginate = array('Srna' => array('recursive' => -1));
         $srnas = $this->paginate($this->Srna, array('Srna.start >=' => $start, 'Srna.stop <=' => $stop));
         if (isset($this->params['requested'])){
             return $srnas;
