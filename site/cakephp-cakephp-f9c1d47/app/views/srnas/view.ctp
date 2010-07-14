@@ -1,11 +1,6 @@
 <div class="srnas view">
 <h2><?php  __('Srna');?></h2>
 	<dl><?php $i = 0; $class = ' class="altrow"';?>
-		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Id'); ?></dt>
-		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $srna['Srna']['id']; ?>
-			&nbsp;
-		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Name'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
 			<?php echo $srna['Srna']['name']; ?>
@@ -28,7 +23,7 @@
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Sequence'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $this->Html->link($srna['Sequence']['id'], array('controller' => 'sequences', 'action' => 'view', $srna['Sequence']['id'])); ?>
+			<?php echo $this->Html->link($srna['Sequence']['seq'], array('controller' => 'sequences', 'action' => 'view', $srna['Sequence']['id'])); ?>
 			&nbsp;
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Score'); ?></dt>

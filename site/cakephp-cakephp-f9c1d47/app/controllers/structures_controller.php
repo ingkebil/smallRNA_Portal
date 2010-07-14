@@ -46,7 +46,7 @@ class StructuresController extends AppController {
 		if (empty($this->data)) {
 			$this->data = $this->Structure->read(null, $id);
 		}
-		$annotations = $this->Structure->Annotation->find('list');
+		$annotations = $this->Structure->Annotation->find('list', array('fields' => array('Annotation.id', 'Annotation.accession')));
 		$this->set(compact('annotations'));
 	}
 

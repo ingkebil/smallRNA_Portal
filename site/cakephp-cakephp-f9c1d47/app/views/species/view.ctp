@@ -27,12 +27,9 @@
 	<?php if (!empty($species['Experiment'])):?>
 	<table cellpadding = "0" cellspacing = "0">
 	<tr>
-		<th><?php __('Id'); ?></th>
 		<th><?php __('Name'); ?></th>
 		<th><?php __('Description'); ?></th>
-		<th><?php __('Species Id'); ?></th>
-		<th><?php __('Internal'); ?></th>
-		<th class="actions"><?php __('Actions');?></th>
+		<!--th class="actions"><?php __('Actions');?></th-->
 	</tr>
 	<?php
 		$i = 0;
@@ -43,16 +40,13 @@
 			}
 		?>
 		<tr<?php echo $class;?>>
-			<td><?php echo $experiment['id'];?></td>
-			<td><?php echo $experiment['name'];?></td>
+			<td><?php echo $this->Html->link($experiment['name'], array('controller' => 'experiments', 'action' => 'view', $experiment['id']));?></td>
 			<td><?php echo $experiment['description'];?></td>
-			<td><?php echo $experiment['species_id'];?></td>
-			<td><?php echo $experiment['internal'];?></td>
-			<td class="actions">
-				<?php echo $this->Html->link(__('View', true), array('controller' => 'experiments', 'action' => 'view', $experiment['id'])); ?>
-				<?php echo $this->Html->link(__('Edit', true), array('controller' => 'experiments', 'action' => 'edit', $experiment['id'])); ?>
-				<?php echo $this->Html->link(__('Delete', true), array('controller' => 'experiments', 'action' => 'delete', $experiment['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $experiment['id'])); ?>
-			</td>
+			<!--td class="actions">
+				<?php $this->Html->link(__('View', true), array('controller' => 'experiments', 'action' => 'view', $experiment['id'])); ?>
+				<?php $this->Html->link(__('Edit', true), array('controller' => 'experiments', 'action' => 'edit', $experiment['id'])); ?>
+				<?php $this->Html->link(__('Delete', true), array('controller' => 'experiments', 'action' => 'delete', $experiment['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $experiment['id'])); ?>
+			</td-->
 		</tr>
 	<?php endforeach; ?>
 	</table>

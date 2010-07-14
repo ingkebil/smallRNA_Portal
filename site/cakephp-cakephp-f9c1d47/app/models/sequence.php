@@ -31,5 +31,7 @@ class Sequence extends AppModel {
 		)
 	);
 
+    var $actsAs = array('containable');
+
 }
 ?>

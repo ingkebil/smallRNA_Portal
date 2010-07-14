@@ -2,18 +2,31 @@
 class SequencesController extends AppController {
 
 	var $name = 'Sequences';
+    var $components = array('RequestHandler');
 
 	function index() {
 		$this->Sequence->recursive = 0;
 		$this->set('sequences', $this->paginate());
 	}
 
+    function srna($id = null) {
+		if (!$id) {
+			$this->Session->setFlash(__('Invalid sequence', true));
+		}
+        if ($this->RequestHandler->isAjax()) {
+            $this->layout = 'ajax';
+        }
+        $this->set('srnas', $this->paginate($this->Sequence->Srna, array('sequence_id' => $id)));
+    }
+
 	function view($id = null) {
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid sequence', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		$this->set('sequence', $this->Sequence->read(null, $id));
+        $sequence = $this->Sequence->find('first', array('conditions' => array('id' => $id), 'contain' => false));
+        $this->set('srnas', $this->paginate($this->Sequence->Srna, array('sequence_id' => $id)));
+		$this->set('sequence', $sequence);
 	}
 
 	function add() {

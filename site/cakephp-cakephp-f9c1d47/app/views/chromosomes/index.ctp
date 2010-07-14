@@ -1,26 +1,26 @@
-<div class="sources index">
-	<h2><?php __('Sources');?></h2>
+<div class="chromosomes index">
+	<h2><?php __('Chromosomes');?></h2>
 	<table cellpadding="0" cellspacing="0">
 	<tr>
 			<th><?php echo $this->Paginator->sort('name');?></th>
-			<th><?php echo $this->Paginator->sort('description');?></th>
+			<th><?php echo $this->Paginator->sort('length');?></th>
 			<!--th class="actions"><?php __('Actions');?></th-->
 	</tr>
 	<?php
 	$i = 0;
-	foreach ($sources as $source):
+	foreach ($chromosomes as $chromosome):
 		$class = null;
 		if ($i++ % 2 == 0) {
 			$class = ' class="altrow"';
 		}
 	?>
 	<tr<?php echo $class;?>>
-		<td><?php echo $this->Html->link($source['Source']['name'], array('action' => 'view', $source['Source']['id'])); ?>&nbsp;</td>
-		<td><?php echo $source['Source']['description']; ?>&nbsp;</td>
+		<td><?php echo $this->Html->link($chromosome['Chromosome']['name'], array('action' => 'view', $chromosome['Chromosome']['id'])); ?>&nbsp;</td>
+		<td><?php echo $chromosome['Chromosome']['length']; ?>&nbsp;</td>
 		<!--td class="actions">
-			<?php $this->Html->link(__('View', true), array('action' => 'view', $source['Source']['id'])); ?>
-			<?php $this->Html->link(__('Edit', true), array('action' => 'edit', $source['Source']['id'])); ?>
-			<?php $this->Html->link(__('Delete', true), array('action' => 'delete', $source['Source']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $source['Source']['id'])); ?>
+			<?php $this->Html->link(__('View', true), array('action' => 'view', $chromosome['Chromosome']['id'])); ?>
+			<?php $this->Html->link(__('Edit', true), array('action' => 'edit', $chromosome['Chromosome']['id'])); ?>
+			<?php $this->Html->link(__('Delete', true), array('action' => 'delete', $chromosome['Chromosome']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $chromosome['Chromosome']['id'])); ?>
 		</td-->
 	</tr>
 <?php endforeach; ?>
@@ -42,7 +42,7 @@
 <div class="actions">
 	<h3><?php __('Actions'); ?></h3>
 	<ul>
-		<li><?php echo $this->Html->link(__('New Source', true), array('action' => 'add')); ?></li>
+		<li><?php echo $this->Html->link(__('New Chromosome', true), array('action' => 'add')); ?></li>
 		<li><?php echo $this->Html->link(__('List Annotations', true), array('controller' => 'annotations', 'action' => 'index')); ?> </li>
 		<li><?php echo $this->Html->link(__('New Annotation', true), array('controller' => 'annotations', 'action' => 'add')); ?> </li>
 	</ul>

@@ -2,12 +2,10 @@
 	<h2><?php __('Experiments');?></h2>
 	<table cellpadding="0" cellspacing="0">
 	<tr>
-			<th><?php echo $this->Paginator->sort('id');?></th>
 			<th><?php echo $this->Paginator->sort('name');?></th>
 			<th><?php echo $this->Paginator->sort('description');?></th>
-			<th><?php echo $this->Paginator->sort('species_id');?></th>
-			<th><?php echo $this->Paginator->sort('internal');?></th>
-			<th class="actions"><?php __('Actions');?></th>
+			<th><?php echo $this->Paginator->sort('species', 'Species.full_name');?></th>
+			<!--th class="actions"><?php __('Actions');?></th-->
 	</tr>
 	<?php
 	$i = 0;
@@ -18,18 +16,16 @@
 		}
 	?>
 	<tr<?php echo $class;?>>
-		<td><?php echo $experiment['Experiment']['id']; ?>&nbsp;</td>
-		<td><?php echo $experiment['Experiment']['name']; ?>&nbsp;</td>
+		<td><?php echo $this->Html->link($experiment['Experiment']['name'], array('action' => 'view', $experiment['Experiment']['id'])); ?>&nbsp;</td>
 		<td><?php echo $experiment['Experiment']['description']; ?>&nbsp;</td>
 		<td>
-			<?php echo $this->Html->link($experiment['Species']['id'], array('controller' => 'species', 'action' => 'view', $experiment['Species']['id'])); ?>
+			<?php echo $this->Html->link($experiment['Species']['full_name'], array('controller' => 'species', 'action' => 'view', $experiment['Species']['id'])); ?>
 		</td>
-		<td><?php echo $experiment['Experiment']['internal']; ?>&nbsp;</td>
-		<td class="actions">
-			<?php echo $this->Html->link(__('View', true), array('action' => 'view', $experiment['Experiment']['id'])); ?>
-			<?php echo $this->Html->link(__('Edit', true), array('action' => 'edit', $experiment['Experiment']['id'])); ?>
-			<?php echo $this->Html->link(__('Delete', true), array('action' => 'delete', $experiment['Experiment']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $experiment['Experiment']['id'])); ?>
-		</td>
+		<!--td class="actions">
+			<?php $this->Html->link(__('View', true), array('action' => 'view', $experiment['Experiment']['id'])); ?>
+			<?php $this->Html->link(__('Edit', true), array('action' => 'edit', $experiment['Experiment']['id'])); ?>
+			<?php $this->Html->link(__('Delete', true), array('action' => 'delete', $experiment['Experiment']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $experiment['Experiment']['id'])); ?>
+		</td-->
 	</tr>
 <?php endforeach; ?>
 	</table>

@@ -8,7 +8,7 @@
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Annotation'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $this->Html->link($structure['Annotation']['id'], array('controller' => 'annotations', 'action' => 'view', $structure['Annotation']['id'])); ?>
+			<?php echo $this->Html->link($structure['Annotation']['accession'], array('controller' => 'annotations', 'action' => 'view', $structure['Annotation']['id'])); ?>
 			&nbsp;
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Start'); ?></dt>

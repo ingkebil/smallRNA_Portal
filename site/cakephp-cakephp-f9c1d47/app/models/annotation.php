@@ -116,6 +116,7 @@ class Annotation extends AppModel {
 	);
 
     var $actsAs = array('containable');
+    var $virtualFields = array('accession' => "CONCAT(Annotation.accession_nr, '.', Annotation.model_nr)");
 
 }
 ?>
