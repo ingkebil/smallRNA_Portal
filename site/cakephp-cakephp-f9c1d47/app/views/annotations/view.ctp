@@ -1,14 +1,9 @@
 <div class="annotations view">
 <h2><?php  __('Annotation');?></h2>
 	<dl><?php $i = 0; $class = ' class="altrow"';?>
-		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Id'); ?></dt>
-		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $annotation['Annotation']['id']; ?>
-			&nbsp;
-		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Accession Nr'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $annotation['Annotation']['accession_nr']; ?>
+			<?php echo $html->link($annotation['Annotation']['accession_nr'], 'http://arabidopsis.org/servlets/TairObject?type=locus&name='.$annotation['Annotation']['accession_nr']); ?>
 			&nbsp;
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Model Nr'); ?></dt>
@@ -33,7 +28,7 @@
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Chr'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $annotation['Annotation']['chr']; ?>
+			<?php echo $annotation['Chromosome']['name']; ?>
 			&nbsp;
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Type'); ?></dt>
@@ -43,13 +38,12 @@
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Species'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $this->Html->link($annotation['Species']['id'], array('controller' => 'species', 'action' => 'view', $annotation['Species']['id'])); ?>
+			<?php echo $this->Html->link($annotation['Species']['full_name'], array('controller' => 'species', 'action' => 'view', $annotation['Species']['id'])); ?>
 			&nbsp;
 		</dd>
-		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Seq'); ?></dt>
+		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Sequence'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $annotation['Annotation']['seq']; ?>
-			&nbsp;
+			<textarea><?php echo $annotation['Annotation']['seq']; ?></textarea>
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Comment'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
@@ -83,12 +77,12 @@
 	<?php if (!empty($annotation['Structure'])):?>
 	<table cellpadding = "0" cellspacing = "0">
 	<tr>
-		<th><?php __('Id'); ?></th>
-		<th><?php __('Annotation Id'); ?></th>
+		<!--th><?php __('Id'); ?></th>
+		<th><?php __('Annotation Id'); ?></th-->
 		<th><?php __('Start'); ?></th>
 		<th><?php __('Stop'); ?></th>
 		<th><?php __('Utr'); ?></th>
-		<th class="actions"><?php __('Actions');?></th>
+		<!--th class="actions"><?php __('Actions');?></th-->
 	</tr>
 	<?php
 		$i = 0;
@@ -99,16 +93,16 @@
 			}
 		?>
 		<tr<?php echo $class;?>>
-			<td><?php echo $structure['id'];?></td>
-			<td><?php echo $structure['annotation_id'];?></td>
+			<!--td><?php echo $structure['id'];?></td>
+			<td><?php echo $structure['annotation_id'];?></td-->
 			<td><?php echo $structure['start'];?></td>
 			<td><?php echo $structure['stop'];?></td>
 			<td><?php echo $structure['utr'];?></td>
-			<td class="actions">
-				<?php echo $this->Html->link(__('View', true), array('controller' => 'structures', 'action' => 'view', $structure['id'])); ?>
-				<?php echo $this->Html->link(__('Edit', true), array('controller' => 'structures', 'action' => 'edit', $structure['id'])); ?>
-				<?php echo $this->Html->link(__('Delete', true), array('controller' => 'structures', 'action' => 'delete', $structure['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $structure['id'])); ?>
-			</td>
+			<!--td class="actions">
+				<?php $this->Html->link(__('View', true), array('controller' => 'structures', 'action' => 'view', $structure['id'])); ?>
+				<?php $this->Html->link(__('Edit', true), array('controller' => 'structures', 'action' => 'edit', $structure['id'])); ?>
+				<?php $this->Html->link(__('Delete', true), array('controller' => 'structures', 'action' => 'delete', $structure['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $structure['id'])); ?>
+			</td-->
 		</tr>
 	<?php endforeach; ?>
 	</table>

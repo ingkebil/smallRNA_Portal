@@ -71,7 +71,7 @@ sub parse {
         }
         my $attributes = pop @els;
 
-        my @split_attrs = split /;|=/, $attributes;
+        my @split_attrs = grep /.+/, split /;|=/, $attributes;
         my %split_attr = ();
         if (scalar(@split_attrs) % 2 == 0) { # name=value pairs
             %split_attr =

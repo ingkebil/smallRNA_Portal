@@ -9,7 +9,7 @@
 		echo $this->Form->input('start');
 		echo $this->Form->input('stop');
 		echo $this->Form->input('strand');
-		echo $this->Form->input('chr');
+		echo $this->Form->input('chromosome_id');
 		echo $this->Form->input('type');
 		echo $this->Form->input('species_id');
 		echo $this->Form->input('seq');

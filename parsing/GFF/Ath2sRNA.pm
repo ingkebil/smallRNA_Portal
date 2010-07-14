@@ -54,6 +54,7 @@ sub run {
 
         $ath2srna->fprint($path . 'annotations.csv', join( "\n", @{ $results->{ annotations } }));
         $ath2srna->fprint($path . 'structures.csv', join( "\n", @{ $results->{ structures } }));
+        $ath2srna->fprint($path . 'chromosomes.csv', join( "\n", @{ $results->{ chromosomes } }));
         $ath2srna->fprint($path . 'ath.sql',        join( "\n", @{ $results->{ sql } }));
     }
     else { # no, we want plain old slow SQL!
@@ -161,9 +162,7 @@ sub run_parser {
         return if $els->[ FEATURE ] =~ m/^(gene|transposable_element_gene|chromosome|protein|pseudogene)$/;
 
         # get an ID, either from the ID, or from the Parent attr
-        my $ID   = exists $attr->{ ID }
-        ? $attr->{ ID }
-        : $attr->{ Parent };
+        my $ID   = exists $attr->{ ID } ? $attr->{ ID } : $attr->{ Parent };
         if ($ID =~ /(.*),/) { # multi value Parents, only take the first one
             $ID = $1;
         }
@@ -180,7 +179,7 @@ sub run_parser {
                 last FEAT;
             };
             /^(exon|pseudogenic_exon|transposon_fragment|five_prime_UTR|three_prime_UTR|CDS)$/i && do {
-                last FEAT if $gene->{ type } eq 'mRNA' && $els->[ FEATURE ] eq 'exon'; # if coding genes, only check 5', 3' and CDS
+                last FEAT if $gene->{ type } eq 'mRNA' && $els->[ FEATURE ] eq 'exon'; # if coding genes, only check 5', 3' and CDS (so skip the only remianing element, the exon)
                 push @{ $gene->{ coords } }, {
                     start => $els->[ START ],
                     stop  => $els->[ STOP ],
@@ -192,7 +191,7 @@ sub run_parser {
                 return;
             }
         }
-        return; # we actually don't need to give anything back the GFF::Parser as we are building the datastructure
+        return; # we actually don't need to give anything back the GFF::Parser as we are building the datastructure ourselves
     };
 
     $self->{ parser }->parse($lines, $process_line);
@@ -237,6 +236,7 @@ sub init_gene {
 my @annotations = ();
 my @sql = ();
 my @structures = ();
+my @chromosomes = ();
 
 
 ## The adders
@@ -244,12 +244,16 @@ sub add_annotation {
     push @annotations, join("\t", @_);
 }
 
+sub add_chromosome {
+    push @chromosomes, join("\t", @_);
+}
+
 sub add_sql {
     push @sql, $_[0];
 }
 
 sub add_annotation_sql {
-    push @sql, 'INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, `chr`, `type`, species_id, seq, comment, source_id)
+    push @sql, 'INSERT INTO `annotations` (id, accession_nr, model_nr, start, stop, strand, chromosome_id, `type`, species_id, seq, comment, source_id)
 VALUES (' . join(q{, }, @_) . ');
 ';
 }
@@ -264,13 +268,19 @@ sub add_structure {
     push @structures, join("\t", @_);
 }
 
+sub add_chromosome_sql {
+    push @sql, 'INSERT INTO `chromosomes` (id, name, length)
+VALUES (' . join(q{, }, @_) . ');
+';
+}
+
 ## the returners
 sub return_sql {
     return \@sql;
 }
 
 sub return_csv {
-    return { annotations => \@annotations, structures => \@structures, sql => \@sql };
+    return { annotations => \@annotations, structures => \@structures, chromosomes => \@chromosomes, sql => \@sql };
 }
 
 ## the actual functions 
@@ -278,6 +288,9 @@ sub return_csv {
 sub reset_make {
     @annotations = ();
     @structures  = ();
+    @chromosomes = ();
+    &reset_chr_ids();
+
     @sql = ();
 }
 
@@ -289,6 +302,7 @@ sub make_CSV {
     return $self->make_output({
             annotation_adder => \&add_annotation,
             structure_adder  => \&add_structure,
+            chromosome_adder => \&add_chromosome,
             sql_adder        => \&add_sql,
             returner         => \&return_csv,
         }, @_);
@@ -302,6 +316,7 @@ sub make_SQL {
     return $self->make_output({
             annotation_adder => \&add_annotation_sql,
             structure_adder  => \&add_structure_sql,
+            chromosome_adder => \&add_chromosome_sql,
             sql_adder        => \&add_sql,
             returner         => \&return_sql,
 
@@ -338,6 +353,11 @@ sub make_output {
         }
         $gene->{ seq } = $seq ? $seq : undef;
 
+        ## now replace the chr with the chr id in the chromsomes table
+        # first get the chr_id
+        my $chr_id = $self->get_chr_id($gene->{ 'chr' }, $handlers);
+        $gene->{ chr_id } = $chr_id;
+
         # quote for the DB
         my $g = {};
         foreach my $key (keys %$gene) {
@@ -357,7 +377,7 @@ sub make_output {
             $g->{ start },
             $g->{ stop },
             $g->{ strand },
-            $g->{ 'chr' },
+            $g->{ chr_id },
             $g->{ type },
             $g->{ species_id },
             $g->{ seq },
@@ -391,6 +411,82 @@ sub make_output {
 
 }
 
+## CHROMOSOME STUFF
+
+sub get_chrs {
+    my $self = shift;
+    my $chr  = shift;
+
+    my $sql = 'SELECT id, name FROM chromosomes WHERE name = ?';
+    return $self->{ dbh }->selectall_arrayref($sql, { Slice => {} }, ( $chr ));
+}
+
+{
+
+my %chr_ids = ();
+my $last_insert_id = 0;
+
+sub reset_chr_ids {
+    $last_insert_id = 0;
+    %chr_ids = ();
+}
+
+sub get_chr_id {
+    my $self = shift;
+    my $chr  = shift;
+    my $handlers = shift;
+
+    if (exists $chr_ids{ $chr }) {
+        return $chr_ids{ $chr };
+    }
+
+    my $rs = $self->{ dbh }->selectcol_arrayref('SELECT id FROM chromosomes WHERE name = ?', { MaxRows => 1 }, ( $chr ));
+
+    if (! scalar @$rs) {
+        my $chr_length = undef;
+        if (exists $self->{ freader }) {
+            my $freader = $self->{ freader };
+            $chr_length = length($self->{ freader }->get_seq($self->{ fasta_file }, $chr));
+        }
+        
+        my $chr_id = $self->get_next_chr_id();
+        $self->add_chr_id($chr, $chr_id);
+        $handlers->{ chromosome_adder }(
+            $chr_id,
+            $chr,
+            $chr_length
+        );
+        return $chr_id;
+    }
+    else {
+        $self->add_chr_id($chr, $rs->[ 0 ]->[ 0 ]);
+        return $rs->[ 0 ]->[ 0 ]; # first row, first column
+    }
+}
+
+sub get_next_chr_id {
+    my $self = shift;
+
+    if (!$last_insert_id) {
+        $last_insert_id = $self->{ dbh }->selectrow_arrayref(q{SELECT max(id) FROM `chromosomes`})->[0];
+    }
+
+    return ++$last_insert_id;
+}
+
+sub add_chr_id {
+    my $self = shift;
+    my $chr = shift;
+    my $chr_id = shift;
+
+    $chr_ids{ $chr } = $chr_id;
+}
+
+}
+
+## FEATURE STUFF
+
+
 sub get_features {
     my $self = shift;
 
@@ -400,6 +496,9 @@ sub get_features {
 
     return \%features;
 }
+
+## ANNOTATION STUFF
+
 
 { 
 my $last_insert_id = 0;

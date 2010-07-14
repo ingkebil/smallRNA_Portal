@@ -89,7 +89,14 @@ class Annotation extends AppModel {
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
-		)
+		),
+        'Chromosome' => array(
+            'className' => 'Chromosome',
+			'foreignKey' => 'chromosome_id',
+			'conditions' => '',
+			'fields' => '',
+			'order' => ''
+        )
 	);
 
 	var $hasMany = array(
@@ -107,6 +114,8 @@ class Annotation extends AppModel {
 			'counterQuery' => ''
 		)
 	);
+
+    var $actsAs = array('containable');
 
 }
 ?>

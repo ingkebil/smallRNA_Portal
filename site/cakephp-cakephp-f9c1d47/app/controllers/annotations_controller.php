@@ -4,9 +4,15 @@ class AnnotationsController extends AppController {
 	var $name = 'Annotations';
     var $helpers = array('Jquery', 'Ajax');
     var $components = array('RequestHandler');
+    var $uses = array('Annotation');
 
 	function index() {
 		$this->Annotation->recursive = 0;
+        $this->paginate = array(
+            'Annotation' => array(
+                'fields' => array('id', 'accession_nr', 'model_nr', 'start', 'stop', 'strand', 'chromosome_id', 'type', 'species_id', 'comment', 'source_id', 'Chromosome.name', 'Species.full_name', 'Species.id', 'Source.name', 'Source.id')
+            ),
+        );
 		$this->set('annotations', $this->paginate());
 	}
 
@@ -16,17 +22,29 @@ class AnnotationsController extends AppController {
 			$this->redirect(array('action' => 'index'));
 		}
         $annot = $this->Annotation->read(null, $id);
-        $this->paginate = array('Srna' => array('recursive' => -1));
+        $this->paginate = array('Srna' => array('recursive' => 0));
         $srnas = $this->paginate($this->Annotation->Species->Experiment->Srna, array('Srna.start >=' => $annot['Annotation']['start'], 'Srna.stop <=' => $annot['Annotation']['stop']));
         $this->set('srnas', $srnas);
 		$this->set('annotation', $annot);
 	}
 
+    function source($id = null) {
+        if ($this->RequestHandler->isAjax()) {
+            $this->layout = 'ajax';
+        }
+        $this->paginate = array('Annotation' => array('recursive' => 0));
+        $annotations = $this->paginate($this->Annotation, array('source_id' => $id));
+        if (isset($this->params['requested'])){
+            return $annotations;
+        }
+        $this->set('annotations', $annotations);
+    }
+
     function between($start = 0, $stop = 0) {
         if ($this->RequestHandler->isAjax()) {
             $this->layout = 'ajax';
         }
-        $this->paginate = array('Annotation' => array('recursive' => -1));
+        $this->paginate = array('Annotation' => array('recursive' => 0));
         $annotations = $this->paginate($this->Annotation, array('Annotation.start <=' => $start, 'Annotation.stop >=' => $stop));
         if (isset($this->params['requested'])){
             return $annotations;
@@ -46,7 +64,8 @@ class AnnotationsController extends AppController {
 		}
 		$species = $this->Annotation->Species->find('list');
 		$sources = $this->Annotation->Source->find('list');
-		$this->set(compact('species', 'sources'));
+		$chromosomes = $this->Annotation->Chromosome->find('list');
+		$this->set(compact('species', 'sources', 'chromosomes'));
 	}
 
 	function edit($id = null) {
@@ -67,7 +86,8 @@ class AnnotationsController extends AppController {
 		}
 		$species = $this->Annotation->Species->find('list');
 		$sources = $this->Annotation->Source->find('list');
-		$this->set(compact('species', 'sources'));
+		$chromosomes = $this->Annotation->Chromosome->find('list');
+		$this->set(compact('species', 'sources', 'chromosomes'));
 	}
 
 	function delete($id = null) {

@@ -42,9 +42,9 @@
 			<?php echo $this->Html->link($srna['Experiment']['name'], array('controller' => 'experiments', 'action' => 'view', $srna['Experiment']['id'])); ?>
 		</td>
 		<td class="actions">
-			<?php echo $this->Html->link(__('View', true), array('action' => 'view', $srna['Srna']['id'])); ?>
-			<?php echo $this->Html->link(__('Edit', true), array('action' => 'edit', $srna['Srna']['id'])); ?>
-			<?php echo $this->Html->link(__('Delete', true), array('action' => 'delete', $srna['Srna']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $srna['Srna']['id'])); ?>
+			<?php echo $this->Html->link(__('View', true), array('controller' => 'srnas', 'action' => 'view', $srna['Srna']['id'])); ?>
+			<?php echo $this->Html->link(__('Edit', true), array('controller' => 'srnas', 'action' => 'edit', $srna['Srna']['id'])); ?>
+			<?php echo $this->Html->link(__('Delete', true), array('controller' => 'srnas', 'action' => 'delete', $srna['Srna']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $srna['Srna']['id'])); ?>
 		</td>
 	</tr>
 <?php endforeach; ?>
@@ -52,7 +52,7 @@
 	<p>
 	<?php
 	echo $this->Paginator->counter(array(
-	'format' => __('Page %page% of an estimated %pages%, showing %current% records out of an estimated %count% total, starting on record %start%, ending on %end%', true)
+	'format' => __('Page %page% of %pages%, showing %current% records out of %count% total, starting on record %start%, ending on %end%', true)
 	));
 	?>	</p>
 

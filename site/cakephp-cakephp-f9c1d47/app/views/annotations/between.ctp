@@ -42,9 +42,9 @@
 			<?php echo $this->Html->link($annotation['Source']['name'], array('controller' => 'sources', 'action' => 'view', $annotation['Source']['id'])); ?>
 		</td>
 		<td class="actions">
-			<?php echo $this->Html->link(__('View', true), array('action' => 'view', $annotation['Annotation']['id'])); ?>
-			<?php echo $this->Html->link(__('Edit', true), array('action' => 'edit', $annotation['Annotation']['id'])); ?>
-			<?php echo $this->Html->link(__('Delete', true), array('action' => 'delete', $annotation['Annotation']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $annotation['Annotation']['id'])); ?>
+			<?php echo $this->Html->link(__('View', true), array('controller' => 'annotations', 'action' => 'view', $annotation['Annotation']['id'])); ?>
+			<?php echo $this->Html->link(__('Edit', true), array('controller' => 'annotations', 'action' => 'edit', $annotation['Annotation']['id'])); ?>
+			<?php echo $this->Html->link(__('Delete', true), array('controller' => 'annotations', 'action' => 'delete', $annotation['Annotation']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $annotation['Annotation']['id'])); ?>
 		</td>
 	</tr>
 <?php endforeach; ?>

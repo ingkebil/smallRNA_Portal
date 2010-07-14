@@ -13,7 +13,9 @@ class SourcesController extends AppController {
 			$this->Session->setFlash(__('Invalid source', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		$this->set('source', $this->Source->read(null, $id));
+        $this->paginate = array('Annotations' => array('recursive' => 0));
+        $this->set('annotations', $this->paginate($this->Source->Annotation, array('source_id' => $id)));
+		$this->set('source', $this->Source->find('first', array('conditions' => array('id' => $id), 'contain' => false)));
 	}
 
 	function add() {

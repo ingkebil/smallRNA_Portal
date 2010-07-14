@@ -1,10 +1,20 @@
 <?php
-class Source extends AppModel {
-	var $name = 'Source';
+class Chromosome extends AppModel {
+	var $name = 'Chromosome';
 	var $validate = array(
 		'name' => array(
 			'notempty' => array(
 				'rule' => array('notempty'),
+				//'message' => 'Your custom message here',
+				//'allowEmpty' => false,
+				//'required' => false,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
+			),
+		),
+		'length' => array(
+			'numeric' => array(
+				'rule' => array('numeric'),
 				//'message' => 'Your custom message here',
 				//'allowEmpty' => false,
 				//'required' => false,
@@ -18,7 +28,7 @@ class Source extends AppModel {
 	var $hasMany = array(
 		'Annotation' => array(
 			'className' => 'Annotation',
-			'foreignKey' => 'source_id',
+			'foreignKey' => 'chromosome_id',
 			'dependent' => false,
 			'conditions' => '',
 			'fields' => '',
@@ -30,8 +40,6 @@ class Source extends AppModel {
 			'counterQuery' => ''
 		)
 	);
-
-    var $actsAs = array('containable');
 
 }
 ?>
