@@ -132,7 +132,7 @@ sub make_output {
         @{ $el->{ elements } }[ NAME ] = $attrs[0];
 
         # get the abundance
-        (my $abundance = $el->{ elements }->[ NAME ]) =~ s/.*x(\d)+/$1/;
+        (my $abundance = $el->{ elements }->[ NAME ]) =~ s/.*x(\d+)/$1/;
         @{ $el->{ elements } }[ ABUNDANCE ] = $abundance;
 
         # get the sequence

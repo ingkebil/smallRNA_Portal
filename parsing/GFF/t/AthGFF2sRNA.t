@@ -236,6 +236,7 @@ is_deeply($ath2srna->{ genes },
 });
 
 # to test if the output is correct, I simply c/p what the script outputs in here everytime I make a change to the belowmentioned GFF
+# Also, this only only will succeed when the DB is empty to start with!
 my @sql = (
 "INSERT INTO `chromosomes` (id, name, length)
 VALUES (1, Chr2, 19698289);

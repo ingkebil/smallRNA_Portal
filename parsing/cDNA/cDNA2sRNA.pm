@@ -7,6 +7,7 @@ use Getopt::Long;
 use Pod::Usage;
 use FASTA::Reader;
 use Smart::Comments;
+use SRNA::DBAbstract;
 use Data::Dumper;
 use Carp;
 local $SIG{__WARN__} = \&Carp::cluck;
@@ -18,13 +19,15 @@ local $SIG{__DIE__} = \&Carp::confess;
 sub run {
     my $gfffile = q{};
     my ($source_id, $species_id) = 0;
-    my ($species_name, $source_name, $path) = q{};
+    my ($species_name, $source_name, $path, $fasta, $fasta_id_regex) = q{};
 
     my $opts = GetOptions(
         'sourceid:i' => \$source_id,
         'sourcename:s' => \$source_name,
         'speciesid:i' => \$species_id,
         'speciesname:s' => \$species_name,
+        'fasta:s' => \$fasta,
+        'fasta_id_regex:s' => \$fasta_id_regex,
         'path:s' => \$path,
     );
 
@@ -33,19 +36,18 @@ sub run {
 
     $ARGV[0] || pod2usage(3);
 
-    my $cdna2srna = __PACKAGE__->new();
-    my $reader = new FASTA::Reader({ filename => $ARGV[0], id_regex => '>(.*)'});
-    my $lines  = $reader->get_all_seq($ARGV[0]);
+    my $cdna2srna = __PACKAGE__->new({ fasta => $fasta, fasta_id_regex => $fasta_id_regex });
     $source_id = $cdna2srna->check_source($source_id, $source_name);
     $species_id = $cdna2srna->check_species($species_id, $species_name);
+    my $freader   = new FASTA::Reader({ filename => $ARGV[0] });
+    my $lines  = $freader->get_all_seq($ARGV[0]);
 
     my $results = $cdna2srna->run_parser($lines, $source_id, $species_id);
     $path .= q{/} if substr($path, -1, 1) ne q{/};
 
-    print Dumper $results;
-
-#    $cdna2srna->fprint($path . 'annotations.csv', join( "\n", @{ $results->{ annotations } }));
-#    $cdna2srna->fprint($path . 'structures.csv', join( "\n", @{ $results->{ structures } }));
+    $cdna2srna->fprint($path . 'annotations.csv', join( "\n", @{ $results->{ annotations } }));
+    $cdna2srna->fprint($path . 'structures.csv',  join( "\n", @{ $results->{ structures  } }));
+    $cdna2srna->fprint($path . 'chromosomes.csv', join( "\n", @{ $results->{ chromosomes } }));
 }
 
 sub fprint {
@@ -64,14 +66,25 @@ sub fprint {
 
 sub new {
     my $inv = shift;
+    my $s = shift;
+    my $db = $s->{ db }     || 'smallrna';
+    my $user = $s->{ user } || 'kebil';
+    my $pass = $s->{ pass } || 'kebil';
+    my $fasta = $s->{ fasta };
+    my $fasta_id_regex = $s->{ fasta_id_regex } || '>(.*)';
+
     my $class = ref $inv || $inv;
 
-    my ($fasta_file, $fasta_id_regex) = @_;
-
-    my $dbh = DBI->connect('dbi:mysql:database=smallrna', 'kebil', 'kebil') or die "Could not connect to DB\n";
+    my $dbh = DBI->connect("dbi:mysql:database=$db", $user, $pass) or die "Could not connect to DB\n";
+    my $chroms = new SRNA::DBAbstract({ dbh => $dbh, table => 'chromosomes' });
+    my $freader = new FASTA::Reader({ filename => $fasta, fasta_id_regex => $fasta_id_regex });
 
     my $self = {
-        dbh    => $dbh,
+        dbh            => $dbh,
+        chroms         => $chroms,
+        freader        => $freader,
+        fasta          => $fasta,
+        fasta_id_regex => $fasta_id_regex,
         # structure is we want to get is something like this, which litterally translates to the DB scheme
         # { acc_nr.model_nr => { strand, chr, type, seq, start, stop, struct } }
         genes   => {},
@@ -86,9 +99,19 @@ sub run_parser {
     my ($species_id, $source_id) = @_;
     my (@annotations, @structures) = ();
 
+    my $chroms = $self->{ chroms };
+
     while (my ($key, $seq) = each %$seqs) {
         my ($acc_nr, $model_nr, $symbols, $comment, $chr, $start, $stop, $strand) = $key =~
         /(.+)\.(\d*) \| Symbols: (.*?) \| (.*) \| (.{3,4}):(\d+)-(\d+) (.+)/;
+
+        ## now replace the chr with the chr id in the chromsomes table
+        # first get the chr_id
+        my $chr_id = $chroms->get_id('name' => ucfirst($chr));
+        if (! $chr_id) {
+            my $len = length $self->{ freader }->get_seq( $self->{ fasta }, ucfirst($chr) );
+            $chr_id = $chroms->add({ name => ucfirst($chr), length => $len, species_id => $species_id});
+        }
 
         push @annotations, join "\t", (
             $self->get_next_id(),
@@ -97,7 +120,7 @@ sub run_parser {
             $start,
             $stop,
             $strand =~ /forward/i ? q{+} : q{-},
-            $chr,
+            $chr_id,
             'cdna',
             $species_id,
             $seq,
@@ -115,7 +138,7 @@ sub run_parser {
         );
     }
 
-    return { annotations => \@annotations, structures => \@structures };
+    return { annotations => \@annotations, structures => \@structures, chromosomes => $chroms->get_new_rows_CSV('id', 'name', 'length', 'species_id') };
 }
 
 { 
@@ -184,6 +207,6 @@ __END__;
 
 Usage: perl SRNA/cDNA.pm [options] file.cdna
 
-Optional:
-  --species_id|--species_name:
-  --sources_id|--sources_name:
+    Optional:
+      --species_id|--species_name:
+      --sources_id|--sources_name:

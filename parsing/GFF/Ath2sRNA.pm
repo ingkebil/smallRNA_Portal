@@ -459,8 +459,8 @@ sub get_chr_id {
         return $chr_id;
     }
     else {
-        $self->add_chr_id($chr, $rs->[ 0 ]->[ 0 ]);
-        return $rs->[ 0 ]->[ 0 ]; # first row, first column
+        $self->add_chr_id($chr, $rs->[ 0 ]);
+        return $rs->[ 0 ]; # first row, first column
     }
 }
 
