@@ -3,6 +3,8 @@ use Test::More 'no_plan';
 use Data::Dumper;
 use DBI;
 
+use SRNA::Utils qw/ promptUser /;
+
 my $package = 'cDNA::cDNA2sRNA';
 my $fasta   = '/home/billiau/git/smallRNA/data/tair9genome.fas'; # you will prolly want to change this ;)
 use_ok($package) or exit;
@@ -38,14 +40,14 @@ $dbh->do(q{CREATE TABLE `annotations` (
   `seq` text NOT NULL,
   `comment` text NOT NULL,
   `source_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8});
 $dbh->do(q{CREATE TABLE `chromosomes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `length` int(11) NOT NULL,
   `species_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8});
 $dbh->do(q{CREATE TABLE `structures` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -53,7 +55,7 @@ $dbh->do(q{CREATE TABLE `structures` (
   `start` int(11) NOT NULL,
   `stop` int(11) NOT NULL,
   `utr` enum('Y','N') NOT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8});
 
 my $cdna = new $package({ db => $db, user => $user, pass => $pass, fasta => $fasta });
@@ -86,31 +88,6 @@ is_deeply($result, {
 });
 
 $dbh->do("DROP DATABASE $db");
-
-## internal functions
-
-sub promptUser {
-   my ($promptString,$defaultValue) = @_;
-
-   if ($defaultValue) {
-      print $promptString, "[", $defaultValue, "]: ";
-   } else {
-      print $promptString, ": ";
-   }
-
-   $| = 1;               # force a flush after our print
-   $_ = <STDIN>;         # get the input from STDIN
-
-   # remove the newline character from the end of the input the user
-   # gave us.
-   chomp;
-
-   if ("$defaultValue") {
-      return $_ ? $_ : $defaultValue;    # return $_ if it has a value
-   } else {
-      return $_;
-   }
-}
 
 __DATA__
 

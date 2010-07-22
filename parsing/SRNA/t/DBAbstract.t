@@ -1,6 +1,7 @@
 use Test::More 'no_plan';
 
 use Data::Dumper;
+use SRNA::Utils qw/ promptUser /;
 
 my $package = 'SRNA::DBAbstract';
 use_ok($package) or exit;
@@ -44,31 +45,6 @@ is_deeply($chroms->get_new_rows_CSV('id', 'name', 'length', 'species_id'), [
 
 # destroy the tmp db
 $dbh->do('DROP DATABASE `kebil_abstract_test`');
-
-## internal functions
-
-sub promptUser {
-   my ($promptString,$defaultValue) = @_;
-
-   if ($defaultValue) {
-      print $promptString, "[", $defaultValue, "]: ";
-   } else {
-      print $promptString, ": ";
-   }
-
-   $| = 1;               # force a flush after our print
-   $_ = <STDIN>;         # get the input from STDIN
-
-   # remove the newline character from the end of the input the user
-   # gave us.
-   chomp;
-
-   if ("$defaultValue") {
-      return $_ ? $_ : $defaultValue;    # return $_ if it has a value
-   } else {
-      return $_;
-   }
-}
 
 __DATA__
 

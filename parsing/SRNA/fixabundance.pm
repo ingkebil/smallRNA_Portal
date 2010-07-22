@@ -6,11 +6,12 @@ use strict;
 use warnings;
 use DBI;
 use Data::Dumper;
+use Settings q/:DB/;
 
 &run() unless caller();
 
 sub run {
-    my $dbh = DBI->connect('dbi:mysql:smallrna', 'kebil', 'kebil');
+    my $dbh = DBI->connect('dbi:mysql:'.DB, USER, PASS);
 
     my $rs = $dbh->selectall_arrayref(q{SELECT abundance, id, name FROM srnas}, { Slice => {} });
     my $sth = $dbh->prepare(q{UPDATE srnas SET abundance = ? WHERE id = ?});

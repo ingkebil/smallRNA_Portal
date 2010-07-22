@@ -111,6 +111,8 @@ sub _parse_fasta {
         $value_of{ $gene_id } = $seq;
     }
 
+    undef $self->{ lines }; # make it reusable after initing it with @lines
+
     return \%value_of;
     #print Dumper \%value_of;
 }

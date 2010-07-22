@@ -17,8 +17,11 @@ our %EXPORT_TAGS = ( GFF_SLOTS => [ @EXPORT_OK ] );
 
 __END__
 
-=head1
+=head1 SYNOPSIS
 
 Placeholder module for the GFF Constants
-=cut
+
+=head1 AUTHOR
+
+Kenny Billiau
 

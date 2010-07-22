@@ -5,11 +5,13 @@ use warnings;
 use DBI;
 use Getopt::Long;
 use Pod::Usage;
-use FASTA::Reader;
 use Smart::Comments;
-use SRNA::DBAbstract;
 use Data::Dumper;
 use Carp;
+
+use FASTA::Reader;
+use Settings q/:DB/;
+use SRNA::DBAbstract;
 local $SIG{__WARN__} = \&Carp::cluck;
 local $SIG{__DIE__} = \&Carp::confess;
 
@@ -67,9 +69,9 @@ sub fprint {
 sub new {
     my $inv = shift;
     my $s = shift;
-    my $db = $s->{ db }     || 'smallrna';
-    my $user = $s->{ user } || 'kebil';
-    my $pass = $s->{ pass } || 'kebil';
+    my $db = $s->{ db }     || DB;
+    my $user = $s->{ user } || USER;
+    my $pass = $s->{ pass } || PASS;
     my $fasta = $s->{ fasta };
     my $fasta_id_regex = $s->{ fasta_id_regex } || '>(.*)';
 

@@ -2,6 +2,7 @@ package SRNA::Add_Experiment;
 
 use strict;
 use warnings;
+use Settings q/:DB/;
 use DBI;
 use Getopt::Long;
 use Pod::Usage;
@@ -20,7 +21,7 @@ sub run {
 
     pod2usage(2) if (!$name && !$descr && !$species_id);
     
-    my $dbh = DBI->connect('dbi:mysql:database=smallrna', 'kebil', 'kebil');
+    my $dbh = DBI->connect('dbi:mysql:database='.DB, USER, PASS);
 
     my $insert = $dbh->prepare('INSERT INTO `experiments` (name, description, species_id) VALUES (?, ?, ?)');
     exit(1) if ! $insert->execute( $name, $descr, $species_id );

@@ -6,9 +6,10 @@ use DBI;
 use Getopt::Long;
 use Pod::Usage;
 use File::Path qw/ make_path /;
+use Settings q/:DB/;
 use Data::Dumper;
 
-our $dbh = DBI->connect('dbi:mysql:database=smallrna', 'kebil', 'kebil');
+our $dbh = DBI->connect('dbi:mysql:database='.DB, USER, PASS);
 
 our $fasta_file_t = '"$cond_dir/$cond/$cond.unique.fas"'; # add the double quotes as these strings get eval'd lateron
 our $mapp_file_t  = '"$mapp_dir/$cond/tair9/${cond}_on_genome.100.gff"';
@@ -69,7 +70,8 @@ sub run {
             }
             foreach my $outtype ( ('sequences', 'types', 'srnas') ) {
                 print "Importing $outtype...";
-                `mysqlimport -u kebil -pkebil -L --fields-enclosed-by \\' smallrna '$path/$outtype.csv'`;
+                $user = USER; $pass = PASS; $db = DB;
+                `mysqlimport -u $user -p$pass -L --fields-enclosed-by \\' $db '$path/$outtype.csv'`;
                 print "done\n";
             }
         }

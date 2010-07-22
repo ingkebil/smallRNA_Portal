@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Pod::Usage;
+use Data::Dumper;
+use DBI;
 
 use GFF q/:GFF_SLOTS/;
 use constant NAME      => FRAME + 1;
@@ -12,17 +14,17 @@ use constant TYPE_ID   => FRAME + 3;
 use constant ABUNDANCE => FRAME + 4;
 use constant EXP_ID    => FRAME + 5;
 
+use Settings q/:DB/;
 use GFF::Parser;
 use FASTA::Reader;
-use Data::Dumper;
-use DBI;
+use SRNA::DBAbstract;
 
 &run() unless caller;
 
 sub run {
     my $gfffile = q{};
-    my ($exp_id, $csv) = 0;
-    my ($path, $type, $fasta_file, $fasta_id_regex) = q{};
+    my ($exp_id, $species_id) = 0;
+    my ($path, $type, $fasta_file, $fasta_id_regex, $chr_fasta) = q{};
 
     my $opts = GetOptions(
         'experiment_id=i' => \$exp_id,
@@ -30,6 +32,8 @@ sub run {
         'path:s' => \$path,
         'fasta:s' => \$fasta_file,
         'fasta_id_regex:s' => \$fasta_id_regex,
+        'chrfasta:s' => \$chr_fasta,
+        'speciesid:i' => \$species_id,
     );
 
     pod2usage(2) if (! $exp_id && ! $type && !$ARGV[0]);
@@ -39,10 +43,10 @@ sub run {
     my @lines = <F>; ### Reading GFF [%]
     close F;
     print "done.\n";
-    my $exp2srna = __PACKAGE__->new($fasta_file, $fasta_id_regex);
+    my $exp2srna = __PACKAGE__->new($fasta_file, $fasta_id_regex, $chr_fasta);
 
     print 'Parsing GFF ... ';
-    $exp2srna->run_parser(\@lines, $exp_id, $type);
+    $exp2srna->run_parser(\@lines, $exp_id, $type, $species_id);
     print "done.\n";
 
     while (my ($outputtype, $results) = each %{ $exp2srna->{ return }->{ csv } }) {
@@ -66,18 +70,26 @@ sub fprint {
 
 sub new {
     my $inv = shift;
+    my $s = shift;
+    my $fasta_file = $s->{ fasta };
+    my $fasta_id_regex = $s->{ fasta_id_regex };
+    my $chr_fasta = $s->{ chr_fasta };
+    my $user = $s->{ user } || USER;
+    my $pass = $s->{ pass } || PASS;
+    my $db   = $s->{ db   } || DB;
+
     my $class = ref $inv || $inv;
 
-    my ($fasta_file, $fasta_id_regex, $type) = @_;
-
     my $gff = new GFF::Parser();
-    my $dbh = DBI->connect('dbi:mysql:database=smallrna', 'kebil', 'kebil') or die "Could not connect to DB\n";
+    my $dbh = DBI->connect('dbi:mysql:database='. $db, $user, $pass) or die "Could not connect to DB\n";
+    my $chroms = new SRNA::DBAbstract({ dbh => $dbh, table => 'chromosomes' });
 
     my $self = {
         parser => $gff,
         dbh    => $dbh,
+        chroms => $chroms,
+        chr_fasta => $chr_fasta,
         return => { csv => { srnas => [], sequences => [], types => [] } },
-        type   => $type,
     };
 
     if ($fasta_file) {
@@ -100,13 +112,14 @@ sub run_parser {
     my $lines = shift;
     my $exp_id = shift;
     my $type = shift;
+    my $species_id = shift;
 
     # well, if we parsed already, don't do it again!
     return $self->{ return }->{ csv }->{ srnas } if (@{ $self->{ return }->{ csv }->{ srnas } });
 
     my $els = $self->{ parser }->parse($lines);
 
-    return $self->{ return }->{ csv }->{ srnas } = $self->make_output($els, $exp_id, $type);
+    return $self->{ return }->{ csv }->{ srnas } = $self->make_output($els, $exp_id, $type, $species_id);
 }
 
 sub make_output {
@@ -114,9 +127,11 @@ sub make_output {
     my $els  = shift;
     my $exp_id = shift;
     my $type = shift;
+    my $species_id = shift;
 
     my @lines = ();
-    foreach my $el (@{ $els }) { ### Generating output [%]
+    print 'Starting generating output ...';
+    foreach my $el (@{ $els }) { ### [%]
         my $line = q{};
         my $id = $self->get_next_id;
 
@@ -149,6 +164,24 @@ sub make_output {
         }
         @{ $el->{ elements } }[ SEQ_ID ] = $seq_id;
 
+        # get the chrom id
+        my $chroms = $self->{ chroms };
+        my $chr_name = ucfirst @{  $el->{ elements }  }[ CHR ];
+        my $chr_id = $chroms->get_id(name => $chr_name);
+        if ( ! $chr_id) {
+            if ( ! exists $self->{ freader }) {
+                print 'Reading chromosomes FASTA ...';
+                $self->{ freader } = new FASTA::Reader({ filename => $self->{ chr_fasta }, 'id_regex' => '>(.*)' });
+                print "done.\n";
+            }
+            my $freader = $self->{ freader };
+            $freader->add_regex($self->{ chr_fasta } => '>(.*)');
+            my $chr_len = length $freader->get_seq($self->{ chr_fasta }, $chr_name);
+            $chr_id = $chroms->add({ name => $chr_name, length => $chr_len, species_id => $species_id });
+            $self->{ return }->{ csv }->{ chromosomes } = $chroms->get_new_rows_CSV('id', 'name', 'length', 'species_id');
+        }
+        @{ $el->{ elements } }[ CHR ] = $chr_id;
+
         # quote for the DB
         my @e = map { $self->{ dbh }->quote($_) } @{ $el->{ elements } };
 
@@ -166,9 +199,11 @@ sub make_output {
         $line .= "\t" . $e[ ABUNDANCE ];
         $line .= "\t" . $undef;
         $line .= "\t" . $e[ EXP_ID    ];
+        $line .= "\t" . $e[ CHR       ];
 
         push @lines, $line;
     }
+    print "done.\n";
 
     return \@lines;
 }
@@ -195,7 +230,8 @@ sub csv_adder {
 
     push @{ $self->{ return }->{ csv }->{ $type } },
         join qq{\t},
-        map { $self->{ dbh }->quote($_); } @_;
+        map { $self->{ dbh }->quote($_); }
+        @_;
 }
 
 {
@@ -299,6 +335,8 @@ file will also be generated.
             * types.csv
         --fasta: The fasta file. If provided, a sequence.csv file will be generated.
         --fasta_id_regex: The regex to extract an ID from the fasta file headers. The ID should be surrounded by round brackets () in the regex. Defaults to '>(.*)'.
+        --chrfasta: The fasta file for the chromosomes. Just in case these have not been added to the DB yet.
+        --speciesid: The id of the species in the DB.
         
 To upload the CSV files into the DB use following command:
 mysqlimport -u <username> -p -L --fields-enclosed-by \' <filename.csv>

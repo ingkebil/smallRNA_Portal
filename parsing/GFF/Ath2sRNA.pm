@@ -6,6 +6,7 @@ use warnings;
 use Smart::Comments;
 use Data::Dumper;
 use GFF q/:GFF_SLOTS/;
+use Settings q/:DB/;
 use GFF::Parser;
 use FASTA::Reader;
 use DBI;
@@ -85,7 +86,7 @@ sub new {
     my ($fasta_file, $fasta_id_regex) = @_;
 
     my $gff = new GFF::Parser();
-    my $dbh = DBI->connect('dbi:mysql:database=smallrna', 'kebil', 'kebil') or die "Could not connect to DB\n";
+    my $dbh = DBI->connect('dbi:mysql:database='.DB, USER, PASS) or die "Could not connect to DB\n";
 
     my $self = {
         parser => $gff,
