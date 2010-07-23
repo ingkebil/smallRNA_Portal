@@ -43,7 +43,7 @@ sub run {
     my @lines = <F>; ### Reading file [%]
     close F;
 
-    my $ath2srna = __PACKAGE__->new($fasta_file, $fasta_id_regex);
+    my $ath2srna = __PACKAGE__->new({ fasta_file => $fasta_file, fasta_id_regex => $fasta_id_regex });
     $source_id = $ath2srna->check_source($source_id, $source_name);
     $species_id = $ath2srna->check_species($species_id, $species_name);
 
@@ -81,12 +81,17 @@ sub fprint {
 
 sub new {
     my $inv = shift;
+    my $s = shift;
+    my $fasta_file = $s->{ fasta_file };
+    my $fasta_id_regex = $s->{ fasta_id_regex };
+    my $user = $s->{ user } || USER;
+    my $pass = $s->{ pass } || PASS;
+    my $db = $s->{ db } || DB;
+
     my $class = ref $inv || $inv;
 
-    my ($fasta_file, $fasta_id_regex) = @_;
-
     my $gff = new GFF::Parser();
-    my $dbh = DBI->connect('dbi:mysql:database='.DB, USER, PASS) or die "Could not connect to DB\n";
+    my $dbh = DBI->connect('dbi:mysql:database='.$db, $user, $pass) or die "Could not connect to DB\n";
 
     my $self = {
         parser => $gff,
@@ -270,7 +275,7 @@ sub add_structure {
 }
 
 sub add_chromosome_sql {
-    push @sql, 'INSERT INTO `chromosomes` (id, name, length)
+    push @sql, 'INSERT INTO `chromosomes` (id, name, length, species_id)
 VALUES (' . join(q{, }, @_) . ');
 ';
 }
@@ -356,7 +361,7 @@ sub make_output {
 
         ## now replace the chr with the chr id in the chromsomes table
         # first get the chr_id
-        my $chr_id = $self->get_chr_id($gene->{ 'chr' }, $handlers);
+        my $chr_id = $self->get_chr_id($gene->{ 'chr' }, $gene->{ species_id }, $handlers);
         $gene->{ chr_id } = $chr_id;
 
         # quote for the DB
@@ -435,6 +440,7 @@ sub reset_chr_ids {
 sub get_chr_id {
     my $self = shift;
     my $chr  = shift;
+    my $species_id = shift;
     my $handlers = shift;
 
     if (exists $chr_ids{ $chr }) {
@@ -455,7 +461,8 @@ sub get_chr_id {
         $handlers->{ chromosome_adder }(
             $chr_id,
             $chr,
-            $chr_length
+            $chr_length,
+            $species_id
         );
         return $chr_id;
     }

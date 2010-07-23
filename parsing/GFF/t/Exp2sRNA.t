@@ -37,7 +37,7 @@ my $db   = &promptUser('DB', 'kebil_exp_test');
 my $user = &promptUser('User for DB', 'kebil');
 my $pass = &promptUser('Password for DB', 'kebil');
 `echo 'CREATE DATABASE $db' | mysql -u $user -p$pass`;
-`mysql -u $user -p$pass $db < $Bin/db.sql`;
+`mysql -u $user -p$pass $db < $Bin/../../../db/schema.ddl`;
 
 # create our test object
 my $exp = new $package({ chr_fasta => $chrfasta, user => $user, pass => $pass, db => $db });

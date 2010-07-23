@@ -43,7 +43,7 @@ sub run {
     my @lines = <F>; ### Reading GFF [%]
     close F;
     print "done.\n";
-    my $exp2srna = __PACKAGE__->new($fasta_file, $fasta_id_regex, $chr_fasta);
+    my $exp2srna = __PACKAGE__->new({ fasta => $fasta_file, fasta_id_regex => $fasta_id_regex, chr_fasta => $chr_fasta });
 
     print 'Parsing GFF ... ';
     $exp2srna->run_parser(\@lines, $exp_id, $type, $species_id);

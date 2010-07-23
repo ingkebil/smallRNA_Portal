@@ -17,20 +17,18 @@ our $mapp_file_t  = '"$mapp_dir/$cond/tair9/${cond}_on_genome.100.gff"';
 &run() unless caller();
 
 sub run {
-    my ($source_id, $species_id) = 0;
-    my ($species_name, $source_name) = q{};
+    my $species_id = 0;
+    my ($species_name, $chr_fasta) = q{};
 
     my $opts = GetOptions(
-        'sourceid:i' => \$source_id,
-        'sourcename:s' => \$source_name,
         'speciesid:i' => \$species_id,
         'speciesname:s' => \$species_name,
+        'chrfasta:s' => \$chr_fasta,
     );
 
     my $cond_dir = $ARGV[0];
     my $mapp_dir = $ARGV[1];
 
-    pod2usage(2) if (! $source_id && ! $source_name);
     pod2usage(2) if (! $species_id && ! $species_name);
 
     ($ARGV[0] && $ARGV[1]) || pod2usage(3);
@@ -56,8 +54,8 @@ sub run {
             my $mapp_file  = eval($mapp_file_t);  # 
 
             # execute the parsing!
-            print qq{perl GFF/Exp2sRNA.pm --experiment_id $exp_id --type $srna_type --path '$path' --fasta '$fasta_file' '$mapp_file'\n};
-            system("perl","GFF/Exp2sRNA.pm","--experiment_id","$exp_id","--type","$srna_type","--path","$path","--fasta","$fasta_file","$mapp_file");
+            print qq{perl GFF/Exp2sRNA.pm --experiment_id $exp_id --type $srna_type --path '$path' --fasta '$fasta_file' --chrfasta '$chr_fasta' --speciesid $species_id '$mapp_file'\n};
+            system("perl","GFF/Exp2sRNA.pm","--experiment_id","$exp_id","--type","$srna_type","--path","$path","--fasta","$fasta_file","--chrfasta", "$chr_fasta","--speciesid","$species_id", "$mapp_file");
             if ($? == -1) {
                 die "Failed to execute: $!\n";
             }
@@ -68,9 +66,9 @@ sub run {
             elsif ($? >> 8 != 0) {
                 die sprintf "Child exited with value %d\n", $? >> 8;
             }
-            foreach my $outtype ( ('sequences', 'types', 'srnas') ) {
+            foreach my $outtype ( ('sequences', 'types', 'chromosomes', 'srnas') ) {
                 print "Importing $outtype...";
-                $user = USER; $pass = PASS; $db = DB;
+                my $user = USER; my $pass = PASS; my $db = DB;
                 `mysqlimport -u $user -p$pass -L --fields-enclosed-by \\' $db '$path/$outtype.csv'`;
                 print "done\n";
             }
@@ -111,6 +109,5 @@ Usage: SRNA::Parseall [options] <cond_dir> <mapp_dir>
   For each file met, GFF::Exp2sRNA.pm is invoked. Make sure GFF::Exp2sRNA is in your path!
 
   Options:
-    --sourceid <id> : The ID the source as provided in the DB, table 'sources'.
     --speciesid <id>: The ID of the species as provided in the DB, table 'species'.
   
