@@ -90,9 +90,6 @@ sub run_parser {
     #     start => [
     #        { ID, start, stop, seq }
     #     ],
-    #     stop => [
-    #        { ID, start, stop, seq }
-    #     ]
     # }
     my $degrs = {};
     my $ref_num = 0;
@@ -108,7 +105,7 @@ sub run_parser {
                 $ref_seq_fl = 1; # next line is the ref seq, set the flag!
                 next LINE;
             };
-            /.*/ && do {
+            /.*/ && do { # just check the ref_seq_fl, or fall through
                 if ($ref_seq_fl) {
                     # get the ref seq
                     my ($ref_seq_spl, $ref_id_spl) = split /\s+/, $line;
@@ -118,7 +115,8 @@ sub run_parser {
                     next LINE;
                 }
             };
-            /^$/ && do { };
+            /^$/ && do { # skip me
+            };
             /.+/ && do {
                 my ($start, $stop) = 0;
                 my ($degr_id, $seq) = q{};

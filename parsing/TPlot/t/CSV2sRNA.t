@@ -88,18 +88,7 @@ my $VAR1 = {
                      }
                    ],
           '601' => [
-                     {
-                       'id' => 'D-N 0.85',
-                       'stop' => 608,
-                       'seq' => 'GATGATGC',
-                       'start' => 601
-                     },
-                     {
-                       'id' => 'D-N 0.51',
-                       'stop' => 607,
-                       'seq' => 'GATGATG',
-                       'start' => 601
-                     },
+                    undef, undef,
                      {
                        'id' => 'D-N 0.51',
                        'stop' => 619,
@@ -116,12 +105,7 @@ my $VAR1 = {
                      }
                    ],
           '901' => [
-                     {
-                       'id' => 'D-N 0.51',
-                       'stop' => 910,
-                       'seq' => 'GCACCTTATG',
-                       'start' => 901
-                     }
+                    undef
                    ],
           '480' => [
                      {
@@ -140,12 +124,7 @@ my $VAR1 = {
                      }
                    ],
           '301' => [
-                     {
-                       'id' => 'D-N 0.5',
-                       'stop' => 317,
-                       'seq' => 'TCGAGAGATGCTATGTG',
-                       'start' => 301
-                     }
+                    undef
                    ],
           '1198' => [
                       {
@@ -164,12 +143,7 @@ my $VAR1 = {
                      }
                    ],
           '1201' => [
-                      {
-                        'id' => 'D-N 0.68',
-                        'stop' => 1216,
-                        'seq' => 'CAACCAAAGCAGCAGA',
-                        'start' => 1201
-                      }
+                    undef
                     ],
           '658' => [
                      {
@@ -181,7 +155,7 @@ my $VAR1 = {
                    ]
         };
 
-#is_deeply($csv2srna->{ parsed }, $VAR1);
+is_deeply($csv2srna->{ parsed }, $VAR1);
 
 my $result = [
         {
