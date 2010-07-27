@@ -130,7 +130,7 @@ sub make_output {
     my $species_id = shift;
 
     my @lines = ();
-    print 'Starting generating output ...';
+    print 'Generating output ...';
     foreach my $el (@{ $els }) { ### [%]
         my $line = q{};
         my $id = $self->get_next_id;

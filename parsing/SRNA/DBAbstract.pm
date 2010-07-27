@@ -41,7 +41,7 @@ sub get_id {
 
     my $rs = $self->{ dbh }->selectcol_arrayref("SELECT id FROM $self->{ table } WHERE $col = ?", { MaxRows => 1 }, ( lc($value) ));
 
-    if (! scalar @$rs) {
+    if (! defined $rs || ! scalar @$rs) {
         return undef;
     }
     else {
