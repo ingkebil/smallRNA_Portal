@@ -202,11 +202,10 @@ my $result = [
             'id' => 'D-N_1_x0.5',
             'score' => 0.5,
             'seq' => 'AATCGAGAGATGCTATGTG',
-            'mm_seq' => 'AATCGAGAGATGCTATGTG',
-            'mm_num' => 0,
             'start' => 299,
             'genome_start' => 3930,
-            'genome_stop' => 3948
+            'genome_stop' => 3948,
+            'srna_id' => 1
           },
           {
             'chrom_id' => '3',
@@ -216,11 +215,10 @@ my $result = [
             'id' => 'D-N_2_x0.5',
             'score' => 0.5,
             'seq' => 'GTTCCTCGATGGAAGATAC',
-            'mm_seq' => 'GTTCCTCGATGGAAGATAC',
-            'mm_num' => 0,
             'start' => 480,
             'genome_start' => 4111,
-            'genome_stop' => 4129
+            'genome_stop' => 4129,
+            'srna_id' => 2
           },
           {
             'chrom_id' => '3',
@@ -230,11 +228,10 @@ my $result = [
             'id' => 'D-N_1_x0.76',
             'score' => 0.76,
             'seq' => 'TATGTCATCTGCAGACTTG',
-            'mm_seq' => 'TATGTCATCTGCAGACTTG',
-            'mm_num' => 0,
             'start' => 571,
             'genome_start' => 4202,
             'genome_stop' => 4220,
+            'srna_id' => 3
           },
           {
             'chrom_id' => '3',
@@ -244,11 +241,10 @@ my $result = [
             'id' => 'D-N_1_x0.51',
             'score' => 0.51,
             'seq' => 'GAGTACAAGGGTGATGATG',
-            'mm_seq' => 'GAGTACAAGGGTGATGATG',
-            'mm_num' => 0,
             'start' => 589,
             'genome_start' => 4220,
             'genome_stop' => 4238,
+            'srna_id' => 4
           },
           {
             'chrom_id' => '3',
@@ -258,11 +254,10 @@ my $result = [
             'id' => 'D-N_1_x0.85',
             'score' => 0.85,
             'seq' => 'AGTACAAGGGTGATGATGC',
-            'mm_seq' => 'AGTACAAGGGTGATGATGC',
-            'mm_num' => 0,
             'start' => 590,
             'genome_start' => 4221,
-            'genome_stop' => 4239
+            'genome_stop' => 4239,
+            'srna_id' => 5
           },
           {
             'chrom_id' => '3',
@@ -272,11 +267,10 @@ my $result = [
             'id' => 'D-N_2_x0.51',
             'score' => 0.51,
             'seq' => 'GATGATGCGGACATTCTAT',
-            'mm_seq' => 'GATGATGCGGACATTCTAT',
-            'mm_num' => 0,
             'start' => 601,
             'genome_start' => 4232,
-            'genome_stop' => 4250
+            'genome_stop' => 4250,
+            'srna_id' => 6
           },
           {
             'chrom_id' => '3',
@@ -286,11 +280,10 @@ my $result = [
             'id' => 'D-N_3_x0.51',
             'score' => 0.51,
             'seq' => 'GACATTCTATCTGCTTATG',
-            'mm_seq' => 'GACATTCTATCTGCTTATG',
-            'mm_num' => 0,
             'start' => 610,
             'genome_start' => 4241,
-            'genome_stop' => 4259
+            'genome_stop' => 4259,
+            'srna_id' => 7
           },
           {
             'chrom_id' => '3',
@@ -300,11 +293,10 @@ my $result = [
             'id' => 'D-N_1_x0.59',
             'score' => 0.59,
             'seq' => 'TTTGTCCCCAATATGACTA',
-            'mm_seq' => 'TTTGTCCCCAATATGACTA',
-            'mm_num' => 0,
             'start' => 649,
             'genome_start' => 4280,
-            'genome_stop' => 4298
+            'genome_stop' => 4298,
+            'srna_id' => 8
           },
           {
             'chrom_id' => '3',
@@ -314,11 +306,10 @@ my $result = [
             'id' => 'D-N_1_x2.03',
             'score' => 2.03,
             'seq' => 'AATATGACTAGTAGTGCAG',
-            'mm_seq' => 'AATATGACTAGTAGTGCAG',
-            'mm_num' => 0,
             'start' => 658,
             'genome_start' => 4289,
-            'genome_stop' => 4307 
+            'genome_stop' => 4307,
+            'srna_id' => 9
           },
           {
             'chrom_id' => '3',
@@ -328,11 +319,10 @@ my $result = [
             'id' => 'D-N_4_x0.51',
             'score' => 0.51,
             'seq' => 'ACTAGTAGTGCAGGTTCTG',
-            'mm_seq' => 'ACTAGTAGTGCAGGTTCTG',
-            'mm_num' => 0,
             'start' => 664,
             'genome_start' => 4295,
-            'genome_stop' => 4313
+            'genome_stop' => 4313,
+            'srna_id' => 10
           },
           {
             'chrom_id' => '3',
@@ -342,11 +332,10 @@ my $result = [
             'id' => 'D-N_1_x0.68',
             'score' => 0.68,
             'seq' => 'ACAGCAAGTTCCTTACTTG',
-            'mm_seq' => 'ACAGCAAGTTCCTTACTTG',
-            'mm_num' => 0,
             'start' => 882,
             'genome_start' => 4513,
-            'genome_stop' => 4531
+            'genome_stop' => 4531,
+            'srna_id' => 11
           },
           {
             'chrom_id' => '3',
@@ -356,11 +345,10 @@ my $result = [
             'id' => 'D-N_5_x0.51',
             'score' => 0.51,
             'seq' => 'CCTTACTTGGCACCTTATG',
-            'mm_seq' => 'CCTTACTTGGCACCTTATG',
-            'mm_num' => 0,
             'start' => 892,
             'genome_start' => 4523,
-            'genome_stop' => 4541
+            'genome_stop' => 4541,
+            'srna_id' => 12
           },
           {
             'chrom_id' => '3',
@@ -370,11 +358,10 @@ my $result = [
             'id' => 'D-N_6_x0.51',
             'score' => 0.51,
             'seq' => 'TAGCAGTGATACTGAAACT',
-            'mm_seq' => 'TAGCAGTGATACTGAAACT',
-            'mm_num' => 0,
             'start' => 1047,
             'genome_start' => 4678,
-            'genome_stop' => 4696 
+            'genome_stop' => 4696 ,
+            'srna_id' => 13
           },
           {
             'chrom_id' => '3',
@@ -384,11 +371,10 @@ my $result = [
             'id' => 'D-N_2_x0.68',
             'score' => 0.68,
             'seq' => 'GAGCAACCAAAGCAGCAGA',
-            'mm_seq' => 'GAGCAACCAAAGCAGCAGA',
-            'mm_num' => 0,
             'start' => 1198,
             'genome_start' => 4829,
-            'genome_stop' => 4847
+            'genome_stop' => 4847,
+            'srna_id' => 14
           },
           {
             'chrom_id' => '3',
@@ -398,11 +384,10 @@ my $result = [
             'id' => 'D-N_7_x0.51',
             'score' => 0.51,
             'seq' => 'TTTTTTTTTGTTTTTTTTT',
-            'mm_seq' => 'TTTTTTTTTGTTTTTTTTT',
-            'mm_num' => 0,
             'start' => 1469,
             'genome_start' => 5100,
-            'genome_stop' => 5118
+            'genome_stop' => 5118,
+            'srna_id' => 15
           }
         ];
 

@@ -5,6 +5,7 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use Data::Dumper;
+###use Smart::Comments;
 use DBI;
 
 use GFF q/:GFF_SLOTS/;
@@ -18,6 +19,7 @@ use Settings q/:DB/;
 use GFF::Parser;
 use FASTA::Reader;
 use SRNA::DBAbstract;
+use SRNA::DNAUtils;
 
 &run() unless caller;
 
@@ -38,16 +40,14 @@ sub run {
 
     pod2usage(2) if (! $exp_id && ! $type && !$ARGV[0]);
 
-    print 'Reading GFF ... ';
+    ### Reading GFF $ARGV[0] ...
     open F, '<', $ARGV[0] or die "$ARGV[0] not found!\n";
-    my @lines = <F>; ### Reading GFF [%]
+    my @lines = <F>;
     close F;
-    print "done.\n";
     my $exp2srna = __PACKAGE__->new({ fasta => $fasta_file, fasta_id_regex => $fasta_id_regex, chr_fasta => $chr_fasta });
 
-    print 'Parsing GFF ... ';
+    ### Parsing GFF $ARGV[0] ...
     $exp2srna->run_parser(\@lines, $exp_id, $type, $species_id);
-    print "done.\n";
 
     while (my ($outputtype, $results) = each %{ $exp2srna->{ return }->{ csv } }) {
         $exp2srna->fprint("$path/$outputtype.csv", join("\n", @{ $results }));
@@ -83,25 +83,28 @@ sub new {
     my $gff = new GFF::Parser();
     my $dbh = DBI->connect('dbi:mysql:database='. $db, $user, $pass) or die "Could not connect to DB\n";
     my $chroms = new SRNA::DBAbstract({ dbh => $dbh, table => 'chromosomes' });
+    my $utils = new SRNA::DNAUtils();
 
     my $self = {
         parser => $gff,
         dbh    => $dbh,
         chroms => $chroms,
+        utils  => $utils,
         chr_fasta => $chr_fasta,
         return => { csv => { srnas => [], sequences => [], types => [] } },
     };
 
+    ### Parsing FASTA $self->{ chr_fasta } ...
+    $self->{ freader } = new FASTA::Reader({ filename => $self->{ chr_fasta }, 'id_regex' => '>(.*)' });
+    $self->{ freader }->_fasta($self->{ chr_fasta }); # force read
     if ($fasta_file) {
-        print 'Reading FASTA ... ';
+        ### Parsing FASTA $fasta_file ...
         $fasta_id_regex = $fasta_id_regex || '>(.*)';
 
-        my $freader = new FASTA::Reader({ filename => $fasta_file, id_regex => $fasta_id_regex});
-        $self->{ freader        } = $freader;
+        $self->{ freader }->add_regex($fasta_file => $fasta_id_regex);
+        $self->{ freader }->_fasta($fasta_file); # force read
         $self->{ fasta_file     } = $fasta_file;
         $self->{ fasta_id_regex } = $fasta_id_regex;
-
-        print "done.\n";
     }
 
     return bless $self, $class;
@@ -130,7 +133,7 @@ sub make_output {
     my $species_id = shift;
 
     my @lines = ();
-    print 'Generating output ...';
+    ### Generating output ...
     foreach my $el (@{ $els }) { ### [%]
         my $line = q{};
         my $id = $self->get_next_id;
@@ -169,18 +172,17 @@ sub make_output {
         my $chr_name = ucfirst @{  $el->{ elements }  }[ CHR ];
         my $chr_id = $chroms->get_id(name => $chr_name);
         if ( ! $chr_id) {
-            if ( ! exists $self->{ freader }) {
-                print 'Reading chromosomes FASTA ...';
-                $self->{ freader } = new FASTA::Reader({ filename => $self->{ chr_fasta }, 'id_regex' => '>(.*)' });
-                print "done.\n";
-            }
-            my $freader = $self->{ freader };
-            $freader->add_regex($self->{ chr_fasta } => '>(.*)');
-            my $chr_len = length $freader->get_seq($self->{ chr_fasta }, $chr_name);
+            my $chr_len = length ${ $self->{ freader }->get_seq_ref($self->{ chr_fasta }, $chr_name) };
             $chr_id = $chroms->add({ name => $chr_name, length => $chr_len, species_id => $species_id });
             $self->{ return }->{ csv }->{ chromosomes } = $chroms->get_new_rows_CSV('id', 'name', 'length', 'species_id');
         }
         @{ $el->{ elements } }[ CHR ] = $chr_id;
+
+        # check for mismatches
+        my $mms = $self->check_mismatch($el->{ elements }, $seq, $chr_name);
+        foreach my $mm (@$mms) {
+            $self->csv_adder('mismatches', undef, $id, $mm);
+        }
 
         # quote for the DB
         my @e = map { $self->{ dbh }->quote($_) } @{ $el->{ elements } };
@@ -203,9 +205,33 @@ sub make_output {
 
         push @lines, $line;
     }
-    print "done.\n";
 
     return \@lines;
+}
+
+sub check_mismatch {
+    my $self = shift;
+    my $srna = shift;
+    my $seq  = shift;
+    my $chrom_name = shift;
+   
+    #my $ref_seq_spl = $self->{ freader }->get_seq_arrayref($self->{ chr_fasta }, $chrom_name);
+    my $ref_seq = substr(${ $self->{ freader }->get_seq_ref($self->{ chr_fasta }, $chrom_name) }, $srna->[ START ] -1, $srna->[ STOP ] - $srna->[ START ] + 1);
+    if ($srna->[ STRAND ] eq q{-}) {
+        $ref_seq = reverse $ref_seq;
+        $ref_seq = ${ $self->{ utils }->full_complement(\$ref_seq) };
+    }
+    my @ref_seq_spl = split //, $ref_seq;
+    my @srna_seq_spl = split //, $seq;
+
+    my @mm = ();
+    for (my $i = 0; $i < $srna->[ STOP ] - $srna->[ START ] + 1; $i++) {
+        if ($ref_seq_spl[ $i ] ne $srna_seq_spl[ $i ]) {
+            push @mm, $srna->[ START ] + $i;
+        }
+    }
+
+    return \@mm;
 }
 
 #sub seq_sql_adder {

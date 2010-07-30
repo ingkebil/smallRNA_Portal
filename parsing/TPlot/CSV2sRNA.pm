@@ -69,10 +69,12 @@ sub new {
 
     my $dbh = DBI->connect('dbi:mysql:database='. $db, $user, $pass) or die "Could not connect to DB\n";
     my $seqs   = new SRNA::DBAbstract({ dbh => $dbh, table => 'sequences' });
+    my $mms    = new SRNA::DBAbstract({ dbh => $dbh, table => 'mismatches' });
 
     my $self = {
         dbh    => $dbh,
         seqs   => $seqs,
+        mms    => $mms,
         chr_fasta => $chr_fasta,
         parsed => {},
         return => { csv => { srnas => [], sequences => [], types => [] } },
@@ -191,9 +193,14 @@ sub run_parser {
             ## add the exp_id
             $new_degr->{ exp_id } = $exp_id;
 
+            ## add the actual id from the db to the hash
+            $new_degr->{ srna_id } = $self->get_next_id();
+
             ## calc eventual mismatches
-            if ($self->check_mismatch($new_degr, $ref_seq)) {
-                print Dumper $new_degr;
+            if (my $mms = $self->check_mismatch($new_degr, $ref_seq)) {
+                foreach my $mm (@$mms) {
+                    $self->{ mms }->add({ id => undef, srna_id => $self->get_cur_id(), pos => $mm});
+                }
             }
 
             push @$parsed, $new_degr;
@@ -207,6 +214,7 @@ sub run_parser {
 
     $self->{ return }->{ csv }->{ srnas } = $self->make_output();
     $self->{ return }->{ csv }->{ sequences } = $self->{ seqs }->get_new_rows_CSV('id', 'seq'); 
+    $self->{ return }->{ csv }->{ mismatches } = $self->{ mms }->get_new_rows_CSV('id', 'srna_id', 'pos');
 
     return $parsed;
 }
@@ -219,21 +227,15 @@ sub check_mismatch {
     my @ref_seq_spl = split //, $ref_seq;
     my @srna_seq_spl = split //, $srna->{ seq };
 
-    my $mm_num = 0; # number of mismatches
-    my $mm_seq = q{}; # the seq with mismatches highlighted
+    my @mm = ();
     for (my $i = $srna->{ start }; $i <= $srna->{ stop }; $i++) {
         my $i_srna = $i - $srna->{ start };
         if ($ref_seq_spl[ $i - 1 ] ne $srna_seq_spl[ $i_srna ]) {
-            $mm_num++;
-            $mm_seq .= lc($srna_seq_spl[ $i_srna ]);
-        }
-        else {
-            $mm_seq .= $srna_seq_spl[ $i_srna ];
+            push @mm, $srna->{ genome_start } + $i;
         }
     }
 
-    $srna->{ mm_seq } = $mm_seq;
-    return $srna->{ mm_num } = $mm_num;
+    return \@mm;
 }
 
 sub make_output {
@@ -269,6 +271,25 @@ sub make_output {
 
     return \@result;
 }
+
+{ 
+my $last_insert_id = 0;
+
+sub get_next_id {
+    my $self = shift;
+
+    if (!$last_insert_id) {
+        $last_insert_id = $self->{ dbh }->selectrow_arrayref(q{SELECT MAX(id) FROM `srnas`;})->[0];
+    }
+
+    return ++$last_insert_id;
+}
+
+sub get_cur_id {
+    return $last_insert_id;
+}
+}
+
 
 1;
 

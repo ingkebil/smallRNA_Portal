@@ -44,8 +44,9 @@ my $exp = new $package({ chr_fasta => $chrfasta, user => $user, pass => $pass, d
 isa_ok($exp, $package);
 
 # add the sequences to our parser
-my $freader = new FASTA::Reader({ filename => 'exp_fasta', lines => \@fasta, 'id_regex' => '>(.*)' });
-$exp->{ freader } = $freader;
+$exp->{ freader }->add_regex('exp_fasta' => '>(.*)');
+$exp->{ freader }->{ lines } = \@fasta;
+$exp->{ freader }->_fasta('exp_fasta');
 $exp->{ fasta_file } = 'exp_fasta';
 $exp->{ fasta_id_regex } = '>(.*)';
 
@@ -74,7 +75,7 @@ is_deeply(
             '1	Chr1	30427671	1'
         ],
         'sequences'	=>	[
-            '\'1\'	\'CTTTTTTTAGAGTGATTTGGATG\'',
+            '\'1\'	\'CTTTATTTAGAGTGATTTGGATG\'',
             '\'2\'	\'TTTTTTTAGAGTGATTTGGATGAT\'',
             '\'3\'	\'AGAGTGATTTGGATGATTCAAGAC\'',
             '\'4\'	\'TGGATGATTCAAGACTTCTCGGTA\'',
@@ -84,6 +85,9 @@ is_deeply(
             '\'8\'	\'ATAAATAAGTTTATGGTTAAGAGT\'',
             '\'9\'	\'CATCTGTAGCTACGATCCTTGGAA\'',
             '\'10\'	\'TCTCTCTCTCTCTCTCTCTC\''
+        ],
+        'mismatches' => [
+            'NULL	\'1\'	\'758\'',
         ]
     },
 );
@@ -105,7 +109,7 @@ Chr1	AGScheible	smallRNA	3882	3905	100	+	.	P_472159_x1
 Chr1	AGScheible	smallRNA	8670	8689	100	+	.	P_252003_x1
 --
 >P_701714_x1
-CTTTTTTTAGAGTGATTTGGATG
+CTTTATTTAGAGTGATTTGGATG
 >P_498551_x1
 TTTTTTTAGAGTGATTTGGATGAT
 >P_237009_x5

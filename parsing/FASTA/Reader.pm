@@ -3,13 +3,15 @@ package FASTA::Reader;
 use strict;
 use warnings;
 use Data::Dumper;
-use Smart::Comments;
+#use Smart::Comments;
+
+my $def_id_regex = '>(.*)';
 
 sub new {
     my $inv = shift;
     my $filename = $_[0]->{ filename } || undef;
     my $lines    = $_[0]->{ lines    } || '';
-    my $id_regex = $_[0]->{ id_regex } || '>(.*)';
+    my $id_regex = $_[0]->{ id_regex } || $def_id_regex;
     my $class = ref $inv || $inv;
 
 
@@ -33,7 +35,7 @@ sub get_seq {
     my ($self, $seq_filename, $id) = @_;
 
     if (!defined $self->{ filenames }->{ $seq_filename }) {
-        $self->{ filenames }->{ $seq_filename } = $self->_fasta($seq_filename);
+        $self->_fasta($seq_filename);
     }
 
     if (!defined $self->{ filenames }->{ $seq_filename }->{ $id }) {
@@ -44,11 +46,30 @@ sub get_seq {
     return $self->{ filenames }->{ $seq_filename }->{ $id };
 }
 
+sub get_seq_ref {
+    my ($self, $seq_filename, $id) = @_;
+
+    #my $s = $self->get_seq($seq_filename, $id);
+    
+    return \$self->{ filenames }->{ $seq_filename }->{ $id };
+}
+
+sub get_seq_arrayref {
+    my ($self, $seq_filename, $id) = @_;
+
+    if (! defined $self->{ filenames_arrayref }->{ $seq_filename }->{ $id }) {
+        my @s = split //, $self->get_seq($seq_filename, $id);
+        $self->{ filenames_arrayref }->{ $seq_filename }->{ $id } = \@s;
+    }
+    
+    return $self->{ filenames_arrayref }->{ $seq_filename }->{ $id };
+}
+
 sub get_all_seq {
     my ($self, $seq_filename) = @_;
 
     if (!defined $self->{ filenames }->{ $seq_filename }) {
-        $self->{ filenames }->{ $seq_filename } = $self->_fasta($seq_filename);
+        $self->_fasta($seq_filename);
     }
 
     return $self->{ filenames }->{ $seq_filename };
@@ -58,7 +79,7 @@ sub get_all_fasta_id {
     my ($self, $seq_filename) = @_;
 
     if (!defined $self->{ filenames }->{ $seq_filename }) {
-        $self->{ filenames }->{ $seq_filename } = $self->_fasta($seq_filename);
+        $self->_fasta($seq_filename);
     }
 
     my @keys = keys %{ $self->{ filenames }->{ $seq_filename } };
@@ -89,10 +110,10 @@ sub _parse_fasta {
     my ($self, $filename) = @_;
     my %value_of = ();
 
-    my $id_regex = $self->{ regexes }->{ $filename };
+    my $id_regex = $self->{ regexes }->{ $filename } || $def_id_regex;
     my $gene_id = q{};
     my $seq = q{};
-    foreach my $line (@{ $self->{ lines } }) { ### Parsing FASTA [%]
+    foreach my $line (@{ $self->{ lines } }) { ### Parsing FASTA '$filename' [%]
         chomp($line);
         if (substr($line,0,1) eq q{>}) {
             if ($gene_id) {
@@ -113,8 +134,9 @@ sub _parse_fasta {
 
     undef $self->{ lines }; # make it reusable after initing it with @lines
 
+    $self->{ filenames }->{ $filename } = \%value_of;
+
     return \%value_of;
-    #print Dumper \%value_of;
 }
 
 1;

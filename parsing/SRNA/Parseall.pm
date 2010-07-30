@@ -17,13 +17,14 @@ our $mapp_file_t  = '"$mapp_dir/$cond/tair9/${cond}_on_genome.100.gff"';
 &run() unless caller();
 
 sub run {
-    my $species_id = 0;
+    my ($species_id, $moist_run) = 0;
     my ($species_name, $chr_fasta) = q{};
 
     my $opts = GetOptions(
         'speciesid:i' => \$species_id,
         'speciesname:s' => \$species_name,
         'chrfasta:s' => \$chr_fasta,
+        'moist-run' => \$moist_run,
     );
 
     my $cond_dir = $ARGV[0];
@@ -66,11 +67,13 @@ sub run {
             elsif ($? >> 8 != 0) {
                 die sprintf "Child exited with value %d\n", $? >> 8;
             }
-            foreach my $outtype ( ('sequences', 'types', 'chromosomes', 'srnas') ) {
-                print "Importing $outtype...";
-                my $user = USER; my $pass = PASS; my $db = DB;
-                `mysqlimport -u $user -p$pass -L --fields-enclosed-by \\' $db '$path/$outtype.csv'`;
-                print "done\n";
+            if (! $moist_run ) {
+                foreach my $outtype ( ('sequences', 'types', 'chromosomes', 'srnas', 'mismatches') ) {
+                    print "Importing $outtype...";
+                    my $user = USER; my $pass = PASS; my $db = DB;
+                    `mysqlimport -u $user -p$pass -L --fields-enclosed-by \\' $db '$path/$outtype.csv'`;
+                    print "done\n";
+                }
             }
         }
     }
@@ -110,4 +113,6 @@ Usage: SRNA::Parseall [options] <cond_dir> <mapp_dir>
 
   Options:
     --speciesid <id>: The ID of the species as provided in the DB, table 'species'.
+    --chrfasta <file>: The FASTA file with the chromosomes for the abovementioned species.
+    --moist-run: Don't import the generated CSV files, just run the script for all conditions. This will still create entries for the experiments in the DB!
   
