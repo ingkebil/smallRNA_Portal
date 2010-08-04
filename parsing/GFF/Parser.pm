@@ -11,7 +11,7 @@ package GFF::Parser;
 
 use strict;
 use warnings;
-###use Smart::Comments;
+use Smart::Comments;
 use Data::Dumper;
 
 =head1

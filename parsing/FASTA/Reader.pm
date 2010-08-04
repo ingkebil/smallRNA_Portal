@@ -9,7 +9,7 @@ my $def_id_regex = '>(.*)';
 
 sub new {
     my $inv = shift;
-    my $filename = $_[0]->{ filename } || undef;
+    my $filename = $_[0]->{ filename } || '';
     my $lines    = $_[0]->{ lines    } || '';
     my $id_regex = $_[0]->{ id_regex } || $def_id_regex;
     my $class = ref $inv || $inv;
@@ -22,6 +22,34 @@ sub new {
     };
 
     return bless $self, $class;
+}
+
+## Instead of reading the whole FASTA file at once, just read it an entry at the time
+sub get_next_seq {
+    my $self = shift;
+    my $filename = shift;
+    my $id_regex = shift || $def_id_regex;
+
+    my ($line_nr, $skip_nr) = $self->{ line_nr } || 0;
+
+    my $id    = q{};
+    my $fasta = q{};
+    open F, '<', $filename;
+    for ($skip_nr--) { my $line = <F>; } # skip the lines we already did
+    while (my $line = <F>) {
+        $line_nr++;
+        chomp($line);
+        if (substr($line,0,1) eq q{>}) {
+            last if $id; # if we reach the next >header, exit
+            ($id = $line) =~ s/$id_regex/$1/i;
+        }
+        else {
+            $fasta .= $line;
+        }
+    }
+    $self->{ line_nr } = $line_nr;
+
+    return { id => $id, fasta => $fasta };
 }
 
 sub add_regex {

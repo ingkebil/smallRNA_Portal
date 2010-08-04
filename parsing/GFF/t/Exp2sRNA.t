@@ -18,6 +18,7 @@ can_ok($package, 'add_seq');
 can_ok($package, 'add_type');
 can_ok($package, 'get_next_id');
 can_ok($package, 'get_cur_id');
+can_ok($package, 'export_to_CSV');
 
 
 # get some sample data

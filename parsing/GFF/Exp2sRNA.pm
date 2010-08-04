@@ -5,7 +5,7 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use Data::Dumper;
-###use Smart::Comments;
+use Smart::Comments;
 use DBI;
 
 use GFF q/:GFF_SLOTS/;
@@ -25,7 +25,7 @@ use SRNA::DNAUtils;
 
 sub run {
     my $gfffile = q{};
-    my ($exp_id, $species_id) = 0;
+    my ($exp_id, $species_id, $writebuffer) = 0;
     my ($path, $type, $fasta_file, $fasta_id_regex, $chr_fasta) = q{};
 
     my $opts = GetOptions(
@@ -36,21 +36,78 @@ sub run {
         'fasta_id_regex:s' => \$fasta_id_regex,
         'chrfasta:s' => \$chr_fasta,
         'speciesid:i' => \$species_id,
+        'writebuffer' => \$writebuffer,
     );
 
     pod2usage(2) if (! $exp_id && ! $type && !$ARGV[0]);
 
-    ### Reading GFF $ARGV[0] ...
-    open F, '<', $ARGV[0] or die "$ARGV[0] not found!\n";
-    my @lines = <F>;
-    close F;
     my $exp2srna = __PACKAGE__->new({ fasta => $fasta_file, fasta_id_regex => $fasta_id_regex, chr_fasta => $chr_fasta });
 
     ### Parsing GFF $ARGV[0] ...
-    $exp2srna->run_parser(\@lines, $exp_id, $type, $species_id);
+    open F, '<', $ARGV[0] or die "$ARGV[0] not found!\n";
 
-    while (my ($outputtype, $results) = each %{ $exp2srna->{ return }->{ csv } }) {
-        $exp2srna->fprint("$path/$outputtype.csv", join("\n", @{ $results }));
+    # following block of code parses the GFF file in chuncks to prevent out of memory errors :)
+    $writebuffer ||= 1_000_000;
+    my @lines = ();
+    my $i = 0;
+    my $j = 0;
+    my $return = { srnas => [], sequences => [], types => [] };
+    while (my $line = <F>) { 
+        push @lines, $line;
+        $i++;
+        if ($i == $writebuffer) {
+            $j++;
+            $exp2srna->run_parser(\@lines, $exp_id, $type, $species_id);
+            $exp2srna->export_to_CSV($path, $j); # export to file
+            #else {
+            #    foreach my $key (keys %$return) {
+            #        $return->{ $key } = [ @{ $return->{ $key } }, @{ $exp2srna->{ return }->{ csv }->{ $key } } ];
+            #    }
+            #}
+
+            $exp2srna->{ return } = { csv => { srnas => [], sequences => [], types => [] } },
+            @lines = ();
+            $i = 0;
+        }
+    }
+    close F;
+    if (@lines) {
+        $exp2srna->run_parser(\@lines, $exp_id, $type, $species_id);
+        $exp2srna->export_to_CSV($path, ++$j); # export to file
+        #else {
+        #    foreach my $key (keys %$return) {
+        #        $return->{ $key } = [ @{ $return->{ $key } }, @{ $exp2srna->{ return }->{ csv }->{ $key } } ];
+        #    }
+        #}
+    }
+    ### tried $j times ...
+    # if (!$hotrun) {
+    #     $exp2srna->{ return }->{ csv } = $return;
+    #     $exp2srna->export_to_CSV($path);
+    # }
+}
+
+sub export_to_CSV {
+    my $self = shift;
+    my $path = shift;
+    my $suff = shift;
+
+    while (my ($outputtype, $results) = each %{ $self->{ return }->{ csv } }) {
+        $self->fprint("$path/$outputtype.$suff.csv", join("\n", @{ $results }));
+    }
+}
+
+sub import_in_DB {
+    my $self = shift;
+    my $path = shift;
+
+    my $user = $self->{ user };
+    my $pass = $self->{ pass };
+    my $db   = $self->{ db };
+
+    while (my ($outputtype, $results) = each %{ $self->{ return }->{ csv } }) {
+        print "mysqlimport -u $user -p --fields-enclosed-by \\' $db < $path/$outputtype.csv\n";
+        `mysqlimport -u $user -p$pass --fields-enclosed-by \\' $db < $path/$outputtype.csv`;
     }
 }
 
@@ -59,9 +116,9 @@ sub fprint {
     my $file = shift;
     my $content = shift;
 
-    if (open(F, '>', $file)) {
-        print F $content;
-        close F;
+    if (open(FF, '>', $file)) {
+        print FF $content;
+        close FF;
     }
     else {
         warn "Failed to write to $file!";
@@ -91,12 +148,20 @@ sub new {
         chroms => $chroms,
         utils  => $utils,
         chr_fasta => $chr_fasta,
+        user => $user,
+        pass => $pass,
+        db  => $db,
         return => { csv => { srnas => [], sequences => [], types => [] } },
     };
 
-    ### Parsing FASTA $self->{ chr_fasta } ...
-    $self->{ freader } = new FASTA::Reader({ filename => $self->{ chr_fasta }, 'id_regex' => '>(.*)' });
-    $self->{ freader }->_fasta($self->{ chr_fasta }); # force read
+    if ($chr_fasta || $fasta_file) {
+        $self->{ freader } = new FASTA::Reader({});
+    }
+    if ($chr_fasta) {
+        ### Parsing FASTA $self->{ chr_fasta } ...
+        $self->{ freader }->add_regex($chr_fasta => '>(.*)');
+        $self->{ freader }->_fasta($self->{ chr_fasta }); # force read
+    }
     if ($fasta_file) {
         ### Parsing FASTA $fasta_file ...
         $fasta_id_regex = $fasta_id_regex || '>(.*)';
@@ -165,23 +230,25 @@ sub make_output {
         if ($seq) {
             $seq_id = $self->add_seq($seq);
         }
-        @{ $el->{ elements } }[ SEQ_ID ] = $seq_id;
+        @{ $el->{ elements } }[ SEQ_ID ] = $seq_id || 1;
 
         # get the chrom id
         my $chroms = $self->{ chroms };
         my $chr_name = ucfirst @{  $el->{ elements }  }[ CHR ];
         my $chr_id = $chroms->get_id(name => $chr_name);
-        if ( ! $chr_id) {
+        if ( ! $chr_id && $self->{ chr_fasta }) {
             my $chr_len = length ${ $self->{ freader }->get_seq_ref($self->{ chr_fasta }, $chr_name) };
             $chr_id = $chroms->add({ name => $chr_name, length => $chr_len, species_id => $species_id });
             $self->{ return }->{ csv }->{ chromosomes } = $chroms->get_new_rows_CSV('id', 'name', 'length', 'species_id');
         }
         @{ $el->{ elements } }[ CHR ] = $chr_id;
 
-        # check for mismatches
-        my $mms = $self->check_mismatch($el->{ elements }, $seq, $chr_name);
-        foreach my $mm (@$mms) {
-            $self->csv_adder('mismatches', undef, $id, $mm);
+        # check for mismatches, if the chr seq is available
+        if ($self->{ chr_fasta }) {
+            my $mms = $self->check_mismatch($el->{ elements }, $seq, $chr_name);
+            foreach my $mm (@$mms) {
+                $self->csv_adder('mismatches', undef, $id, $mm);
+            }
         }
 
         # quote for the DB
@@ -347,10 +414,13 @@ Exp2sRNA - Parsing GFF files into CSV statements for the smallRNA database;
 
 Usage: Exp2sRNA [options] gfffile
 
-Exp2sRNA parses a smallRNA GFF file into a CSV. Two files will be generated:
-srnas.csv and types.cvs. The latter will containt the new entries for the types
-table.  If a fasta file is provided with the --fasta param, a sequences.csv
-file will also be generated.
+Exp2sRNA parses a smallRNA GFF file into a CSV. Two sorts of files will be
+generated: srnas.#.csv and types.#.cvs. The latter will containt the new entries
+for the types table.  If a fasta file is provided with the --fasta param, a
+sequences.#.csv file will also be generated.  The # will be replaced by a
+number. Every 1_000_000 lines ofthe mappnig file, the CSV files are dumped to
+prevent OEM errors. If this would still be insufficient, you can adapt the
+internal buffersize with the --writebuffer param.
 
     Options:
         --experiment_id: The id of the experiment as stored in the database. This id will be used in the generation of the CSV.
@@ -363,6 +433,7 @@ file will also be generated.
         --fasta_id_regex: The regex to extract an ID from the fasta file headers. The ID should be surrounded by round brackets () in the regex. Defaults to '>(.*)'.
         --chrfasta: The fasta file for the chromosomes. Just in case these have not been added to the DB yet.
         --speciesid: The id of the species in the DB.
+        --writebuffer: After how many lines of the mapping file the CSV files should be written. Defaults to 1_000_000
         
 To upload the CSV files into the DB use following command:
 mysqlimport -u <username> -p -L --fields-enclosed-by \' <filename.csv>

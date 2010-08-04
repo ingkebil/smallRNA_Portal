@@ -50,6 +50,20 @@ sub get_id {
     }
 }
 
+sub get_record {
+    my $self  = shift;
+    my $col   = shift;
+    my $value = shift;
+
+    my $rs = $self->{ dbh }->selectrow_hashref("SELECT * FROM $self->{ table } WHERE $col = ?", { MaxRows => 1 }, ( lc($value) ));
+
+    if (! defined $rs || ! scalar @$rs) {
+        return undef;
+    }
+
+    return $rs;
+}
+
 sub get_next_id {
     my $self = shift;
 

@@ -29,7 +29,7 @@ sub run {
 
     print "Reading CSV $ARGV[0] ... ";
     open F, '<', $ARGV[0] or die "$ARGV[0] not found!\n";
-    my @lines = <F>; ### Reading GFF [%]
+    my @lines = <F>;
     close F;
     print "done.\n";
     my $exp2srna = __PACKAGE__->new({ chr_fasta => $chr_fasta });

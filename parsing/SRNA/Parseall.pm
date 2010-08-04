@@ -11,8 +11,28 @@ use Data::Dumper;
 
 our $dbh = DBI->connect('dbi:mysql:database='.DB, USER, PASS);
 
-our $fasta_file_t = '"$cond_dir/$cond/$cond.unique.fas"'; # add the double quotes as these strings get eval'd lateron
-our $mapp_file_t  = '"$mapp_dir/$cond/tair9/${cond}_on_genome.100.gff"';
+my %settings = (
+    arath => {
+        dirs => {
+            fasta_file => '"$cond_dir/$cond/$cond.unique.fas"', # add the double quotes as these strings get eval'd lateron
+            mapp_file  => '"$mapp_dir/$cond/tair9/${cond}_on_genome.100.gff"',
+        },
+        conds => {
+            smallrna  => [ qw/ P P+3h N N+3h FN FN2 C2 C303 C3h5 / ],
+            degradome => [ qw/ DFN D-N D-P D-P12 / ],
+        },
+    },
+    medtr => {
+        dirs => {
+            fasta_file => '"$cond_dir/$cond/sequences/$cond.unique.fas"', # add the double quotes as these strings get eval'd lateron
+            mapp_file  => '"$mapp_dir/$cond/evaluation/mt3/${cond}_on_mt3.100.gff"',
+        },
+        conds => {
+            smallrna => [ qw/ GDN-1 GDN-2 / ],
+            degradome => [ qw/ GDN-3 GDN-4 / ],
+        },
+    }
+);
 
 &run() unless caller();
 
@@ -34,16 +54,25 @@ sub run {
 
     ($ARGV[0] && $ARGV[1]) || pod2usage(3);
 
-    my $conds = {
-        smallrna  => [ qw/ P P+3h N N+3h FN FN2 C2 C303 C3h5 / ],
-        #degradome => [ qw/ DFN D-N D-P D-P12 / ],
-    };
+    if (! $species_id) {
+        if (! ($species_id = &select_species_id($species_name))) {
+            die "Species '$species_name' not found in db!\n";
+        }
+    }
+    if (! $species_name) {
+        if (! ($species_name = &select_species_name($species_id))) {
+            die "Species '$species_id' not found in db!\n";
+        }
+    }
+
+    my $conds = $settings{ $species_name }->{ conds };
+    my $dirs  = $settings{ $species_name }->{ dirs  };
 
     # run the Exp2sRNA script for the genome mapping (needs a gff and a fasta file)
     foreach my $srna_type (keys %$conds) {
         foreach my $cond (@{ $conds->{ $srna_type } }) {
             print "Parsing '$cond' ... \n";
-            my $path = "/home/billiau/tmp/$srna_type/$cond/";
+            my $path = "/home/billiau/tmp/$species_name/$srna_type/$cond/";
             make_path($path) if (!-d $path);
 
             my $exp_id = 0;
@@ -51,12 +80,17 @@ sub run {
                 $exp_id = &add_exp($cond, $species_id, '');
             }
 
-            my $fasta_file = eval($fasta_file_t); # get the variables filled in
-            my $mapp_file  = eval($mapp_file_t);  # 
+            my $fasta_file = eval($dirs->{ fasta_file }); # get the variables filled in
+            my $mapp_file  = eval($dirs->{ mapp_file  }); # 
 
             # execute the parsing!
-            print qq{perl GFF/Exp2sRNA.pm --experiment_id $exp_id --type $srna_type --path '$path' --fasta '$fasta_file' --chrfasta '$chr_fasta' --speciesid $species_id '$mapp_file'\n};
-            system("perl","GFF/Exp2sRNA.pm","--experiment_id","$exp_id","--type","$srna_type","--path","$path","--fasta","$fasta_file","--chrfasta", "$chr_fasta","--speciesid","$species_id", "$mapp_file");
+            my @prog = ("perl","GFF/Exp2sRNA.pm","--experiment_id","$exp_id","--type","$srna_type","--path","$path","--fasta","$fasta_file");
+            if ($chr_fasta) {
+                push @prog, ("--chrfasta", "$chr_fasta");
+            }
+            push @prog, ("--speciesid","$species_id", "$mapp_file");
+            print join q{ }, @prog;
+            system(@prog);
             if ($? == -1) {
                 die "Failed to execute: $!\n";
             }
@@ -68,10 +102,13 @@ sub run {
                 die sprintf "Child exited with value %d\n", $? >> 8;
             }
             if (! $moist_run ) {
-                foreach my $outtype ( ('sequences', 'types', 'chromosomes', 'srnas', 'mismatches') ) {
-                    print "Importing $outtype...";
-                    my $user = USER; my $pass = PASS; my $db = DB;
-                    `mysqlimport -u $user -p$pass -L --fields-enclosed-by \\' $db '$path/$outtype.csv'`;
+                my $user = USER; my $pass = PASS; my $db = DB;
+                foreach my $outtype ( ('types', 'sequences', 'chromosomes', 'srnas', 'mismatches') ) {
+                    my $count = `find $path -name '$outtype*csv' | wc -l`;
+                    print "Importing $count of $outtype...";
+                    foreach my $i (1 .. $count) {
+                        `mysqlimport -u $user -p$pass -L --fields-enclosed-by \\' $db '$path/$outtype.$i.csv'`;
+                    }
                     print "done\n";
                 }
             }
@@ -96,6 +133,23 @@ sub select_exp {
     return $rs->[0];
 }
 
+sub select_species_id {
+    my $rs = $dbh->selectrow_arrayref(q{ SELECT id FROM `species` WHERE name = ? }, undef, ( $_[0] ) );
+
+    if (! defined $rs) {
+        return undef;
+    }
+    return $rs->[0];
+}
+
+sub select_species_name {
+    my $rs = $dbh->selectrow_arrayref(q{ SELECT short_name FROM `species` WHERE id = ? }, undef, ( $_[0] ) );
+
+    if (! defined $rs) {
+        return undef;
+    }
+    return $rs->[0];
+}
 1;
 
 __END__
