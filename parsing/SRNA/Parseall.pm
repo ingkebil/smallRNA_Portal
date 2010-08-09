@@ -29,7 +29,7 @@ my %settings = (
         },
         conds => {
             smallrna => [ qw/ GDN-1 GDN-2 / ],
-            #degradome => [ qw/ GDN-3 GDN-4 / ],
+            degradome => [ qw/ GDN-3 GDN-4 / ],
         },
     }
 );
