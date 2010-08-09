@@ -47,7 +47,7 @@ sub run {
     open F, '<', $ARGV[0] or die "$ARGV[0] not found!\n";
 
     # following block of code parses the GFF file in chuncks to prevent out of memory errors :)
-    $writebuffer ||= 1_000_000;
+    $writebuffer ||= 300_000;
     my @lines = ();
     my $i = 0;
     my $j = 0;
@@ -283,7 +283,9 @@ sub check_mismatch {
     my $chrom_name = shift;
    
     #my $ref_seq_spl = $self->{ freader }->get_seq_arrayref($self->{ chr_fasta }, $chrom_name);
-    my $ref_seq = substr(${ $self->{ freader }->get_seq_ref($self->{ chr_fasta }, $chrom_name) }, $srna->[ START ] -1, $srna->[ STOP ] - $srna->[ START ] + 1);
+    my $ref_seq_ref = $self->{ freader }->get_seq_ref($self->{ chr_fasta }, $chrom_name);
+    return () if ! ref $ref_seq_ref;
+    my $ref_seq = substr($$ref_seq_ref, $srna->[ START ] -1, $srna->[ STOP ] - $srna->[ START ] + 1);
     if ($srna->[ STRAND ] eq q{-}) {
         $ref_seq = reverse $ref_seq;
         $ref_seq = ${ $self->{ utils }->full_complement(\$ref_seq) };

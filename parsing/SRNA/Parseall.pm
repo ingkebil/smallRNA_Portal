@@ -19,7 +19,7 @@ my %settings = (
         },
         conds => {
             smallrna  => [ qw/ P P+3h N N+3h FN FN2 C2 C303 C3h5 / ],
-            degradome => [ qw/ DFN D-N D-P D-P12 / ],
+#            degradome => [ qw/ DFN D-N D-P D-P12 / ],
         },
     },
     medtr => {
@@ -29,7 +29,7 @@ my %settings = (
         },
         conds => {
             smallrna => [ qw/ GDN-1 GDN-2 / ],
-            degradome => [ qw/ GDN-3 GDN-4 / ],
+            #degradome => [ qw/ GDN-3 GDN-4 / ],
         },
     }
 );
@@ -107,7 +107,7 @@ sub run {
                     my $count = `find $path -name '$outtype*csv' | wc -l`;
                     print "Importing $count of $outtype...";
                     foreach my $i (1 .. $count) {
-                        `mysqlimport -u $user -p$pass -L --fields-enclosed-by \\' $db '$path/$outtype.$i.csv'`;
+                        `mysqlimport -u $user -p$pass -L -i --fields-enclosed-by \\' $db '$path/$outtype.$i.csv'`;
                     }
                     print "done\n";
                 }

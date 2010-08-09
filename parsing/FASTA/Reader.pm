@@ -48,6 +48,7 @@ sub get_next_seq {
         }
     }
     $self->{ line_nr } = $line_nr;
+    close F;
 
     return { id => $id, fasta => $fasta };
 }
@@ -78,6 +79,14 @@ sub get_seq_ref {
     my ($self, $seq_filename, $id) = @_;
 
     #my $s = $self->get_seq($seq_filename, $id);
+    if (!defined $self->{ filenames }->{ $seq_filename }) {
+        $self->_fasta($seq_filename);
+    }
+
+    if (!defined $self->{ filenames }->{ $seq_filename }->{ $id }) {
+        warn "$id was not found in $seq_filename\n";
+        return 0;
+    }
     
     return \$self->{ filenames }->{ $seq_filename }->{ $id };
 }

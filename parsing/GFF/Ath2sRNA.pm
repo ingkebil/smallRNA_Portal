@@ -338,7 +338,7 @@ sub make_output {
 
     my $features = $self->get_features();
 
-    while (my ($acc_model_nr, $gene) = each %{ $self->{ genes } }) {
+    while (my ($acc_model_nr, $gene) = each %{ $self->{ genes } }) { ### Making output [%]
         my ($acc_nr, $model_nr) = split /\./, $acc_model_nr;
         $gene->{ acc_nr } = $acc_nr;
         $gene->{ model_nr } = $model_nr || 1;
@@ -353,9 +353,8 @@ sub make_output {
         # get the seq
         my $seq = undef;
         if (exists $self->{ freader }) {
-            my $freader = $self->{ freader };
-            $seq = $freader->get_seq($self->{ fasta_file }, $gene->{ 'chr' }); 
-            $seq = substr($seq, $gene->{ start }, $gene->{ stop } - $gene->{ start });
+            #$seq = $freader->get_seq($self->{ fasta_file }, $gene->{ 'chr' }); 
+            $seq = substr(${ $self->{ freader }->get_seq_ref($self->{ fasta_file }, $gene->{ 'chr' }) }, $gene->{ start }, $gene->{ stop } - $gene->{ start });
         }
         $gene->{ seq } = $seq ? $seq : undef;
 
@@ -515,7 +514,10 @@ sub get_next_id {
     my $self = shift;
 
     if (!$last_insert_id) {
-        $last_insert_id = $self->{ dbh }->selectrow_arrayref(q{SELECT LAST_INSERT_ID()})->[0];
+        $last_insert_id = $self->{ dbh }->selectrow_arrayref(q{SELECT LAST_INSERT_ID() FROM `annotations`});
+        if (! defined $last_insert_id) {
+            $last_insert_id = 0;
+        }
     }
 
     return ++$last_insert_id;
