@@ -77,8 +77,8 @@ class Annotation extends AppModel {
 
 	var $belongsTo = array(
 		'Species' => array(
-			'className' => 'Species',
-			'foreignKey' => 'species_id',
+			'classname' => 'species',
+			'foreignkey' => 'species_id',
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''

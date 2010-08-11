@@ -57,32 +57,14 @@
 		</dd>
 	</dl>
 </div>
-<div class="actions">
-	<h3><?php __('Actions'); ?></h3>
-	<ul>
-		<li><?php echo $this->Html->link(__('Edit Annotation', true), array('action' => 'edit', $annotation['Annotation']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(__('Delete Annotation', true), array('action' => 'delete', $annotation['Annotation']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $annotation['Annotation']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(__('List Annotations', true), array('action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Annotation', true), array('action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Species', true), array('controller' => 'species', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Species', true), array('controller' => 'species', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Sources', true), array('controller' => 'sources', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Source', true), array('controller' => 'sources', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Structures', true), array('controller' => 'structures', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Structure', true), array('controller' => 'structures', 'action' => 'add')); ?> </li>
-	</ul>
-</div>
 <div class="related">
 	<h3><?php __('Related Structures');?></h3>
 	<?php if (!empty($annotation['Structure'])):?>
 	<table cellpadding = "0" cellspacing = "0">
 	<tr>
-		<!--th><?php __('Id'); ?></th>
-		<th><?php __('Annotation Id'); ?></th-->
 		<th><?php __('Start'); ?></th>
 		<th><?php __('Stop'); ?></th>
 		<th><?php __('Utr'); ?></th>
-		<!--th class="actions"><?php __('Actions');?></th-->
 	</tr>
 	<?php
 		$i = 0;
@@ -93,26 +75,13 @@
 			}
 		?>
 		<tr<?php echo $class;?>>
-			<!--td><?php echo $structure['id'];?></td>
-			<td><?php echo $structure['annotation_id'];?></td-->
 			<td><?php echo $structure['start'];?></td>
 			<td><?php echo $structure['stop'];?></td>
 			<td><?php echo $structure['utr'];?></td>
-			<!--td class="actions">
-				<?php $this->Html->link(__('View', true), array('controller' => 'structures', 'action' => 'view', $structure['id'])); ?>
-				<?php $this->Html->link(__('Edit', true), array('controller' => 'structures', 'action' => 'edit', $structure['id'])); ?>
-				<?php $this->Html->link(__('Delete', true), array('controller' => 'structures', 'action' => 'delete', $structure['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $structure['id'])); ?>
-			</td-->
 		</tr>
 	<?php endforeach; ?>
 	</table>
 <?php endif; ?>
-
-	<div class="actions">
-		<ul>
-			<li><?php echo $this->Html->link(__('New Structure', true), array('controller' => 'structures', 'action' => 'add'));?> </li>
-		</ul>
-	</div>
 </div>
 <h3>Related small RNAs</h3>
 <?php echo $this->Jquery->page('../srnas/between', compact('srnas'), array('url' => array('controller' => 'srnas', 'action' => 'between', $annotation['Annotation']['start'], $annotation['Annotation']['stop']))); ?>

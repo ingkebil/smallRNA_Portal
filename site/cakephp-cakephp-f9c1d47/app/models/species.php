@@ -41,6 +41,19 @@ class Species extends AppModel {
 			'finderQuery' => '',
 			'counterQuery' => ''
 		),
+		'Chromosome' => array(
+			'className' => 'Chromosome',
+			'foreignKey' => 'species_id',
+			'dependent' => false,
+			'conditions' => '',
+			'fields' => '',
+			'order' => '',
+			'limit' => '',
+			'offset' => '',
+			'exclusive' => '',
+			'finderQuery' => '',
+			'counterQuery' => ''
+		),
 		'Experiment' => array(
 			'className' => 'Experiment',
 			'foreignKey' => 'species_id',

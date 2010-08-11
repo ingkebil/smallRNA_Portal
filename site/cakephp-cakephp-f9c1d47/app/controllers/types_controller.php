@@ -47,6 +47,7 @@ class TypesController extends AppController {
 	}
 
 	function delete($id = null) {
+        return;
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid id for type', true));
 			$this->redirect(array('action'=>'index'));

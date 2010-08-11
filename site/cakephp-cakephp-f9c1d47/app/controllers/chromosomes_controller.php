@@ -61,6 +61,7 @@ class ChromosomesController extends AppController {
 	}
 
 	function delete($id = null) {
+        return;
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid id for chromosome', true));
 			$this->redirect(array('action'=>'index'));

@@ -11,7 +11,6 @@
 			<th><?php echo $this->Paginator->sort('abundance');?></th>
 			<th><?php echo $this->Paginator->sort('nomalized_abundance');?></th>
 			<th><?php echo $this->Paginator->sort('experiment', 'Experiment.name');?></th>
-			<!--th class="actions"><?php __('Actions');?></th-->
 	</tr>
 	<?php
 	$i = 0;
@@ -35,11 +34,6 @@
 		<td>
 			<?php echo $this->Html->link($srna['Experiment']['name'], array('controller' => 'experiments', 'action' => 'view', $srna['Experiment']['id'])); ?>
 		</td>
-		<!--td class="actions">
-			<?php $this->Html->link(__('View', true), array('controller' => 'srnas', 'action' => 'view', $srna['Srna']['id'])); ?>
-			<?php $this->Html->link(__('Edit', true), array('controller' => 'srnas', 'action' => 'edit', $srna['Srna']['id'])); ?>
-			<?php $this->Html->link(__('Delete', true), array('controller' => 'srnas', 'action' => 'delete', $srna['Srna']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $srna['Srna']['id'])); ?>
-		</td-->
 	</tr>
 <?php endforeach; ?>
 	</table>
@@ -56,16 +50,4 @@
  |
 		<?php echo $this->Paginator->next(__('next', true) . ' >>', array(), null, array('class' => 'disabled'));?>
 	</div>
-</div>
-<div class="actions">
-	<h3><?php __('Actions'); ?></h3>
-	<ul>
-		<li><?php echo $this->Html->link(__('New Srna', true), array('action' => 'add')); ?></li>
-		<li><?php echo $this->Html->link(__('List Sequences', true), array('controller' => 'sequences', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Sequence', true), array('controller' => 'sequences', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Types', true), array('controller' => 'types', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Type', true), array('controller' => 'types', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Experiments', true), array('controller' => 'experiments', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Experiment', true), array('controller' => 'experiments', 'action' => 'add')); ?> </li>
-	</ul>
 </div>

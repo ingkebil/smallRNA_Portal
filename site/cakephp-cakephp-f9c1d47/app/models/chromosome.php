@@ -41,5 +41,27 @@ class Chromosome extends AppModel {
 		)
 	);
 
+    var $belongsTo = array(
+        'Species' => array(
+			'classname' => 'species',
+			'foreignkey' => 'species_id',
+			'conditions' => '',
+			'fields' => '',
+			'order' => ''
+        )
+    );
+
+    var $actsAs = array('containable');
+
+    function get_chr_annoj($species_id) {
+        $chrs = $this->find('list', array('conditions' => array('species_id' => $species_id), 'fields' => array('Chromosome.name', 'Chromosome.length'), 'contain' => false));
+
+        $result = array();
+        foreach ($chrs as $name => $size) {
+            $result[] = array('id' => $name, 'size' => $size);
+        }
+        return $result;
+    }
+
 }
 ?>

@@ -60,6 +60,7 @@ class SequencesController extends AppController {
 	}
 
 	function delete($id = null) {
+        return;
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid id for sequence', true));
 			$this->redirect(array('action'=>'index'));

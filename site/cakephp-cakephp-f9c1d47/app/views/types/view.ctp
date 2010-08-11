@@ -13,17 +13,6 @@
 		</dd>
 	</dl>
 </div>
-<div class="actions">
-	<h3><?php __('Actions'); ?></h3>
-	<ul>
-		<li><?php echo $this->Html->link(__('Edit Type', true), array('action' => 'edit', $type['Type']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(__('Delete Type', true), array('action' => 'delete', $type['Type']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $type['Type']['id'])); ?> </li>
-		<li><?php echo $this->Html->link(__('List Types', true), array('action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Type', true), array('action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Srnas', true), array('controller' => 'srnas', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Srna', true), array('controller' => 'srnas', 'action' => 'add')); ?> </li>
-	</ul>
-</div>
 <div class="related">
 	<h3><?php __('Related Srnas');?></h3>
 	<?php if (!empty($type['Srna'])):?>
@@ -40,7 +29,6 @@
 		<th><?php __('Abundance'); ?></th>
 		<th><?php __('Nomalized Abundance'); ?></th>
 		<th><?php __('Experiment Id'); ?></th>
-		<th class="actions"><?php __('Actions');?></th>
 	</tr>
 	<?php
 		$i = 0;
@@ -62,19 +50,8 @@
 			<td><?php echo $srna['abundance'];?></td>
 			<td><?php echo $srna['nomalized_abundance'];?></td>
 			<td><?php echo $srna['experiment_id'];?></td>
-			<td class="actions">
-				<?php echo $this->Html->link(__('View', true), array('controller' => 'srnas', 'action' => 'view', $srna['id'])); ?>
-				<?php echo $this->Html->link(__('Edit', true), array('controller' => 'srnas', 'action' => 'edit', $srna['id'])); ?>
-				<?php echo $this->Html->link(__('Delete', true), array('controller' => 'srnas', 'action' => 'delete', $srna['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $srna['id'])); ?>
-			</td>
 		</tr>
 	<?php endforeach; ?>
 	</table>
 <?php endif; ?>
-
-	<div class="actions">
-		<ul>
-			<li><?php echo $this->Html->link(__('New Srna', true), array('controller' => 'srnas', 'action' => 'add'));?> </li>
-		</ul>
-	</div>
 </div>

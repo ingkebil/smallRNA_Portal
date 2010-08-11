@@ -1,0 +1,121 @@
+/*liste, misschien nuttig om comments te zetten bij dit gehack */
+
+
+
+/*set color of navigation icons*/
+.x-tool {
+	background:transparent url( <?php echo $html->url('/annoj/img/beg-tool-sprites.png');?>) no-repeat scroll 0 0;
+}
+
+.x-panel {
+	border:0 solid #DCDCDC;
+	/*background:transparent url(img/green-top-bottom.gif) repeat-x 0 -1px;*/
+}
+.x-panel-body{
+	border-color: #DCDCDC;
+}
+/*all headers*/
+.x-panel-header {
+	color:#002648;
+	border:1px solid #DCDCDC;
+	background:transparent url(img/beg-top-bottom3.png) repeat-x 0 -1px;
+	font-family:Verdana,Arial,Helvetica;
+	font-variant:small-caps;
+}
+
+/*color of vertical bar between navigation panel and track panel*/
+.x-splitbar-h {
+	background: #CCCCCC;
+}
+
+
+.x-panel-tbar .x-toolbar{
+	background: #C1CE98;
+	border-color: #DCDCDC;
+	/*background:transparent url(images/green-top-bottom.gif) repeat-x 0 -1px;*/
+}
+
+/*colors for background if menu collapsed */
+.x-layout-collapsed {
+	background-color:#C1CE98;
+	border:1px solid #DCDCDC;
+}
+
+.x-border-layout-ct {
+	background:#CCCCCC none repeat scroll 0 0;
+}
+/*colors for border in config */
+.x-panel-noborder .x-panel-header-noborder {
+	border-bottom:1px solid #DCDCDC;
+}
+.x-panel-noborder .x-panel-tbar-noborder .x-toolbar {
+	border-bottom:1px solid #DCDCDC;
+	border-width:0 0 1px;
+}
+.x-toolbar {
+	background:#C1CE98 url(img/beg-bg.gif) repeat-x scroll left top;
+	font-family:Helvetica,Verdana,Arial;
+}
+.x-toolbar span {
+	font-family:Helvetica,Verdana,Arial;
+}
+
+.x-toolbar .x-btn-over .x-btn-center{
+	background-image: url(img/beg-btn-sprite.gif);
+}
+
+.x-toolbar .x-btn-over .x-btn-left{
+	background-image:url(img/beg-btn-sprite.gif);
+}
+
+.x-toolbar .x-btn-over .x-btn-right{
+	background-image:url(img/beg-btn-sprite.gif);
+}
+.x-progress-bar{
+	background:#C1CE98; 
+	background-image:url(img/beg-progress-bg.gif );
+	border-top:1px solid #D1E4FD;
+	border-bottom:1px solid #8B8900;
+	border-right:1px solid #8B8900;
+}
+/* x-window are the pop-up windows (eg, 'loading' in the beginning)*/
+.x-window-proxy {
+	background:#C1ce98;
+	border:1px solid #8b8900;
+}
+.x-window-tc {
+	background-image:url(img/Xwindow/beg-top-bottom.png);
+}
+.x-window-bc {
+	background-image:url(img/Xwindow/beg-top-bottom.png);
+}
+.x-window-tl {
+	background-image:url(img/Xwindow/beg-left-corners.png);
+}
+.x-window-tr {
+	background-image:url(img/Xwindow/beg-right-corners.png);
+}
+.x-window-bl {
+	background-image:url(img/Xwindow/beg-left-corners.png);
+}
+.x-window-br {
+	background-image:url(img/Xwindow/beg-right-corners.png);
+}
+.x-window-mr {
+	background-image:url(img/Xwindow/beg-left-right.png);
+}
+.x-window-ml {
+	background-image: url(img/Xwindow/beg-left-right.png);
+}
+.x-window-mc {
+	font-family:Helvetica,Verdana,Arial;
+
+}
+body.x-body-masked .x-window-plain .x-window-mc {
+	background:#c1ce98;
+}
+
+.x-form-field-wrap .x-form-trigger {
+	background:transparent url(img/beg-trigger.gif); 
+	border-bottom:1px solid #B5B8C8;
+}

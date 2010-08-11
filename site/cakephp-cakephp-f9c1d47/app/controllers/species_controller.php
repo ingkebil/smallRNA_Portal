@@ -40,7 +40,12 @@ class SpeciesController extends AppController {
         $species = $this->Species->find('first', array('conditions' => array('id' => $id), 'contain' => array('Experiment')));
         $this->set('species', $species);
         $this->set('species_id', $species['Species']['id']);
-        $this->set('annotations', $this->paginate($this->Species->Annotation, array('species_id' => $id)));
+        $this->paginate = array(
+            'Annotation' => array(
+                'contain' => array('Chromosome', 'Species', 'Source')
+            )
+        );
+        $this->set('annotations', $this->paginate($this->Species->Annotation, array('Annotation.species_id' => $id)));
 	}
 
 	function add() {
@@ -74,6 +79,7 @@ class SpeciesController extends AppController {
 	}
 
 	function delete($id = null) {
+        return;
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid id for species', true));
 			$this->redirect(array('action'=>'index'));

@@ -53,6 +53,7 @@ class ExperimentsController extends AppController {
 	}
 
 	function delete($id = null) {
+        return;
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid id for experiment', true));
 			$this->redirect(array('action'=>'index'));

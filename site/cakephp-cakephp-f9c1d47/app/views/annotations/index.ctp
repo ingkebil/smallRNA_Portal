@@ -12,7 +12,6 @@
 			<th><?php echo $this->Paginator->sort('Species', 'Species.full_name');?></th>
 			<th><?php echo $this->Paginator->sort('comment');?></th>
 			<th><?php echo $this->Paginator->sort('Source', 'Source.name');?></th>
-			<!--th class="actions"><?php __('Actions');?></th-->
 	</tr>
 	<?php
 	$i = 0;
@@ -37,11 +36,6 @@
 		<td>
 			<?php echo $this->Html->link($annotation['Source']['name'], array('controller' => 'sources', 'action' => 'view', $annotation['Source']['id'])); ?>
 		</td>
-		<!--td class="actions">
-			<?php $this->Html->link(__('View', true), array('action' => 'view', $annotation['Annotation']['id'])); ?>
-			<?php $this->Html->link(__('Edit', true), array('action' => 'edit', $annotation['Annotation']['id'])); ?>
-			<?php $this->Html->link(__('Delete', true), array('action' => 'delete', $annotation['Annotation']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $annotation['Annotation']['id'])); ?>
-		</td-->
 	</tr>
 <?php endforeach; ?>
 	</table>
@@ -58,16 +52,4 @@
  |
 		<?php echo $this->Paginator->next(__('next', true) . ' >>', array(), null, array('class' => 'disabled'));?>
 	</div>
-</div>
-<div class="actions">
-	<h3><?php __('Actions'); ?></h3>
-	<ul>
-		<li><?php echo $this->Html->link(__('New Annotation', true), array('action' => 'add')); ?></li>
-		<li><?php echo $this->Html->link(__('List Species', true), array('controller' => 'species', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Species', true), array('controller' => 'species', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Sources', true), array('controller' => 'sources', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Source', true), array('controller' => 'sources', 'action' => 'add')); ?> </li>
-		<li><?php echo $this->Html->link(__('List Structures', true), array('controller' => 'structures', 'action' => 'index')); ?> </li>
-		<li><?php echo $this->Html->link(__('New Structure', true), array('controller' => 'structures', 'action' => 'add')); ?> </li>
-	</ul>
 </div>

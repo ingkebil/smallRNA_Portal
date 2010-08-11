@@ -1,7 +1,7 @@
 <ul>
 <li>Mapping onto TAIR9
 <ul>
-    <li><?php echo $html->link('Genome Browser', '/browser/'); ?></li>
+    <li><?php echo $html->link('Genome Browser', '/annoj/arath'); ?> (srna mapping is still slow :/)</li>
     <li><?php echo $html->link('Normal Browser', '/srnas/experiment/1'); ?></li>
 </ul>
 </li>

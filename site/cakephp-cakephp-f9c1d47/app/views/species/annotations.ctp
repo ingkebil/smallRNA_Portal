@@ -14,7 +14,6 @@
 		<th><?php echo $this->Paginator->sort('species', 'Species.full_name'); ?></th>
 		<th><?php echo $this->Paginator->sort('comment'); ?></th>
 		<th><?php echo $this->Paginator->sort('source', 'Source.name'); ?></th>
-		<!--th class="actions"><?php __('Actions');?></th-->
 	</tr>
 	<?php
 		$i = 0;
@@ -35,11 +34,6 @@
 			<td><?php echo $annotation['Species']['full_name'];?></td>
 			<td><?php echo $annotation['Annotation']['comment'];?></td>
 			<td><?php echo $annotation['Source']['name'];?></td>
-			<!--td class="actions">
-				<?php $this->Html->link(__('View', true), array('controller' => 'annotations', 'action' => 'view', $annotation['Annotation']['id'])); ?>
-				<?php $this->Html->link(__('Edit', true), array('controller' => 'annotations', 'action' => 'edit', $annotation['Annotation']['id'])); ?>
-				<?php $this->Html->link(__('Delete', true), array('controller' => 'annotations', 'action' => 'delete', $annotation['Annotation']['id']), null, sprintf(__('Are you sure you want to delete # %s?', true), $annotation['Annotation']['id'])); ?>
-			</td-->
 		</tr>
 	<?php endforeach; ?>
 	</table>
@@ -57,11 +51,5 @@
 		<?php echo $this->Paginator->next(__('next', true) . ' >>', array(), null, array('class' => 'disabled'));?>
 	</div>
 <?php endif; ?>
-
-	<div class="actions">
-		<ul>
-			<li><?php echo $this->Html->link(__('New Annotation', true), array('controller' => 'annotations', 'action' => 'add'));?> </li>
-		</ul>
-	</div>
 </div>
 <?php echo $this->Jquery->end_paginate(); ?>

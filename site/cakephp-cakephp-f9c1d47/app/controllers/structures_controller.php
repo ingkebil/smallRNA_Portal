@@ -51,6 +51,7 @@ class StructuresController extends AppController {
 	}
 
 	function delete($id = null) {
+        return;
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid id for structure', true));
 			$this->redirect(array('action'=>'index'));
