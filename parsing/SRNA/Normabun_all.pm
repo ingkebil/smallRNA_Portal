@@ -22,3 +22,5 @@ foreach my $cond (@conds) {
      print "mysql -u $user -p $db < $file\n";
      `mysql -u $user -p$pass $db < $file`;
 }
+
+1;
