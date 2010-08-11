@@ -21,6 +21,11 @@
 			<?php echo $srna['Srna']['strand']; ?>
 			&nbsp;
 		</dd>
+		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Chromosome'); ?></dt>
+		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
+			<?php echo $srna['Chromosome']['name']; ?>
+			&nbsp;
+		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Sequence'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
 			<?php echo $this->Html->link($srna['Sequence']['seq'], array('controller' => 'sequences', 'action' => 'view', $srna['Sequence']['id'])); ?>

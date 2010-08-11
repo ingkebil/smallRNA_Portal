@@ -96,7 +96,14 @@ class Srna extends AppModel {
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
-		)
+        ),
+        'Chromosome' => array(
+			'className' => 'Chromosome',
+			'foreignKey' => 'chromosome_id',
+			'conditions' => '',
+			'fields' => '',
+			'order' => ''
+        )
 	);
 
     var $actsAs = array('containable');
