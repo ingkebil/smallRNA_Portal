@@ -9,7 +9,7 @@
 			<th><?php echo $this->Paginator->sort('score');?></th>
 			<th><?php echo $this->Paginator->sort('type_id');?></th>
 			<th><?php echo $this->Paginator->sort('abundance');?></th>
-			<th><?php echo $this->Paginator->sort('nomalized_abundance');?></th>
+			<th><?php echo $this->Paginator->sort('normalized_abundance');?></th>
 			<th><?php echo $this->Paginator->sort('experiment', 'Experiment.name');?></th>
 	</tr>
 	<?php
@@ -30,7 +30,7 @@
 			<?php echo $this->Html->link($srna['Type']['name'], array('controller' => 'types', 'action' => 'view', $srna['Type']['id'])); ?>
 		</td>
 		<td><?php echo $srna['Srna']['abundance']; ?>&nbsp;</td>
-		<td><?php echo $srna['Srna']['nomalized_abundance']; ?>&nbsp;</td>
+		<td><?php echo $srna['Srna']['normalized_abundance']; ?>&nbsp;</td>
 		<td>
 			<?php echo $this->Html->link($srna['Experiment']['name'], array('controller' => 'experiments', 'action' => 'view', $srna['Experiment']['id'])); ?>
 		</td>

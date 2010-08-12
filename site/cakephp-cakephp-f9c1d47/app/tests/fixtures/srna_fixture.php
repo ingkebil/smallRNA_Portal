@@ -12,7 +12,7 @@ class SrnaFixture extends CakeTestFixture {
 		'score' => array('type' => 'float', 'null' => false, 'default' => NULL),
 		'type_id' => array('type' => 'integer', 'null' => false, 'default' => NULL, 'key' => 'index'),
 		'abundance' => array('type' => 'integer', 'null' => false, 'default' => NULL),
-		'nomalized_abundance' => array('type' => 'float', 'null' => false, 'default' => NULL),
+		'normalized_abundance' => array('type' => 'float', 'null' => false, 'default' => NULL),
 		'experiment_id' => array('type' => 'integer', 'null' => false, 'default' => NULL, 'key' => 'index'),
 		'indexes' => array('PRIMARY' => array('column' => 'id', 'unique' => 1), 'start_stop' => array('column' => array('start', 'stop', 'type_id', 'experiment_id'), 'unique' => 0), 'fk_snras_Sequences1' => array('column' => 'sequence_id', 'unique' => 0), 'fk_snras_experiments1' => array('column' => 'experiment_id', 'unique' => 0), 'fk_snras_types1' => array('column' => 'type_id', 'unique' => 0)),
 		'tableParameters' => array('charset' => 'utf8', 'collate' => 'utf8_general_ci', 'engine' => 'InnoDB')
@@ -28,7 +28,7 @@ class SrnaFixture extends CakeTestFixture {
 			'score' => 1,
 			'type_id' => 1,
 			'abundance' => 1,
-			'nomalized_abundance' => 1,
+			'normalized_abundance' => 1,
 			'experiment_id' => 1
 		),
 	);

@@ -46,9 +46,9 @@
 			<?php echo $srna['Srna']['abundance']; ?>
 			&nbsp;
 		</dd>
-		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Nomalized Abundance'); ?></dt>
+		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Normalized Abundance'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $srna['Srna']['nomalized_abundance']; ?>
+			<?php echo $srna['Srna']['normalized_abundance']; ?>
 			&nbsp;
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Experiment'); ?></dt>

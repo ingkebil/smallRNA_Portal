@@ -27,7 +27,7 @@
 		<th><?php __('Score'); ?></th>
 		<th><?php __('Type Id'); ?></th>
 		<th><?php __('Abundance'); ?></th>
-		<th><?php __('Nomalized Abundance'); ?></th>
+		<th><?php __('Normalized Abundance'); ?></th>
 		<th><?php __('Experiment Id'); ?></th>
 	</tr>
 	<?php
@@ -48,7 +48,7 @@
 			<td><?php echo $srna['score'];?></td>
 			<td><?php echo $srna['type_id'];?></td>
 			<td><?php echo $srna['abundance'];?></td>
-			<td><?php echo $srna['nomalized_abundance'];?></td>
+			<td><?php echo $srna['normalized_abundance'];?></td>
 			<td><?php echo $srna['experiment_id'];?></td>
 		</tr>
 	<?php endforeach; ?>

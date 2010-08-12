@@ -11,7 +11,7 @@
 		echo $this->Form->input('score');
 		echo $this->Form->input('type_id');
 		echo $this->Form->input('abundance');
-		echo $this->Form->input('nomalized_abundance');
+		echo $this->Form->input('normalized_abundance');
 		echo $this->Form->input('experiment_id');
 	?>
 	</fieldset>
