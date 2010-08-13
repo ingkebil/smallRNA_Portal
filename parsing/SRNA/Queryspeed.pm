@@ -4,235 +4,268 @@ use strict;
 use warnings;
 use DBI;
 use Time::HiRes qw/ gettimeofday tv_interval /;
+use Data::Dumper;
 
 my $dbi = DBI->connect('dbi:mysql:database=smallrna_opt', 'kebil', 'kebil', { AutoCommit => 1 } );
+# autocommit on to have a reconnect when the connection should time out
 
 $| = 1; # autoflush on
 
-#print "No Index\n";
-#$dbi->do(q{ALTER TABLE `annotations` DROP INDEX `start_stop` });
-#$dbi->do(q{ALTER TABLE `annotations` DROP INDEX `stop_start` });
-#&exe();
+# test conditions for the annotations
+#{
+#    my @ids = (100..199);
+#    my @ranges = ();
+#    for my $i (1..100) {
+#        push @ranges, [ (3500 + $i*125), (4500 + $i*125) ] ;
+#    }
 #
-#print "start_stop\n";
-#$dbi->do(q{ALTER TABLE `annotations` ADD INDEX `start_stop` ( `start` ASC, `stop` ASC ) });
-#&exe();
+#    my %qs = (
+#        'list one annot' => { 
+#            q => q{ SELECT `Annotation`.`id`, `Annotation`.`accession_nr`, `Annotation`.`model_nr`, `Annotation`.`start`, `Annotation`.`stop`, `Annotation`.`strand`, `Annotation`.`chromosome_id`, `Annotation`.`type`, `Annotation`.`species_id`, `Annotation`.`seq`, `Annotation`.`comment`, `Annotation`.`source_id`, (CONCAT(`Annotation`.`accession_nr`, '.', `Annotation`.`model_nr`)) AS `Annotation__accession`, `Species`.`id`, `Species`.`full_name`, `Species`.`short_name`, `Species`.`NCBI_tax_id`, `Source`.`id`, `Source`.`name`, `Source`.`description`, `Chromosome`.`id`, `Chromosome`.`name`, `Chromosome`.`length`, `Chromosome`.`species_id` FROM `annotations` AS `Annotation` LEFT JOIN `species` AS `Species` ON (`Annotation`.`species_id` = `Species`.`id`) LEFT JOIN `sources` AS `Source` ON (`Annotation`.`source_id` = `Source`.`id`) LEFT JOIN `chromosomes` AS `Chromosome` ON (`Annotation`.`chromosome_id` = `Chromosome`.`id`) WHERE `Annotation`.`id` = ? },
+#            data => \@ids, 
+#        },
+#        'list range of annots' => {
+#            q => q{ SELECT `Annotation`.`id`, `Annotation`.`accession_nr`, `Annotation`.`model_nr`, `Annotation`.`start`, `Annotation`.`stop`, `Annotation`.`strand`, `Annotation`.`chromosome_id`, `Annotation`.`type`, `Annotation`.`species_id`, `Annotation`.`seq`, `Annotation`.`comment`, `Annotation`.`source_id`, (CONCAT(`Annotation`.`accession_nr`, '.', `Annotation`.`model_nr`)) AS `Annotation__accession`, `Species`.`id`, `Species`.`full_name`, `Species`.`short_name`, `Species`.`NCBI_tax_id`, `Source`.`id`, `Source`.`name`, `Source`.`description`, `Chromosome`.`id`, `Chromosome`.`name`, `Chromosome`.`length`, `Chromosome`.`species_id` FROM `annotations` AS `Annotation` LEFT JOIN `species` AS `Species` ON (`Annotation`.`species_id` = `Species`.`id`) LEFT JOIN `sources` AS `Source` ON (`Annotation`.`source_id` = `Source`.`id`) LEFT JOIN `chromosomes` AS `Chromosome` ON (`Annotation`.`chromosome_id` = `Chromosome`.`id`) WHERE `Annotation`.`start` <= ? AND `Annotation`.`stop` >= ? },
+#            data => \@ranges,
+#        },
+#        'list all annots' => {
+#            q => q{ SELECT `Annotation`.`id`, `Annotation`.`accession_nr`, `Annotation`.`model_nr`, `Annotation`.`start`, `Annotation`.`stop`, `Annotation`.`strand`, `Annotation`.`chromosome_id`, `Annotation`.`type`, `Annotation`.`species_id`, `Annotation`.`seq`, `Annotation`.`comment`, `Annotation`.`source_id`, (CONCAT(`Annotation`.`accession_nr`, '.', `Annotation`.`model_nr`)) AS `Annotation__accession`, `Species`.`id`, `Species`.`full_name`, `Species`.`short_name`, `Species`.`NCBI_tax_id`, `Source`.`id`, `Source`.`name`, `Source`.`description`, `Chromosome`.`id`, `Chromosome`.`name`, `Chromosome`.`length`, `Chromosome`.`species_id` FROM `annotations` AS `Annotation` LEFT JOIN `species` AS `Species` ON (`Annotation`.`species_id` = `Species`.`id`) LEFT JOIN `sources` AS `Source` ON (`Annotation`.`source_id` = `Source`.`id`) LEFT JOIN `chromosomes` AS `Chromosome` ON (`Annotation`.`chromosome_id` = `Chromosome`.`id`) },
+#            data => [],
+#        },
+#        'count range annots', => {
+#            q => q{ SELECT COUNT(*) AS `count` FROM `annotations` AS `Annotation` WHERE `Annotation`.`start` <= ? AND `Annotation`.`stop` >= ? },
+#            data => \@ranges,
+#        },
+#        'count all annots' => {
+#            q => q{ SELECT COUNT(*) AS `count` FROM `annotations` AS `Annotation` },
+#            data => [],
+#        }
+#    );
 #
-#print "start\n";
-#$dbi->do(q{ALTER TABLE `annotations` DROP INDEX `start_stop` });
-#$dbi->do(q{ALTER TABLE `annotations` ADD INDEX `start` ( `start` ASC ) });
-#&exe();
+#    $dbi->do(q{ALTER TABLE `annotations` DROP INDEX `start_stop` });
+#    $dbi->do(q{ALTER TABLE `annotations` DROP INDEX `stop_start` });
+#    &exe('No Index', \%qs);
 #
-#print "stop\n";
-#$dbi->do(q{ALTER TABLE `annotations` DROP INDEX `start` });
-#$dbi->do(q{ALTER TABLE `annotations` ADD INDEX `stop` ( `stop` ASC ) });
-#&exe();
+#    $dbi->do(q{ALTER TABLE `annotations` ADD INDEX `start_stop` ( `start` ASC, `stop` ASC ) });
+#    &exe('start_stop', \%qs);
 #
-#print "stop_start\n";
-#$dbi->do(q{ALTER TABLE `annotations` DROP INDEX `stop` });
-#$dbi->do(q{ALTER TABLE `annotations` ADD INDEX `stop_start` ( `stop` ASC, `start` ASC ) });
-#&exe();
-
-
-#print "No Index\n";
-#$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
-#$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
-#&exe_srnas();
+#    $dbi->do(q{ALTER TABLE `annotations` DROP INDEX `start_stop` });
+#    $dbi->do(q{ALTER TABLE `annotations` ADD INDEX `start` ( `start` ASC ) });
+#    &exe('start', \%qs);
 #
-#print "start_stop\n";
-#$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` ASC, `stop` ASC ) });
-#&exe_srnas();
+#    $dbi->do(q{ALTER TABLE `annotations` DROP INDEX `start` });
+#    $dbi->do(q{ALTER TABLE `annotations` ADD INDEX `stop` ( `stop` ASC ) });
+#    &exe('stop', \%qs);
 #
-#print "start\n";
-#$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
-#$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start` ( `start` ASC) });
-#&exe_srnas();
+#    $dbi->do(q{ALTER TABLE `annotations` DROP INDEX `stop` });
+#    $dbi->do(q{ALTER TABLE `annotations` ADD INDEX `stop_start` ( `stop` ASC, `start` ASC ) });
+#    &exe('stop_start', \%qs);
+#}
+
+
+# test for the srnas
+#{
+#    my @ids = (100..199);
+#    my @ranges = ();
+#    for my $i (1..100) {
+#        push @ranges, [ (3500 + $i*125), (4000 + $i*125) ] ;
+#    }
 #
-#print "stop\n";
-#$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start` });
-#$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop` ( `stop` ASC) });
-#&exe_srnas();
+#    my %qs = (
+#        'list one srna' => {
+#            q => q{  SELECT `Srna`.`id`, `Srna`.`name`, `Srna`.`start`, `Srna`.`stop`, `Srna`.`strand`, `Srna`.`sequence_id`, `Srna`.`score`, `Srna`.`type_id`, `Srna`.`abundance`, `Srna`.`nomalized_abundance`, `Srna`.`experiment_id`, `Srna`.`chromosome_id`, `Sequence`.`id`, `Sequence`.`seq`, `Type`.`id`, `Type`.`name`, `Experiment`.`id`, `Experiment`.`name`, `Experiment`.`description`, `Experiment`.`species_id`, `Experiment`.`internal` FROM `srnas` AS `Srna` LEFT JOIN `sequences` AS `Sequence` ON (`Srna`.`sequence_id` = `Sequence`.`id`) LEFT JOIN `types` AS `Type` ON (`Srna`.`type_id` = `Type`.`id`) LEFT JOIN `experiments` AS `Experiment` ON (`Srna`.`experiment_id` = `Experiment`.`id`) WHERE `Srna`.`id` =? },
+#            data => \@ids,
+#        },
+#        'list range srnas' => {
+#            q =>q{SELECT `Srna`.`id`, `Srna`.`name`, `Srna`.`start`, `Srna`.`stop`, `Srna`.`strand`, `Srna`.`sequence_id`, `Srna`.`score`, `Srna`.`type_id`, `Srna`.`abundance`, `Srna`.`nomalized_abundance`, `Srna`.`experiment_id`, `Srna`.`chromosome_id`, `Sequence`.`id`, `Sequence`.`seq`, `Type`.`id`, `Type`.`name`, `Experiment`.`id`, `Experiment`.`name`, `Experiment`.`description`, `Experiment`.`species_id`, `Experiment`.`internal` FROM `srnas` AS `Srna` LEFT JOIN `sequences` AS `Sequence` ON (`Srna`.`sequence_id` = `Sequence`.`id`) LEFT JOIN `types` AS `Type` ON (`Srna`.`type_id` = `Type`.`id`) LEFT JOIN `experiments` AS `Experiment` ON (`Srna`.`experiment_id` = `Experiment`.`id`) WHERE `Srna`.`start` >= ? AND `Srna`.`stop` <= ? AND chromosome_id = 7 },
+#            data => \@ranges,
+#        },
+#        'list all srnas' => {
+#            q => q{SELECT `Srna`.`id`, `Srna`.`name`, `Srna`.`start`, `Srna`.`stop`, `Srna`.`strand`, `Srna`.`sequence_id`, `Srna`.`score`, `Srna`.`type_id`, `Srna`.`abundance`, `Srna`.`nomalized_abundance`, `Srna`.`experiment_id`, `Srna`.`chromosome_id`, `Sequence`.`id`, `Sequence`.`seq`, `Type`.`id`, `Type`.`name`, `Experiment`.`id`, `Experiment`.`name`, `Experiment`.`description`, `Experiment`.`species_id`, `Experiment`.`internal` FROM `srnas` AS `Srna` LEFT JOIN `sequences` AS `Sequence` ON (`Srna`.`sequence_id` = `Sequence`.`id`) LEFT JOIN `types` AS `Type` ON (`Srna`.`type_id` = `Type`.`id`) LEFT JOIN `experiments` AS `Experiment` ON (`Srna`.`experiment_id` = `Experiment`.`id`) WHERE chromosome_id = 7 LIMIT 500},
+#            data => [],
+#        },
+#        'count range srnas' => {
+#            q =>q{SELECT COUNT(*) AS `count` FROM `srnas` AS `Srna` WHERE `Srna`.`start` >= ? AND `Srna`.`stop` <= ? AND chromosome_id = 7 },
+#            data => \@ranges,
+#        },
+#        'count all srnas' => {
+#            q =>q{SELECT COUNT(*) AS `count` FROM `srnas` AS `Srna` WHERE chromosome_id = 7 },
+#            data => [],
+#        },
+#    );
 #
-#print "stop_start\n";
-#$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop` });
-#$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` ASC, `start` ASC) });
-#&exe_srnas();
+#
+#    print "^ ", join "^", keys %qs;
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
+#    &exe('no index', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` ASC, `stop` ASC ) });
+#    &exe('start_stop', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start` ( `start` ASC) });
+#    &exe('start', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop` ( `stop` ASC) });
+#    &exe('stop', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` ASC, `start` ASC) });
+#    &exe('stop_start', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` DESC, `stop` DESC) });
+#    &exe('start_stop DESC', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` ASC, `stop` DESC) });
+#    &exe('start_stop ASC DESC', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` DESC, `stop` ASC) });
+#    &exe('start_stop DESC ASC', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start` ( `start` DESC) });
+#    &exe('start DESC', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop` ( `stop` DESC) });
+#    &exe('stop', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` DESC, `start` DESC) });
+#    &exe('stop_start DESC DESC', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` ASC, `start` DESC) });
+#    &exe('stop_start DESC ASC', \%qs);
+#
+#    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
+#    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` DESC, `start` ASC) });
+#    &exe('stop_start DESC ASC', \%qs);
+#
+#}
 
-
-print "No Index\n";
-$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
-$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
-&exe_srnas();
-
-print "start_stop DESC\n";
-$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` DESC, `stop` DESC) });
-&exe_srnas();
-
-print "start_stop ASC DESC\n";
-$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
-$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` ASC, `stop` DESC) });
-&exe_srnas();
-
-print "start_stop DESC ASC\n";
-$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
-$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` DESC, `stop` ASC) });
-&exe_srnas();
-
-print "start\n";
-$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
-$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start` ( `start` DESC) });
-&exe_srnas();
-
-print "stop\n";
-$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start` });
-$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop` ( `stop` DESC) });
-&exe_srnas();
-
-print "stop_start DESC\n";
-$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop` });
-$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` DESC, `start` DESC) });
-&exe_srnas();
-
-print "stop_start ASC DESC\n";
-$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
-$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` ASC, `start` DESC) });
-&exe_srnas();
-
-print "stop_start DESC ASC\n";
-$dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
-$dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` DESC, `start` ASC) });
-&exe_srnas();
-
-
-sub exe {
-    my @ids = (100..199);
-    my @ranges = ();
-    for my $i (1..100) {
-        push @ranges, [ (3500 + $i*125), (4500 + $i*125) ] ;
-    }
-
-    # list one annot
-    my $start = [gettimeofday()];
-    my $sth = $dbi->prepare(q{ SELECT `Annotation`.`id`, `Annotation`.`accession_nr`, `Annotation`.`model_nr`, `Annotation`.`start`, `Annotation`.`stop`, `Annotation`.`strand`, `Annotation`.`chromosome_id`, `Annotation`.`type`, `Annotation`.`species_id`, `Annotation`.`seq`, `Annotation`.`comment`, `Annotation`.`source_id`, (CONCAT(`Annotation`.`accession_nr`, '.', `Annotation`.`model_nr`)) AS `Annotation__accession`, `Species`.`id`, `Species`.`full_name`, `Species`.`short_name`, `Species`.`NCBI_tax_id`, `Source`.`id`, `Source`.`name`, `Source`.`description`, `Chromosome`.`id`, `Chromosome`.`name`, `Chromosome`.`length`, `Chromosome`.`species_id` FROM `annotations` AS `Annotation` LEFT JOIN `species` AS `Species` ON (`Annotation`.`species_id` = `Species`.`id`) LEFT JOIN `sources` AS `Source` ON (`Annotation`.`source_id` = `Source`.`id`) LEFT JOIN `chromosomes` AS `Chromosome` ON (`Annotation`.`chromosome_id` = `Chromosome`.`id`) WHERE `Annotation`.`id` = ? });
-    for my $id (@ids) {
-        $sth->execute( $id );
-    }
-    my $stop = [gettimeofday()];
-
-    print "\tlist one annot\n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . scalar(@ids)/tv_interval($start, $stop) . "q/s\n";
-
-    # list range of annots
-    $start = [gettimeofday()];
-    $sth = $dbi->prepare(q{ SELECT `Annotation`.`id`, `Annotation`.`accession_nr`, `Annotation`.`model_nr`, `Annotation`.`start`, `Annotation`.`stop`, `Annotation`.`strand`, `Annotation`.`chromosome_id`, `Annotation`.`type`, `Annotation`.`species_id`, `Annotation`.`seq`, `Annotation`.`comment`, `Annotation`.`source_id`, (CONCAT(`Annotation`.`accession_nr`, '.', `Annotation`.`model_nr`)) AS `Annotation__accession`, `Species`.`id`, `Species`.`full_name`, `Species`.`short_name`, `Species`.`NCBI_tax_id`, `Source`.`id`, `Source`.`name`, `Source`.`description`, `Chromosome`.`id`, `Chromosome`.`name`, `Chromosome`.`length`, `Chromosome`.`species_id` FROM `annotations` AS `Annotation` LEFT JOIN `species` AS `Species` ON (`Annotation`.`species_id` = `Species`.`id`) LEFT JOIN `sources` AS `Source` ON (`Annotation`.`source_id` = `Source`.`id`) LEFT JOIN `chromosomes` AS `Chromosome` ON (`Annotation`.`chromosome_id` = `Chromosome`.`id`) WHERE `Annotation`.`start` <= ? AND `Annotation`.`stop` >= ? });
-    foreach my $range (@ranges) {
-        $sth->execute( @$range );
-    }
-    $stop = [gettimeofday()];
-
-    print "\tlist range annots\n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . scalar(@ranges)/tv_interval($start, $stop) . "q/s\n";
-
-    # list all annots
-    $start = [gettimeofday()];
-    $sth = $dbi->prepare(q{ SELECT `Annotation`.`id`, `Annotation`.`accession_nr`, `Annotation`.`model_nr`, `Annotation`.`start`, `Annotation`.`stop`, `Annotation`.`strand`, `Annotation`.`chromosome_id`, `Annotation`.`type`, `Annotation`.`species_id`, `Annotation`.`seq`, `Annotation`.`comment`, `Annotation`.`source_id`, (CONCAT(`Annotation`.`accession_nr`, '.', `Annotation`.`model_nr`)) AS `Annotation__accession`, `Species`.`id`, `Species`.`full_name`, `Species`.`short_name`, `Species`.`NCBI_tax_id`, `Source`.`id`, `Source`.`name`, `Source`.`description`, `Chromosome`.`id`, `Chromosome`.`name`, `Chromosome`.`length`, `Chromosome`.`species_id` FROM `annotations` AS `Annotation` LEFT JOIN `species` AS `Species` ON (`Annotation`.`species_id` = `Species`.`id`) LEFT JOIN `sources` AS `Source` ON (`Annotation`.`source_id` = `Source`.`id`) LEFT JOIN `chromosomes` AS `Chromosome` ON (`Annotation`.`chromosome_id` = `Chromosome`.`id`) });
-    $sth->execute();
-    $stop = [gettimeofday()];
-
-    print "\tlist all annots\n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . 1/tv_interval($start, $stop) . "q/s\n";
-
-    # count all annots
-    $start = [gettimeofday()];
-    $sth = $dbi->prepare(q{ SELECT COUNT(*) AS `count` FROM `annotations` AS `Annotation` WHERE `Annotation`.`start` <= ? AND `Annotation`.`stop` >= ? });
-    foreach my $range (@ranges) {
-        $sth->execute( @$range );
-    }
-    $stop = [gettimeofday()];
-
-    print "\tcount range of annots\n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . scalar(@ranges)/tv_interval($start, $stop) . "q/s\n";
-
-    # list all annots
-    $start = [gettimeofday()];
-    $sth = $dbi->prepare(q{ SELECT COUNT(*) AS `count` FROM `annotations` AS `Annotation` });
-    $sth->execute();
-    $stop = [gettimeofday()];
-
-    print "\tcount all annots\n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . 1/tv_interval($start, $stop) . "q/s\n";
-
-    print "\n";
-
-}
-
-sub exe_srnas {
+# test for the srnas with double indexes
+{
     my @ids = (100..199);
     my @ranges = ();
     for my $i (1..100) {
         push @ranges, [ (3500 + $i*125), (4000 + $i*125) ] ;
     }
 
-    # list one srna 
-    my $start = [gettimeofday()];
-    my $sth = $dbi->prepare(q{  SELECT `Srna`.`id`, `Srna`.`name`, `Srna`.`start`, `Srna`.`stop`, `Srna`.`strand`, `Srna`.`sequence_id`, `Srna`.`score`, `Srna`.`type_id`, `Srna`.`abundance`, `Srna`.`nomalized_abundance`, `Srna`.`experiment_id`, `Srna`.`chromosome_id`, `Sequence`.`id`, `Sequence`.`seq`, `Type`.`id`, `Type`.`name`, `Experiment`.`id`, `Experiment`.`name`, `Experiment`.`description`, `Experiment`.`species_id`, `Experiment`.`internal` FROM `srnas` AS `Srna` LEFT JOIN `sequences` AS `Sequence` ON (`Srna`.`sequence_id` = `Sequence`.`id`) LEFT JOIN `types` AS `Type` ON (`Srna`.`type_id` = `Type`.`id`) LEFT JOIN `experiments` AS `Experiment` ON (`Srna`.`experiment_id` = `Experiment`.`id`) WHERE `Srna`.`id` =? });
-    for my $id (@ids) {
-        $sth->execute( $id );
+    my %qs = (
+        'list one srna' => {
+            q => q{  SELECT `Srna`.`id`, `Srna`.`name`, `Srna`.`start`, `Srna`.`stop`, `Srna`.`strand`, `Srna`.`sequence_id`, `Srna`.`score`, `Srna`.`type_id`, `Srna`.`abundance`, `Srna`.`nomalized_abundance`, `Srna`.`experiment_id`, `Srna`.`chromosome_id`, `Sequence`.`id`, `Sequence`.`seq`, `Type`.`id`, `Type`.`name`, `Experiment`.`id`, `Experiment`.`name`, `Experiment`.`description`, `Experiment`.`species_id`, `Experiment`.`internal` FROM `srnas` AS `Srna` LEFT JOIN `sequences` AS `Sequence` ON (`Srna`.`sequence_id` = `Sequence`.`id`) LEFT JOIN `types` AS `Type` ON (`Srna`.`type_id` = `Type`.`id`) LEFT JOIN `experiments` AS `Experiment` ON (`Srna`.`experiment_id` = `Experiment`.`id`) WHERE `Srna`.`id` =? },
+            data => \@ids,
+        },
+        'list range srnas' => {
+            q =>q{SELECT `Srna`.`id`, `Srna`.`name`, `Srna`.`start`, `Srna`.`stop`, `Srna`.`strand`, `Srna`.`sequence_id`, `Srna`.`score`, `Srna`.`type_id`, `Srna`.`abundance`, `Srna`.`nomalized_abundance`, `Srna`.`experiment_id`, `Srna`.`chromosome_id`, `Sequence`.`id`, `Sequence`.`seq`, `Type`.`id`, `Type`.`name`, `Experiment`.`id`, `Experiment`.`name`, `Experiment`.`description`, `Experiment`.`species_id`, `Experiment`.`internal` FROM `srnas` AS `Srna` LEFT JOIN `sequences` AS `Sequence` ON (`Srna`.`sequence_id` = `Sequence`.`id`) LEFT JOIN `types` AS `Type` ON (`Srna`.`type_id` = `Type`.`id`) LEFT JOIN `experiments` AS `Experiment` ON (`Srna`.`experiment_id` = `Experiment`.`id`) WHERE `Srna`.`start` >= ? AND `Srna`.`stop` <= ? AND chromosome_id = 7 },
+            data => \@ranges,
+        },
+        'list all srnas' => {
+            q => q{SELECT `Srna`.`id`, `Srna`.`name`, `Srna`.`start`, `Srna`.`stop`, `Srna`.`strand`, `Srna`.`sequence_id`, `Srna`.`score`, `Srna`.`type_id`, `Srna`.`abundance`, `Srna`.`nomalized_abundance`, `Srna`.`experiment_id`, `Srna`.`chromosome_id`, `Sequence`.`id`, `Sequence`.`seq`, `Type`.`id`, `Type`.`name`, `Experiment`.`id`, `Experiment`.`name`, `Experiment`.`description`, `Experiment`.`species_id`, `Experiment`.`internal` FROM `srnas` AS `Srna` LEFT JOIN `sequences` AS `Sequence` ON (`Srna`.`sequence_id` = `Sequence`.`id`) LEFT JOIN `types` AS `Type` ON (`Srna`.`type_id` = `Type`.`id`) LEFT JOIN `experiments` AS `Experiment` ON (`Srna`.`experiment_id` = `Experiment`.`id`) WHERE chromosome_id = 7 LIMIT 500},
+            data => [],
+        },
+        'count range srnas' => {
+            q =>q{SELECT COUNT(*) AS `count` FROM `srnas` AS `Srna` WHERE `Srna`.`start` >= ? AND `Srna`.`stop` <= ? AND chromosome_id = 7 },
+            data => \@ranges,
+        },
+        'count all srnas' => {
+            q =>q{SELECT COUNT(*) AS `count` FROM `srnas` AS `Srna` WHERE chromosome_id = 7 },
+            data => [],
+        },
+    );
+
+
+    print "^ ", join "^", keys %qs;
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop` });
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start` });
+    &exe('no index', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` ASC, `stop` ASC, `chromosome_id` ASC ) });
+    &exe('start_stop', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start` ( `start` ASC, `chromosome_id` ASC) });
+    &exe('start', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop` ( `stop` ASC, `chromosome_id` ASC) });
+    &exe('stop', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` ASC, `start` ASC, `chromosome_id` ASC) });
+    &exe('stop_start', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` DESC, `stop` DESC, `chromosome_id` ASC) });
+    &exe('start_stop DESC', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` ASC, `stop` DESC, `chromosome_id` ASC) });
+    &exe('start_stop ASC DESC', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start_stop` ( `start` DESC, `stop` ASC, `chromosome_id` ASC) });
+    &exe('start_stop DESC ASC', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start_stop` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `start` ( `start` DESC, `chromosome_id` ASC) });
+    &exe('start DESC', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `start` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop` ( `stop` DESC, `chromosome_id` ASC) });
+    &exe('stop', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` DESC, `start` DESC, `chromosome_id` ASC) });
+    &exe('stop_start DESC DESC', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` ASC, `start` DESC, `chromosome_id` ASC) });
+    &exe('stop_start ASC DESC', \%qs);
+
+    $dbi->do(q{ALTER TABLE `srnas` DROP INDEX `stop_start` });
+    $dbi->do(q{ALTER TABLE `srnas` ADD INDEX `stop_start` ( `stop` DESC, `start` ASC, `chromosome_id` ASC) });
+    &exe('stop_start DESC ASC', \%qs);
+
+}
+
+sub exe {
+    my $title = shift;
+    my $qs = shift;
+
+    print "\n| $title |";
+    while (my ($t, $exec) = each %$qs) {
+        my $start = [gettimeofday()];
+        my $sth = $dbi->prepare($exec->{ q });
+        my $total = 1;
+        if (@{ $exec->{ data } }) {
+            foreach my $data (@{ $exec->{ data } }) {
+                if (ref $data) {
+                    $sth->execute( @$data );
+                }
+                else {
+                    $sth->execute( $data );
+                }
+            }
+            $total = scalar @{ $exec->{ data } };
+        }
+        else {
+            $sth->execute();
+        }
+        my $stop = [gettimeofday()];
+
+        printf " %.4f (%.4f) |", 1/tv_interval($start, $stop), tv_interval($start, $stop);
     }
-    my $stop = [gettimeofday()];
-
-    print "\tlist one srna \n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . scalar(@ids)/tv_interval($start, $stop) . "q/s\n";
-
-    # list range of srnas 
-    $start = [gettimeofday()];
-    $sth = $dbi->prepare(q{SELECT `Srna`.`id`, `Srna`.`name`, `Srna`.`start`, `Srna`.`stop`, `Srna`.`strand`, `Srna`.`sequence_id`, `Srna`.`score`, `Srna`.`type_id`, `Srna`.`abundance`, `Srna`.`nomalized_abundance`, `Srna`.`experiment_id`, `Srna`.`chromosome_id`, `Sequence`.`id`, `Sequence`.`seq`, `Type`.`id`, `Type`.`name`, `Experiment`.`id`, `Experiment`.`name`, `Experiment`.`description`, `Experiment`.`species_id`, `Experiment`.`internal` FROM `srnas` AS `Srna` LEFT JOIN `sequences` AS `Sequence` ON (`Srna`.`sequence_id` = `Sequence`.`id`) LEFT JOIN `types` AS `Type` ON (`Srna`.`type_id` = `Type`.`id`) LEFT JOIN `experiments` AS `Experiment` ON (`Srna`.`experiment_id` = `Experiment`.`id`) WHERE `Srna`.`start` >= ? AND `Srna`.`stop` <= ? });
-    foreach my $range (@ranges) {
-        $sth->execute( @$range );
-    }
-    $stop = [gettimeofday()];
-
-    print "\tlist range srnas\n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . scalar(@ranges)/tv_interval($start, $stop) . "q/s\n";
-
-    # list all srnas 
-    $start = [gettimeofday()];
-    $sth = $dbi->prepare(q{SELECT `Srna`.`id`, `Srna`.`name`, `Srna`.`start`, `Srna`.`stop`, `Srna`.`strand`, `Srna`.`sequence_id`, `Srna`.`score`, `Srna`.`type_id`, `Srna`.`abundance`, `Srna`.`nomalized_abundance`, `Srna`.`experiment_id`, `Srna`.`chromosome_id`, `Sequence`.`id`, `Sequence`.`seq`, `Type`.`id`, `Type`.`name`, `Experiment`.`id`, `Experiment`.`name`, `Experiment`.`description`, `Experiment`.`species_id`, `Experiment`.`internal` FROM `srnas` AS `Srna` LEFT JOIN `sequences` AS `Sequence` ON (`Srna`.`sequence_id` = `Sequence`.`id`) LEFT JOIN `types` AS `Type` ON (`Srna`.`type_id` = `Type`.`id`) LEFT JOIN `experiments` AS `Experiment` ON (`Srna`.`experiment_id` = `Experiment`.`id`) LIMIT 500});
-    $sth->execute();
-    $stop = [gettimeofday()];
-
-    print "\tlist all srnas\n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . 1/tv_interval($start, $stop) . "q/s\n";
-
-    # count srnas in a range
-    $start = [gettimeofday()];
-    $sth = $dbi->prepare(q{SELECT COUNT(*) AS `count` FROM `srnas` AS `Srna` WHERE `Srna`.`start` >= ? AND `Srna`.`stop` <= ? });
-    foreach my $range (@ranges) {
-        $sth->execute( @$range );
-    }
-    $stop = [gettimeofday()];
-
-    print "\tcount range of srnas\n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . scalar(@ranges)/tv_interval($start, $stop) . "q/s\n";
-
-    # count all srnas 
-    $start = [gettimeofday()];
-    $sth = $dbi->prepare(q{SELECT COUNT(*) AS `count` FROM `srnas` AS `Srna` });
-    $sth->execute();
-    $stop = [gettimeofday()];
-
-    print "\tcount all srnas\n";
-    print "\t\tTotal: " . tv_interval($start, $stop) . "s\n";
-    print "\t\tq/s  : " . 1/tv_interval($start, $stop) . "q/s\n";
 
     print "\n";
 }
