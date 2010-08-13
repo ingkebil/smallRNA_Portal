@@ -89,7 +89,11 @@ class AppModel extends Model {
      *
      */
     function paginateCount($conditions = null, $recursive = 0, $extra = array()) {
-        $this->recursive = -1;
+       # if (isset($extra['normal']) && $extra['normal']) {
+       #     unset($extra['normal']);
+       #     return parent::paginateCount($conditions, $recursive, $extra);
+       # }
+       # $this->recursive = -1;
         return $this->find('count', array('conditions' => $conditions));
     }
 

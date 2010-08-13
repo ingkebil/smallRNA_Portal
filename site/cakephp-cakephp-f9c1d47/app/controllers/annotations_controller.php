@@ -23,7 +23,7 @@ class AnnotationsController extends AppController {
 		}
         $annot = $this->Annotation->read(null, $id);
         $this->paginate = array('Srna' => array('recursive' => 0));
-        $srnas = $this->paginate($this->Annotation->Species->Experiment->Srna, array('Srna.start >=' => $annot['Annotation']['start'], 'Srna.stop <=' => $annot['Annotation']['stop']));
+        $srnas = $this->paginate($this->Annotation->Species->Experiment->Srna, array('Srna.start >=' => $annot['Annotation']['start'], 'Srna.stop <=' => $annot['Annotation']['stop'], 'chromosome_id' => $annot['Annotation']['chromosome_id']));
         $this->set('srnas', $srnas);
 		$this->set('annotation', $annot);
 	}

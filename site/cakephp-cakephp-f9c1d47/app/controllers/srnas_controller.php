@@ -24,7 +24,7 @@ class SrnasController extends AppController {
 		}
         $srna = $this->Srna->read(null, $id);
         $this->paginate = array('Annotation' => array('recursive' => 0));
-        $annotations = $this->paginate($this->Srna->Experiment->Species->Annotation, array('Annotation.start <=' => $srna['Srna']['start'], 'Annotation.stop >=' => $srna['Srna']['stop']));
+        $annotations = $this->paginate($this->Srna->Experiment->Species->Annotation, array('Annotation.start <=' => $srna['Srna']['start'], 'Annotation.stop >=' => $srna['Srna']['stop'], 'chromosome_id' => $srna['Srna']['chromosome_id']));
         $this->set('annotations', $annotations);
 		$this->set('srna', $srna);
 	}
@@ -41,6 +41,73 @@ class SrnasController extends AppController {
         $this->set('srnas', $srnas);
     }
 
+    function search() {
+        if (! empty($this->data)) {
+            #     [Srna] => Array
+            #          (
+            #              [chromosome_id] => 
+            #              [strand] => 
+            #              [type_id] => 
+            #              [experiment_id] => 
+            #              [start] => 
+            #              [stop] => 
+            #              [normalized_abundance_between] => 
+            #              [normalized_abundance_stop] => 
+            #              [sequence_contains] => aaagt
+            #          )
+
+            foreach ($this->data as $key => $values) {
+                $conditions[ $key ] = array_filter($values, create_function('$a', 'return $a === 0 || ! empty($a);'));
+                if (empty($conditions[ $key ])) {
+                    unset($conditions[ $key ]);
+                }
+            }
+            $named = array();
+            foreach ($conditions as $model => $keys) {
+                $url_model = urlencode($model);
+                foreach ($keys as $key => $value) {
+                    $url_value = urlencode($value);
+                    $url_key   = urlencode($key);
+                    $named[ "$url_model.$url_key" ] = $url_value;
+                }
+            }
+            $named['action'] = 'results';
+
+            $this->redirect($named);
+        }
+		$types = $this->Srna->Type->find('list');
+		$experiments = $this->Srna->Experiment->find('list');
+        $chromosomes = $this->Srna->Chromosome->find('list', array('order' => array('name' => 'ASC')));
+		$this->set(compact('types', 'experiments', 'chromosomes'));
+    }
+
+    function results() {
+        #$this->set('params', $named);
+        $conditions = array();
+        foreach ($this->passedArgs as $key => $value) {
+            switch ($key) {
+            case 'Srna.chromosome_id':
+            case 'Srna.strand':
+            case 'type_id':
+            case 'experiment_id':
+                $conditions[ $key ] = $value;
+                break;
+            case 'start':
+            case 'normalized_abundance_between':
+                $conditions[ "$key >=" ] = $value;
+                break;
+            case 'stop':
+            case 'normalized_abundance_stop':
+                $conditions[ "$key <=" ] = $value;
+                break;
+            case 'Sequence.seq':
+                $conditions[ "$key LIKE" ] = "%$value%";
+            }
+        }
+        $srnas = $this->paginate($this->Srna, $conditions, array('normal' => true));
+        $this->set('srnas', $srnas);
+    }
+
 	function add() {
 		if (!empty($this->data)) {
 			$this->Srna->create();
@@ -51,7 +118,7 @@ class SrnasController extends AppController {
 				$this->Session->setFlash(__('The srna could not be saved. Please, try again.', true));
 			}
 		}
-		$sequences = $this->Srna->Sequence->find('list');
+		#$sequences = $this->Srna->Sequence->find('list');
 		$types = $this->Srna->Type->find('list');
 		$experiments = $this->Srna->Experiment->find('list');
 		$this->set(compact('sequences', 'types', 'experiments'));

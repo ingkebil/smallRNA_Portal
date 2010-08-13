@@ -6,6 +6,7 @@
 			<th><?php echo $this->Paginator->sort('start');?></th>
 			<th><?php echo $this->Paginator->sort('stop');?></th>
 			<th><?php echo $this->Paginator->sort('strand');?></th>
+			<th><?php echo $this->Paginator->sort('chromosome', 'Chromosome.name');?></th>
 			<th><?php echo $this->Paginator->sort('score');?></th>
 			<th><?php echo $this->Paginator->sort('type_id');?></th>
 			<th><?php echo $this->Paginator->sort('abundance');?></th>
@@ -25,6 +26,7 @@
 		<td><?php echo $srna['Srna']['start']; ?>&nbsp;</td>
 		<td><?php echo $srna['Srna']['stop']; ?>&nbsp;</td>
 		<td><?php echo $srna['Srna']['strand']; ?>&nbsp;</td>
+		<td><?php echo $srna['Chromosome']['name']; ?>&nbsp;</td>
 		<td><?php echo $srna['Srna']['score']; ?>&nbsp;</td>
 		<td>
 			<?php echo $this->Html->link($srna['Type']['name'], array('controller' => 'types', 'action' => 'view', $srna['Type']['id'])); ?>
