@@ -19,8 +19,8 @@ foreach my $cond (@conds) {
     my $exp_id = $dbi->selectrow_arrayref(q{ SELECT id FROM `experiments` WHERE name = ? }, {}, ( $cond ))->[0];
     print "perl $Bin/../SRNA/Normabun.pm --exp-id $exp_id $ARGV[0]/$cond\n";
     `perl $Bin/../SRNA/Normabun.pm --exp-id $exp_id $ARGV[0]/$cond`;
-     print "mysql -u $user -p $db < $file\n";
-     `mysql -u $user -p$pass $db < $file`;
+#     print "mysql -u $user -p $db < $ARGV[0]/$cond/normabun.sql\n";
+#     `mysql -u $user -p$pass $db < $ARGV[0]/$cond/normabun.sql`;
 }
 
 1;

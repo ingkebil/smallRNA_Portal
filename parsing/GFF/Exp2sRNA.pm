@@ -59,11 +59,6 @@ sub run {
             $j++;
             $exp2srna->run_parser(\@lines, $exp_id, $type, $species_id);
             $exp2srna->export_to_CSV($path, $j); # export to file
-            #else {
-            #    foreach my $key (keys %$return) {
-            #        $return->{ $key } = [ @{ $return->{ $key } }, @{ $exp2srna->{ return }->{ csv }->{ $key } } ];
-            #    }
-            #}
 
             $exp2srna->{ return } = { csv => { srnas => [], sequences => [], types => [] } },
             @lines = ();
@@ -74,17 +69,8 @@ sub run {
     if (@lines) {
         $exp2srna->run_parser(\@lines, $exp_id, $type, $species_id);
         $exp2srna->export_to_CSV($path, ++$j); # export to file
-        #else {
-        #    foreach my $key (keys %$return) {
-        #        $return->{ $key } = [ @{ $return->{ $key } }, @{ $exp2srna->{ return }->{ csv }->{ $key } } ];
-        #    }
-        #}
     }
     ### tried $j times ...
-    # if (!$hotrun) {
-    #     $exp2srna->{ return }->{ csv } = $return;
-    #     $exp2srna->export_to_CSV($path);
-    # }
 }
 
 sub export_to_CSV {

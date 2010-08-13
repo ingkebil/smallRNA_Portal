@@ -15,11 +15,11 @@ my %settings = (
     arath => {
         dirs => {
             fasta_file => '"$cond_dir/$cond/$cond.unique.fas"', # add the double quotes as these strings get eval'd lateron
-            mapp_file  => '"$mapp_dir/$cond/tair9/${cond}_on_genome.100.gff"',
+            mapp_file  => '"$mapp_dir/$cond/tair9/genome/${cond}_on_genome.100.gff"',
         },
         conds => {
-            smallrna  => [ qw/ P P+3h N N+3h FN FN2 C2 C303 C3h5 / ],
-#            degradome => [ qw/ DFN D-N D-P D-P12 / ],
+            #smallrna  => [ qw/ P P+3h N N+3h FN FN2 C2 C303 C3h5 / ],
+            degradome => [ qw/ D-P D-P12 / ],
         },
     },
     medtr => {
