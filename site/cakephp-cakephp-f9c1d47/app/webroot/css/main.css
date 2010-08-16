@@ -380,7 +380,7 @@ form .submit input[type=submit]:hover {
 }
 form input.short_input {
     display: inline;
-    width: 30px;
+    width: 60px;
 }
 
 /** Notices and Errors **/

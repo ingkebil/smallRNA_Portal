@@ -57,7 +57,7 @@ class SrnasController extends AppController {
             #          )
 
             foreach ($this->data as $key => $values) {
-                $conditions[ $key ] = array_filter($values, create_function('$a', 'return $a === 0 || ! empty($a);'));
+                $conditions[ $key ] = array_filter($values, create_function('$a', 'return ! empty($a) || $a == 0;'));
                 if (empty($conditions[ $key ])) {
                     unset($conditions[ $key ]);
                 }
@@ -66,8 +66,8 @@ class SrnasController extends AppController {
             foreach ($conditions as $model => $keys) {
                 $url_model = urlencode($model);
                 foreach ($keys as $key => $value) {
-                    $url_value = urlencode($value);
                     $url_key   = urlencode($key);
+                    $url_value = urlencode($value);
                     $named[ "$url_model.$url_key" ] = $url_value;
                 }
             }
@@ -82,29 +82,29 @@ class SrnasController extends AppController {
     }
 
     function results() {
-        #$this->set('params', $named);
         $conditions = array();
         foreach ($this->passedArgs as $key => $value) {
             switch ($key) {
-            case 'Srna.chromosome_id':
             case 'Srna.strand':
-            case 'type_id':
-            case 'experiment_id':
+                $value = ($value == 0) ? '+' : '-';
+            case 'Srna.chromosome_id':
+            case 'Srna.type_id':
+            case 'Srna.experiment_id':
                 $conditions[ $key ] = $value;
                 break;
-            case 'start':
-            case 'normalized_abundance_between':
+            case 'Srna.start':
+            case 'Srna.normalized_abundance_between':
                 $conditions[ "$key >=" ] = $value;
                 break;
-            case 'stop':
-            case 'normalized_abundance_stop':
+            case 'Srna.stop':
+            case 'Srna.normalized_abundance_stop':
                 $conditions[ "$key <=" ] = $value;
                 break;
             case 'Sequence.seq':
                 $conditions[ "$key LIKE" ] = "%$value%";
             }
         }
-        $srnas = $this->paginate($this->Srna, $conditions, array('normal' => true));
+        $srnas = $this->paginate($this->Srna, $conditions, array(), true);
         $this->set('srnas', $srnas);
     }
 

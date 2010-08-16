@@ -25,6 +25,7 @@ class AppController extends Controller {
 /**
  * Handles automatic pagination of model records.
  * Added the skipping of the actual paginating query when the count is zero.
+ * Normal counting behaviour binds with all models, evenif the where doesn't require this. Normal behaviour is now that no models are bound. You can toggle back to original bheviour with the added 4th param.
  *
  * @param mixed $object Model to paginate (e.g: model instance, or 'Model', or 'Model.InnerModel')
  * @param mixed $scope Conditions to use while paginating
@@ -33,7 +34,7 @@ class AppController extends Controller {
  * @access public
  * @link http://book.cakephp.org/view/1232/Controller-Setup
  */
-	function paginate($object = null, $scope = array(), $whitelist = array()) {
+	function paginate($object = null, $scope = array(), $whitelist = array(), $normalCount = 0) {
 		if (is_array($object)) {
 			$whitelist = $scope;
 			$scope = $object;
@@ -178,16 +179,22 @@ class AppController extends Controller {
 			$extra['type'] = $type;
 		}
 
+        ///// ADDED normalCount TOGGLE /////
+        $recursiveCount = $recursive;
+        if (!$normalCount) {
+            $recursiveCount = -1;
+        }
 		if (method_exists($object, 'paginateCount')) {
-			$count = $object->paginateCount($conditions, $recursive, $extra);
+			$count = $object->paginateCount($conditions, $recursiveCount, $extra);
 		} else {
 			$parameters = compact('conditions');
-			if ($recursive != $object->recursive) {
+			if ($recursiveCount != $object->recursive) {
 				$parameters['recursive'] = $recursive;
 			}
 			$count = $object->find('count', array_merge($parameters, $extra));
 		}
 		$pageCount = intval(ceil($count / $limit));
+        ///// END /////
 
 		if ($page === 'last' || $page >= $pageCount) {
 			$options['page'] = $page = $pageCount;
