@@ -1,3 +1,5 @@
+<?php $this->Html->script('raphael-min', array('inline' => false, 'once' => true)); ?>
+<?php $this->Html->script('genestruct', array('inline' => false, 'once' => true)); ?>
 <div class="annotations view">
 <h2><?php  __('Annotation');?></h2>
 	<dl><?php $i = 0; $class = ' class="altrow"';?>
@@ -68,6 +70,7 @@
 	</tr>
 	<?php
 		$i = 0;
+        $struct = '';
 		foreach ($annotation['Structure'] as $structure):
 			$class = null;
 			if ($i++ % 2 == 0) {
@@ -79,8 +82,13 @@
 			<td><?php echo $structure['stop'];?></td>
 			<td><?php echo $structure['utr'];?></td>
 		</tr>
+    <?php
+        $struct .= ';' . $structure['start'] . $structure['utr'] . $structure['stop'];
+    ?>
 	<?php endforeach; ?>
 	</table>
+    <div id="genestruct" style="width:500px;height: 250px;">&nbsp;</div>
+    <?php substr($struct, 1); echo $this->Html->scriptBlock("genestruct('genestruct', '$struct')"); ?>
 <?php endif; ?>
 </div>
 <h3>Related small RNAs</h3>
