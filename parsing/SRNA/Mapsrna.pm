@@ -13,7 +13,7 @@ my $path = $ARGV[0] || die "Gimme a export dir\n";
 my $dbi = DBI->connect('dbi:mysql:database='.DB, USER, PASS);
 
 my $annoth = $dbi->prepare(q{ SELECT id FROM annotations WHERE chromosome_id = ? AND stop >= ? AND start <= ? });
-my $sth = $dbi->prepare(qq{ SELECT srnas.id, chromosome_id, stop, start FROM srnas});
+my $sth = $dbi->prepare(qq{ SELECT srnas.id, chromosome_id, stop, start FROM srnas ORDER BY stop, id });
 $sth->execute();
 my @results = ();
 my $writebuffer = 1_000_000; # after how many results do we write out to disk
@@ -24,7 +24,7 @@ while (my @row = $sth->fetchrow_array()) { ### [%]
     my $rs = $dbi->selectall_arrayref($annoth, {}, @row[1..3] );
     
     foreach my $r (@$rs) {
-        push @results, [ $r->[ 0 ], $row[ 0 ] ];
+        push @results, "$r->[ 0 ]\t$row[ 0 ]";
         $i++;
         if ($i == $writebuffer) {
             &fprint($path, ++$j, \@results); # export to file
@@ -43,7 +43,7 @@ sub fprint {
     my $path = shift;
     my $try = shift;
     my $content = shift;
-    my $file = "$path/mappings.$try.csv";
+    my $file = "$path/mappings.slow.$try.csv";
 
     if (open(FF, '>', $file)) {
         print FF join "\n", @$content;

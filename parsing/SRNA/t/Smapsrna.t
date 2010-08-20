@@ -31,27 +31,29 @@ foreach my $line (@lines) {
     }
 }
 
-my $results = SRNA::Smapsrna::run('~/tmp/', $user, $pass, $db);
-is_deeply($results, [
-    [ '2', '1' ],
-    [ '3', '1' ],
-    [ '4', '1' ],
-    [ '5', '1' ],
-    [ '3', '2' ],
-    [ '4', '2' ],
-    [ '5', '2' ],
-    [ '7', '2' ],
-    [ '3', '3' ],
-    [ '4', '3' ],
-    [ '7', '3' ],
-    [ '3', '5' ],
-    [ '4', '5' ],
-    [ '7', '5' ],
-    [ '4', '6' ],
-    [ '9', '8' ],
-    [ '10', '9' ],
-    [ '10', '10' ]
-]);
+my @results = sort @{ SRNA::Smapsrna::run('~/tmp/', $user, $pass, $db) };
+my @expected_unsort = (
+    "2\t1",
+    "3\t1",
+    "4\t1",
+    "5\t1",
+    "3\t2",
+    "4\t2",
+    "5\t2",
+    "7\t2",
+    "3\t3",
+    "4\t3",
+    "7\t3",
+    "3\t5",
+    "4\t5",
+    "7\t5",
+    "4\t6",
+    "9\t8",
+    "10\t9",
+    "10\t10"
+);
+my @expected = sort @expected_unsort;
+is_deeply(\@results, \@expected);
 
 # drop the db
 `echo 'DROP DATABASE $db' | mysql -u $user -p$pass`;
