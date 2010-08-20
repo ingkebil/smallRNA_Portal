@@ -106,7 +106,7 @@ class Annotation extends AppModel {
 			'dependent' => false,
 			'conditions' => '',
 			'fields' => '',
-			'order' => '',
+			'order' => array('start' => 'ASC'),
 			'limit' => '',
 			'offset' => '',
 			'exclusive' => '',

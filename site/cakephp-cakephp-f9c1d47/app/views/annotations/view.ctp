@@ -75,36 +75,26 @@
 	</dl>
 </div>
 <div class="related">
-	<h3><?php __('Related Structures');?></h3>
-	<?php if (!empty($annotation['Structure'])):?>
-	<table cellpadding = "0" cellspacing = "0">
-	<tr>
-		<th><?php __('Start'); ?></th>
-		<th><?php __('Stop'); ?></th>
-		<th><?php __('Utr'); ?></th>
-	</tr>
+<h3>Gene structure</h3>
 	<?php
-		$i = 0;
         $struct = '';
+        $start = -1;
+        $stop = -1;
 		foreach ($annotation['Structure'] as $structure):
-			$class = null;
-			if ($i++ % 2 == 0) {
-				$class = ' class="altrow"';
-			}
-		?>
-		<tr<?php echo $class;?>>
-			<td><?php echo $structure['start'];?></td>
-			<td><?php echo $structure['stop'];?></td>
-			<td><?php echo $structure['utr'];?></td>
-		</tr>
-    <?php
-        $struct .= ';' . $structure['start'] . $structure['utr'] . $structure['stop'];
-    ?>
-	<?php endforeach; ?>
+            $start = $start == -1 ? $structure['start'] : $start;
+            $stop  = $structure['stop' ];
+            $struct .= ';' . $structure['start'] . $structure['utr'] . $structure['stop'];
+	    endforeach; ?>
 	</table>
-    <div id="genestruct" style="width:500px;height: 250px;">&nbsp;</div>
-    <?php substr($struct, 1); echo $this->Html->scriptBlock("genestruct('genestruct', '$struct')"); ?>
-<?php endif; ?>
+    <div id="genestruct" style="height: 50px">&nbsp;</div>
+    <?php substr($struct, 1); echo $this->Html->scriptBlock("
+        genestruct('genestruct', '$struct', $start, $stop);
+        $(document).ready(function () {
+            $(window).resize(function () {
+                genestruct('genestruct', '$struct', $start, $stop);
+            })
+        });
+    "); ?>
 </div>
 <h3>Related small RNAs</h3>
-<?php echo $this->Jquery->page('../srnas/between', compact('srnas'), array('url' => array('controller' => 'srnas', 'action' => 'between', $annotation['Annotation']['start'], $annotation['Annotation']['stop']))); ?>
+<?php echo $this->Jquery->page('../srnas/between', compact('srnas'), array('url' => array('controller' => 'srnas', 'action' => 'between', $annotation['Annotation']['start'], $annotation['Annotation']['stop'], $annotation['Annotation']['chromosome_id']))); ?>

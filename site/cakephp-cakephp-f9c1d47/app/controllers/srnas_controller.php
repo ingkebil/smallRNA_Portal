@@ -29,12 +29,16 @@ class SrnasController extends AppController {
 		$this->set('srna', $srna);
 	}
 
-    function between($start = 0, $stop = 0) {
+    function between($start = 0, $stop = 0, $chr_id = null) {
         if ($this->RequestHandler->isAjax()) {
             $this->layout = 'ajax';
         }
         $this->paginate = array('Srna' => array('recursive' => 0));
-        $srnas = $this->paginate($this->Srna, array('Srna.start >=' => $start, 'Srna.stop <=' => $stop));
+        $conds = array('Srna.start >=' => $start, 'Srna.stop <=' => $stop);
+        if (!is_null($chr_id)) {
+            $conds['Srna.chromosome_id'] = $chr_id;
+        }
+        $srnas = $this->paginate($this->Srna, $conds);
         if (isset($this->params['requested'])){
             return $srnas;
         }
@@ -42,6 +46,7 @@ class SrnasController extends AppController {
     }
 
     function search() {
+        $this->cacheAction = false;
         if (! empty($this->data)) {
             #     [Srna] => Array
             #          (

@@ -23,7 +23,7 @@ class AnnotationsController extends AppController {
 		}
         $annot = $this->Annotation->read(null, $id);
         $this->paginate = array('Srna' => array('recursive' => 0));
-        $srnas = $this->paginate($this->Annotation->Species->Experiment->Srna, array('Srna.start >=' => $annot['Annotation']['start'], 'Srna.stop <=' => $annot['Annotation']['stop'], 'chromosome_id' => $annot['Annotation']['chromosome_id']));
+        $srnas = $this->paginate($this->Annotation->Species->Experiment->Srna, array('Srna.start >=' => $annot['Annotation']['start'], 'Srna.stop <=' => $annot['Annotation']['stop'], 'Srna.chromosome_id' => $annot['Annotation']['chromosome_id']));
         $this->set('srna_red_read_count', $this->Annotation->Species->Experiment->Srna->find('all', array('conditions' => array('Srna.start >=' => $annot['Annotation']['start'], 'Srna.stop <=' => $annot['Annotation']['stop'], 'chromosome_id' => $annot['Annotation']['chromosome_id']), 'fields' => array('SUM(`Srna`.`normalized_abundance`) AS norm_abundance_count, SUM(`Srna`.`abundance`) AS abundance_count'))));
         $this->set('srnas', $srnas);
 		$this->set('annotation', $annot);
