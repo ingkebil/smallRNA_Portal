@@ -89,7 +89,9 @@ class AppModel extends Model {
      *
      */
     function paginateCount($conditions = null, $recursive = 0, $extra = array()) {
-        $this->recursive = $recursive;
+        if (isset($extra['unbindcount'])) {
+            $this->recursive = -1;
+        }
         return $this->find('count', array('conditions' => $conditions));
     }
 

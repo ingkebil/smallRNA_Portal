@@ -69,7 +69,7 @@
 		</dd>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Non-redundant Reads'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
-			<?php echo $this->params['paging']['Srna']['count']; ?>
+			<?php echo $this->params['paging']['Mapping']['count']; ?>
 			&nbsp;
 		</dd>
 	</dl>
@@ -97,4 +97,4 @@
     "); ?>
 </div>
 <h3>Related small RNAs</h3>
-<?php echo $this->Jquery->page('../srnas/between', compact('srnas'), array('url' => array('controller' => 'srnas', 'action' => 'between', $annotation['Annotation']['start'], $annotation['Annotation']['stop'], $annotation['Annotation']['chromosome_id']))); ?>
+<?php echo $this->Jquery->page('../annotations/srnas', compact('srnas'), array('url' => array('controller' => 'annotations', 'action' => 'srnas', $annotation['Annotation']['id']))); ?>

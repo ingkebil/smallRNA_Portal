@@ -6,7 +6,7 @@ class SrnasController extends AppController {
     var $helpers = array('Ajax', 'Jquery');
 
 	function index() {
-		$this->Srna->recursive = 0;
+        $this->paginate = array('Srna' => array('unbindcount' => 1));
 		$this->set('srnas', $this->paginate());
 	}
 
@@ -14,6 +14,7 @@ class SrnasController extends AppController {
     }
 
     function experiment($id) {
+        $this->paginate = array('Srna' => array('unbindcount' => 1));
         $this->set('srnas', $this->paginate($this->Srna, array('Experiment_id' => $id)));
     }
 
@@ -33,12 +34,12 @@ class SrnasController extends AppController {
         if ($this->RequestHandler->isAjax()) {
             $this->layout = 'ajax';
         }
-        $this->paginate = array('Srna' => array('recursive' => 0));
+        $this->paginate = array('Mapping' => array('contain' => array('Srna.Chromosome', 'Srna.Type', 'Srna.Experiment')));
         $conds = array('Srna.start >=' => $start, 'Srna.stop <=' => $stop);
         if (!is_null($chr_id)) {
             $conds['Srna.chromosome_id'] = $chr_id;
         }
-        $srnas = $this->paginate($this->Srna, $conds);
+        $srnas = $this->paginate($this->Srna->Mapping, $conds);
         if (isset($this->params['requested'])){
             return $srnas;
         }

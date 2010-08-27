@@ -7,7 +7,7 @@ class DATABASE_CONFIG {
 		'host' => 'localhost',
 		'login' => 'kebil',
 		'password' => 'kebil',
-		'database' => 'smallrna_opt',
+		'database' => 'smallrna_arath',
 		'encoding' => 'UTF-8'
 	);
 

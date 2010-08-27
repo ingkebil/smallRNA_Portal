@@ -106,6 +106,27 @@ class Srna extends AppModel {
         )
 	);
 
+    var $hasMany = array(
+		'Mapping' => array(
+			'className' => 'Mapping',
+			'foreignKey' => 'srna_id',
+			'dependent' => false,
+			'conditions' => '',
+			'fields' => '',
+			'order' => '',
+			'limit' => '',
+			'offset' => '',
+			'exclusive' => '',
+			'finderQuery' => '',
+			'counterQuery' => ''
+		)
+    );
+
     var $actsAs = array('containable');
+
+    function sum_abundancies($annot_id, $exp_id = null) {
+        $sql = 'SELECT sum(S.abundance) as abundance_count, sum(S.normalized_abundance) as norm_abundance_count FROM `mappings` M JOIN `srnas` S ON S.id = M.srna_id WHERE M.annotation_id = ' . mysql_real_escape_string($annot_id);
+        return $this->query($sql);
+    }
 }
 ?>
