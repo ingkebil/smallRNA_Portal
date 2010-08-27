@@ -9,6 +9,7 @@ use GFF q/:GFF_SLOTS/;
 use Settings q/:DB/;
 use GFF::Parser;
 use FASTA::Reader;
+use SRNA::DNAUtils;
 use DBI;
 use Getopt::Long;
 use Pod::Usage;
@@ -354,7 +355,11 @@ sub make_output {
         my $seq = undef;
         if (exists $self->{ freader }) {
             #$seq = $freader->get_seq($self->{ fasta_file }, $gene->{ 'chr' }); 
-            $seq = substr(${ $self->{ freader }->get_seq_ref($self->{ fasta_file }, $gene->{ 'chr' }) }, $gene->{ start }, $gene->{ stop } - $gene->{ start });
+            $seq = substr(${ $self->{ freader }->get_seq_ref($self->{ fasta_file }, $gene->{ 'chr' }) }, $gene->{ start }, $gene->{ stop } - $gene->{ start } + 1);
+            if ($gene->{ strand } eq q{-}) {
+                $seq = reverse $seq;
+                $seq = ${ $self->{ utils }->full_complement(\$seq) };
+            }
         }
         $gene->{ seq } = $seq ? $seq : undef;
 

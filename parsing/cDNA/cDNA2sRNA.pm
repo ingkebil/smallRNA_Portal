@@ -44,7 +44,7 @@ sub run {
     my $freader   = new FASTA::Reader({ filename => $ARGV[0] });
     my $lines  = $freader->get_all_seq($ARGV[0]);
 
-    my $results = $cdna2srna->run_parser($lines, $source_id, $species_id);
+    my $results = $cdna2srna->run_parser($lines, $species_id, $source_id);
     $path .= q{/} if substr($path, -1, 1) ne q{/};
 
     $cdna2srna->fprint($path . 'annotations.csv', join( "\n", @{ $results->{ annotations } }));
