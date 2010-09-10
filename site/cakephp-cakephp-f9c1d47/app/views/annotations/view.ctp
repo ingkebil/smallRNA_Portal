@@ -1,5 +1,9 @@
 <?php $this->Html->script('raphael-min', array('inline' => false, 'once' => true)); ?>
+<?php //$this->Html->script('raphael.zoom', array('inline' => false, 'once' => true)); ?>
 <?php $this->Html->script('genestruct', array('inline' => false, 'once' => true)); ?>
+<?php $this->Html->script('jquery-1.4.2.min', array('inline' => false, 'once' => true)); ?>
+<?php $this->Html->script('jquery-ui', array('inline' => false, 'once' => true)); ?>
+<?php //$this->Html->script('SVGPan', array('inline' => false, 'once' => true)); ?>
 <div class="annotations view">
 <h2><?php  __('Annotation');?></h2>
 	<dl><?php $i = 0; $class = ' class="altrow"';?>
@@ -86,13 +90,28 @@
             $struct .= ';' . $structure['start'] . $structure['utr'] . $structure['stop'];
 	    endforeach; ?>
 	</table>
-    <div id="genestruct" style="height: 50px">&nbsp;</div>
+    <?php 
+        $srna_coords = array();
+        foreach ($all_srnas as $srna) {
+            $srna_coords[] = "['".$srna['Srna']['start']."','".$srna['Srna']['stop']."']";
+        }
+        $degr_coords = array();
+        foreach ($all_degr as $srna) {
+            $degr_coords[] = "['".$srna['Srna']['start']."','".$srna['Srna']['stop']."']";
+        }
+    ?>
+    <div>Current zoom level: <span id="zoomlevel">1</span></div>
+    <div style="overflow: hidden; border: 1px dotted grey; height: <?php echo count($all_srnas) + count($all_degr) + 60; ?>px;"><div id="genestruct" style="height: <?php echo count($all_srnas) + count($all_degr) + 60; ?>px;">&nbsp;</div></div>
     <?php substr($struct, 1); echo $this->Html->scriptBlock("
-        genestruct('genestruct', '$struct', $start, $stop);
+        var srnas = [ ".implode(',', $srna_coords)." ];
+        var degrs = [ ".implode(',', $degr_coords)." ];
+        drawstructs('genestruct', '$struct', srnas, degrs, $start, $stop);
         $(document).ready(function () {
             $(window).resize(function () {
-                genestruct('genestruct', '$struct', $start, $stop);
-            })
+                drawstructs('genestruct', '$struct', srnas, degrs, $start, $stop);
+            });
+            $('#genestruct').draggable({ axis: 'x' });
+            //SVGPanInit(document.getElementById('genestruct').firstChild);
         });
     "); ?>
 </div>

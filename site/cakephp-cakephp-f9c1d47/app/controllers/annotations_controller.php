@@ -10,7 +10,8 @@ class AnnotationsController extends AppController {
         $this->Annotation->recursive = 0;
         $this->paginate = array(
             'Annotation' => array(
-                'fields' => array('id', 'accession_nr', 'model_nr', 'start', 'stop', 'strand', 'chromosome_id', 'type', 'species_id', 'comment', 'source_id', 'Chromosome.name', 'Species.full_name', 'Species.id', 'Source.name', 'Source.id')
+                'fields' => array('id', 'accession_nr', 'model_nr', 'start', 'stop', 'strand', 'chromosome_id', 'type', 'species_id', 'comment', 'source_id', 'Chromosome.name', 'Species.full_name', 'Species.id', 'Source.name', 'Source.id'),
+                'order' => array('Chromosome.name' => 'ASC', 'start' => 'ASC')
             ),
         );
         $this->set('annotations', $this->paginate());
@@ -22,9 +23,37 @@ class AnnotationsController extends AppController {
             $this->redirect(array('action' => 'index'));
         }
         $annot = $this->Annotation->read(null, $id);
+        $this->set('all_srnas', $this->Mapping->find('all', array(
+            'conditions' => array(
+                'Mapping.annotation_id' => $annot['Annotation']['id'],
+                'Srna.type_id' => 1
+            ),
+            'contain' => array(
+                'Srna' => array(
+                    'fields' => array(
+                        'id', 'start', 'stop'
+                    )
+                 )
+            ),
+            'order' => array('start' => 'ASC')
+        )));
+        $this->set('all_degr', $this->Mapping->find('all', array(
+            'conditions' => array(
+                'Mapping.annotation_id' => $annot['Annotation']['id'],
+                'Srna.type_id' => 2
+            ),
+            'contain' => array(
+                'Srna' => array(
+                    'fields' => array(
+                        'id', 'start', 'stop'
+                    )
+                )
+            ),
+            'order' => array('start' => 'ASC')
+        )));
+        $this->set('srna_red_read_count', $this->Annotation->Species->Experiment->Srna->sum_abundancies($annot['Annotation']['id']));
         $this->paginate = array('Mapping' => array('contain' => array('Srna.Chromosome', 'Srna.Type', 'Srna.Experiment')));
         $srnas = $this->paginate($this->Mapping, array('Mapping.annotation_id' => $annot['Annotation']['id']));
-        $this->set('srna_red_read_count', $this->Annotation->Species->Experiment->Srna->sum_abundancies($annot['Annotation']['id']));
         $this->set('srnas', $srnas);
         $this->set('annotation', $annot);
     }
