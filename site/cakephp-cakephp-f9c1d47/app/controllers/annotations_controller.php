@@ -33,7 +33,7 @@ class AnnotationsController extends AppController {
                     'fields' => array(
                         'id', 'start', 'stop'
                     )
-                 )
+                )
             ),
             'order' => array('start' => 'ASC')
         )));
@@ -58,6 +58,15 @@ class AnnotationsController extends AppController {
         $this->set('annotation', $annot);
     }
 
+    // function related($id = null) {
+    //     if (!$id) {
+    //         $this->Session->setFlash(__('Invalid annotation', true));
+    //         $this->redirect(array('action' => 'index'));
+    //     }
+    //     $this->paginate = array('Mapping' => array('contain' => array('Srna.Chromosome', 'Srna.Type', 'Srna.Experiment')));
+    //     $srnas = $this->paginate($this->Mapping, array('Mapping.annotation_id' => $id));
+    // }
+
     function srnas($id = null) {
         if ($this->RequestHandler->isAjax()) {
             $this->layout = 'ajax';
@@ -78,18 +87,18 @@ class AnnotationsController extends AppController {
         $annotations = $this->paginate($this->Annotation, array('source_id' => $id));
         if (isset($this->params['requested'])){
             return $annotations;
-    }
-    $this->set('annotations', $annotations);
+        }
+        $this->set('annotations', $annotations);
     }
 
     function between($start = 0, $stop = 0) {
         if ($this->RequestHandler->isAjax()) {
             $this->layout = 'ajax';
-}
-$this->paginate = array('Annotation' => array('recursive' => 0));
-$annotations = $this->paginate($this->Annotation, array('Annotation.start <=' => $start, 'Annotation.stop >=' => $stop));
-if (isset($this->params['requested'])){
-    return $annotations;
+        }
+        $this->paginate = array('Annotation' => array('recursive' => 0));
+        $annotations = $this->paginate($this->Annotation, array('Annotation.start <=' => $start, 'Annotation.stop >=' => $stop));
+        if (isset($this->params['requested'])){
+            return $annotations;
         }
         $this->set('annotations', $annotations);
     }
@@ -122,28 +131,28 @@ if (isset($this->params['requested'])){
             } else {
                 $this->Session->setFlash(__('The annotation could not be saved. Please, try again.', true));
             }
-            }
-            if (empty($this->data)) {
-                $this->data = $this->Annotation->read(null, $id);
-            }
-            $species = $this->Annotation->Species->find('list');
-            $sources = $this->Annotation->Source->find('list');
-            $chromosomes = $this->Annotation->Chromosome->find('list');
-            $this->set(compact('species', 'sources', 'chromosomes'));
-            }
+        }
+        if (empty($this->data)) {
+            $this->data = $this->Annotation->read(null, $id);
+        }
+        $species = $this->Annotation->Species->find('list');
+        $sources = $this->Annotation->Source->find('list');
+        $chromosomes = $this->Annotation->Chromosome->find('list');
+        $this->set(compact('species', 'sources', 'chromosomes'));
+    }
 
-            function delete($id = null) {
-                return;
-                if (!$id) {
-                    $this->Session->setFlash(__('Invalid id for annotation', true));
-                    $this->redirect(array('action'=>'index'));
-            }
-            if ($this->Annotation->delete($id)) {
-                $this->Session->setFlash(__('Annotation deleted', true));
-                $this->redirect(array('action'=>'index'));
-            }
-            $this->Session->setFlash(__('Annotation was not deleted', true));
-            $this->redirect(array('action' => 'index'));
-            }
-            }
+    function delete($id = null) {
+        return;
+        if (!$id) {
+            $this->Session->setFlash(__('Invalid id for annotation', true));
+            $this->redirect(array('action'=>'index'));
+        }
+        if ($this->Annotation->delete($id)) {
+            $this->Session->setFlash(__('Annotation deleted', true));
+            $this->redirect(array('action'=>'index'));
+        }
+        $this->Session->setFlash(__('Annotation was not deleted', true));
+        $this->redirect(array('action' => 'index'));
+    }
+}
 ?>

@@ -21,6 +21,15 @@ class GenemodelController extends AnnojAppController {
         $this->set('genome', $genome);
     }
 
+    /** 
+        The output should be something like:
+        { 
+            success => true,
+            data    => {
+                [ acc.model, followup#, strand, type, start, length ]
+            }
+
+     */
     function range($genome) {
         $assembly = $this->params['form']['assembly'];
         $bases    = $this->params['form']['bases']   ;
@@ -44,7 +53,7 @@ class GenemodelController extends AnnojAppController {
                     $a['strand'],
                     $exon['utr'] == 'Y' ? 'five_prime_UTR' : 'CDS',
                     $exon['start'],
-                    $exon['stop'] - $exon['start']
+                    $exon['stop'] - $exon['start'] + 1
                 );
             }
         }

@@ -38,7 +38,7 @@ class mapping extends AppModel {
 			'foreignKey' => 'srna_id',
 			'conditions' => '',
 			'fields' => '',
-			'order' => ''
+			'order' => 'Srna.type_id, Srna.start'
 		)
 	);
 

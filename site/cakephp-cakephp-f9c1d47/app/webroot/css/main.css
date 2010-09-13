@@ -57,9 +57,13 @@ h2 {
 	font-size: 190%;
 }
 h3 {
+    margin-top: 20px;
 	color: #993;
 	font-family:'Gill Sans','lucida grande', helvetica, arial, sans-serif;
 	font-size: 165%;
+}
+h3 span {
+    font-size: 60%;
 }
 h4 {
 	color: #993;
@@ -152,8 +156,8 @@ ul, li {
 div.form,
 div.index,
 div.view {
-/*	float:right;*/
-	width:76%;
+/*	float:right;
+	width:85%;
 /*	border-left:1px solid #666;*/
 	padding:20px 0px;
 }
@@ -161,8 +165,8 @@ div.actions {
 	float:left;
 	width:16%;
 	padding:10px 1.5%;
-    display: none;
-    visibility: none;
+    /*display: none;
+    visibility: none;*/
 }
 div.actions h3 {
 	padding-top:0;
@@ -250,7 +254,7 @@ div.paging span a {
 dl {
 	line-height: 2em;
 	margin: 0em 0em;
-	width: 70%;
+	width: 60%;
 }
 dl .altrow {
 	background: #f4f4f4;

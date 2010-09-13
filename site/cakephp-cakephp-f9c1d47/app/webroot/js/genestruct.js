@@ -80,8 +80,8 @@ function drawstructs(div, pgenestruct, srnastruct, degrstruct, start, stop) {
         var x1 = (st[0] - start) * f;
         var x2 = (st[1] - start) * f;
 
-        boxes[i] = paper.rect(x1, y1, x2-x1, h);
-        boxes[i].attr({ fill: color, stroke: 0 });
+        boxes[i] = paper.rect(x1, y1, x2-x1 + 1, h);
+        boxes[i].attr({ fill: color, stroke: color });
         //lines[i] = paper.path('M'+x2+' '+h_cds+'L'+x2+' '+$(div).height()).attr({stroke: '#555'});
         //startlines[i] = paper.path('M'+x1+' '+h_cds+'V'+box_height).setAttr({stroke: '#ddd'});
         //stoplines[i]  = paper.path('M'+x2+' '+h_cds+'V'+box_height).setAttr({stroke: '#ddd'});
@@ -95,7 +95,7 @@ function drawstructs(div, pgenestruct, srnastruct, degrstruct, start, stop) {
         var srna_start = (srnastruct[i][0] - start) * f;
         var srna_stop  = (srnastruct[i][1] - start) * f;
         //srnas[i] = paper.path('M'+srna_start+' '+y+'L'+srna_stop+' '+y).setAttr({stroke: 'blue'});
-        srnas[i] = paper.rect(srna_start,y,srna_stop-srna_start,1).attr({fill: 'blue', stroke: 0 }); 
+        srnas[i] = paper.rect(srna_start,y,srna_stop-srna_start+1,1).attr({fill: 'blue', stroke: 0 }); 
     };
 
     var degrs = Array();
@@ -104,15 +104,9 @@ function drawstructs(div, pgenestruct, srnastruct, degrstruct, start, stop) {
         var srna_start = (degrstruct[i][0] - start) * f;
         var srna_stop  = (degrstruct[i][1] - start) * f;
         //degrs[i] = paper.path('M'+srna_start+' '+y+'L'+srna_stop+' '+y).setAttr({stroke: 'orange'});
-        degrs[i] = paper.rect(srna_start,y,srna_stop-srna_start,1).attr({fill: 'orange', stroke: 0});
+        degrs[i] = paper.rect(srna_start,y,srna_stop-srna_start+1,1).attr({fill: 'orange', stroke: 0});
     };
 
-    // Add svgpan script to the SVG
-    //var desc = document.getElementById(div).firstChild.firstChild; // the first child after <svg
-    //var script = document.createElement('script').setAttributeNS('xlink','href','SVGPan.js');
-    //document.getElementById(div).firstChild.insertBefore(script, desc);
-    //var g      = document.createElement('g').setAttribute('id', 'viewport');
-    //document.getElementById(div).firstChild.insertBefore(g, desc);
     if (!zoomAttached) {
         initZoom(div, pgenestruct, srnastruct, degrstruct, start, stop);
     }

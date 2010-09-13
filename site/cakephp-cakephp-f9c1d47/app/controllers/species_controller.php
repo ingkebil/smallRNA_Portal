@@ -23,7 +23,7 @@ class SpeciesController extends AppController {
                 $id = $id['Species']['id'];
             }
         }
-        $this->set('annotations', $this->paginate($this->Species->Annotation, array('species_id' => $id)));
+        $this->set('annotations', $this->paginate($this->Species->Annotation, array('Annotation.species_id' => $id)));
     }
 
 	function view($id = null) {

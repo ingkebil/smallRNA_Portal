@@ -1,11 +1,16 @@
 <?php $this->Html->script('raphael-min', array('inline' => false, 'once' => true)); ?>
 <?php //$this->Html->script('raphael.zoom', array('inline' => false, 'once' => true)); ?>
-<?php $this->Html->script('genestruct', array('inline' => false, 'once' => true)); ?>
+<?php //$this->Html->script('genestruct', array('inline' => false, 'once' => true)); ?>
+<?php $this->Html->script('divstruct', array('inline' => false, 'once' => true)); ?>
 <?php $this->Html->script('jquery-1.4.2.min', array('inline' => false, 'once' => true)); ?>
 <?php $this->Html->script('jquery-ui', array('inline' => false, 'once' => true)); ?>
 <?php //$this->Html->script('SVGPan', array('inline' => false, 'once' => true)); ?>
 <div class="annotations view">
 <h2><?php  __('Annotation');?></h2>
+    <div style="float: right;">
+        <?php echo $html->link('View in GenomeView', '/annotations/view/limit:100000/'.$annotation['Annotation']['id'].'.jnlp', array('style' => '-moz-border-radius:8px 8px 8px 8px; background:-moz-linear-gradient(center top , #F1F1D4, #E6E49F) repeat scroll 0 0 #E6E49F; border:1px solid #AAAC62; color:#333333; font-weight:normal; min-width:0; padding:4px 8px; text-decoration:none; text-shadow:0 1px 0 #FFFFFF;')); ?><br /><br />
+<?php echo $html->link('Download as GFF', '/annotations/view/limit:100000/'.$annotation['Annotation']['id'].'.gff', array('style' => '-moz-border-radius:8px 8px 8px 8px; background:-moz-linear-gradient(center top , #F1F1D4, #E6E49F) repeat scroll 0 0 #E6E49F; border:1px solid #AAAC62; color:#333333; font-weight:normal; min-width:0; padding:4px 8px; text-decoration:none; text-shadow:0 1px 0 #FFFFFF;')); ?>
+    </div>
 	<dl><?php $i = 0; $class = ' class="altrow"';?>
 		<dt<?php if ($i % 2 == 0) echo $class;?>><?php __('Accession Nr'); ?></dt>
 		<dd<?php if ($i++ % 2 == 0) echo $class;?>>
@@ -79,7 +84,7 @@
 	</dl>
 </div>
 <div class="related">
-<h3>Gene structure</h3>
+<h3>Gene structure </h3>
 	<?php
         $struct = '';
         $start = -1;
@@ -93,27 +98,27 @@
     <?php 
         $srna_coords = array();
         foreach ($all_srnas as $srna) {
-            $srna_coords[] = "['".$srna['Srna']['start']."','".$srna['Srna']['stop']."']";
+            $srna_coords[] = "['".$srna['Srna']['start']."','".$srna['Srna']['stop']."','".$srna['Srna']['id']."']";
         }
         $degr_coords = array();
         foreach ($all_degr as $srna) {
-            $degr_coords[] = "['".$srna['Srna']['start']."','".$srna['Srna']['stop']."']";
+            $degr_coords[] = "['".$srna['Srna']['start']."','".$srna['Srna']['stop']."','".$srna['Srna']['id']."']";
         }
     ?>
     <div>Current zoom level: <span id="zoomlevel">1</span></div>
-    <div style="overflow: hidden; border: 1px dotted grey; height: <?php echo count($all_srnas) + count($all_degr) + 60; ?>px;"><div id="genestruct" style="height: <?php echo count($all_srnas) + count($all_degr) + 60; ?>px;">&nbsp;</div></div>
+    <div style="overflow: hidden; border: 1px dotted grey; height: <?php echo count($all_srnas) + count($all_degr) + 60; ?>px;"><div id="genestruct" style="height: <?php echo count($all_srnas) + count($all_degr) + 60; ?>px; position: relative;">&nbsp;</div></div>
     <?php substr($struct, 1); echo $this->Html->scriptBlock("
         var srnas = [ ".implode(',', $srna_coords)." ];
         var degrs = [ ".implode(',', $degr_coords)." ];
         drawstructs('genestruct', '$struct', srnas, degrs, $start, $stop);
         $(document).ready(function () {
-            $(window).resize(function () {
-                drawstructs('genestruct', '$struct', srnas, degrs, $start, $stop);
-            });
+        //    $(window).resize(function () {
+        //        drawstructs('genestruct', '$struct', srnas, degrs, $start, $stop);
+        //    });
             $('#genestruct').draggable({ axis: 'x' });
-            //SVGPanInit(document.getElementById('genestruct').firstChild);
+        //    //SVGPanInit(document.getElementById('genestruct').firstChild);
         });
     "); ?>
 </div>
-<h3>Related small RNAs</h3>
+<h3>Related small RNAs <span><?php echo $html->link('Download as GFF', '/annotations/srnas/limit:100000/'.$annotation['Annotation']['id'].'.gff', array('style' => '-moz-border-radius:8px 8px 8px 8px; background:-moz-linear-gradient(center top , #F1F1D4, #E6E49F) repeat scroll 0 0 #E6E49F; border:1px solid #AAAC62; color:#333333; font-weight:normal; min-width:0; padding:4px 8px; text-decoration:none; text-shadow:0 1px 0 #FFFFFF;')); ?></span></h3>
 <?php echo $this->Jquery->page('../annotations/srnas', compact('srnas'), array('url' => array('controller' => 'annotations', 'action' => 'srnas', $annotation['Annotation']['id']))); ?>

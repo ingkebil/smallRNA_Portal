@@ -28,10 +28,10 @@ class RnamodelController extends AnnojAppController {
         $assembly = $this->params['form']['assembly'];
         $bases    = $this->params['form']['bases']   ;
         $left     = $this->params['form']['left']    ;
-        $right    = 1000;#$this->params['form']['right']   ;
+        $right    = 10000; //$this->params['form']['right']   ;
         $pixels   = $this->params['form']['pixels']  ;
 
-        $rnas = $this->Srna->find('all', array('conditions' => array('Srna.start >=' => $left, 'Srna.stop <=' => $right, 'Srna.experiment_id' => 1), 'fields' => array('Srna.name', 'Srna.strand', 'Srna.start', 'Srna.stop'), 'contain' => false));
+        $rnas = $this->Srna->find('all', array('conditions' => array('Srna.start >=' => $left, 'Srna.start + 40 <=' => $right, 'Srna.experiment_id' => 1), 'fields' => array('Srna.name', 'Srna.strand', 'Srna.start', 'Srna.stop'), 'contain' => false));
 
         $data = array();
         foreach ($rnas as $rna) {

@@ -6,6 +6,11 @@ class AppController extends Controller {
     var $helpers = array('Jquery', 'Session', 'Cache');
     var $cacheAction = '1 hour';
 
+    function beforeFilter() {
+        $this->RequestHandler->__requestContent['gff'] = 'text/plain';
+        $this->RequestHandler->__requestContent['jnlp'] = 'application/x-java-jnlp-file';
+    }
+
     function beforeRender() {
         parent::beforeRender();
 
