@@ -1,7 +1,7 @@
 <?php
 class Srna extends AppModel {
 	var $name = 'Srna';
-#	var $validate = array(
+	var $validate = array(
 #		'name' => array(
 #			'notempty' => array(
 #				'rule' => array('notempty'),
@@ -12,26 +12,44 @@ class Srna extends AppModel {
 #				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 #			),
 #		),
+#    var $validate = array(
 #		'start' => array(
-#			'numeric' => array(
-#				'rule' => array('numeric'),
-#				//'message' => 'Your custom message here',
-#				//'allowEmpty' => false,
-#				//'required' => false,
-#				//'last' => false, // Stop validation after this rule
-#				//'on' => 'create', // Limit validation to 'create' or 'update' operations
-#			),
+#            'rule' => 'checkStartStop',
+#            'message' => 'Please fill in both start and stop coordinates',
+#            'allowEmpty' => true,
+#            'required' => false,
+#            //'last' => false, // Stop validation after this rule
+#            //'on' => 'create', // Limit validation to 'create' or 'update' operations
+#        ),
+#        'stop' => array(
+#            'rule' => 'checkStartStop',
+#            'message' => 'Please fill in both start and stop coordinates',
+#            'allowEmpty' => true,
+#            'required' => false,
+#            //'last' => false, // Stop validation after this rule
+#            //'on' => 'create', // Limit validation to 'create' or 'update' operations
 #		),
-#		'stop' => array(
-#			'numeric' => array(
-#				'rule' => array('numeric'),
-#				//'message' => 'Your custom message here',
-#				//'allowEmpty' => false,
-#				//'required' => false,
-#				//'last' => false, // Stop validation after this rule
-#				//'on' => 'create', // Limit validation to 'create' or 'update' operations
-#			),
-#		),
+#    );
+		'start' => array(
+            'numeric' => array(
+                'rule' => 'numeric',
+                //'message' => 'Please fill in both start and stop coordinates',
+                'allowEmpty' => true,
+                'required' => false,
+                //'last' => false, // Stop validation after this rule
+                //'on' => 'create', // Limit validation to 'create' or 'update' operations
+            ),
+        ),
+        'stop' => array(
+            'numeric' => array(
+                'rule' => 'numeric',
+                //'message' => 'Please fill in both start and stop coordinates',
+                'allowEmpty' => true,
+                'required' => false,
+                //'last' => false, // Stop validation after this rule
+                //'on' => 'create', // Limit validation to 'create' or 'update' operations
+            ),
+		),
 #		'sequence_id' => array(
 #			'numeric' => array(
 #				'rule' => array('numeric'),
@@ -72,7 +90,7 @@ class Srna extends AppModel {
 #				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 #			),
 #		),
-#	);
+	);
 #	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
 	var $belongsTo = array(
@@ -122,11 +140,18 @@ class Srna extends AppModel {
 		)
     );
 
-    var $actsAs = array('containable');
+    var $actsAs = array('Containable');
 
     function sum_abundancies($annot_id, $exp_id = null) {
         $sql = 'SELECT sum(S.abundance) as abundance_count, sum(S.normalized_abundance) as norm_abundance_count FROM `mappings` M JOIN `srnas` S ON S.id = M.srna_id WHERE M.annotation_id = ' . mysql_real_escape_string($annot_id);
         return $this->query($sql);
     }
+
+#    function checkStartStop($check) {
+#        if (!empty($this->data[$this->name]['start']) || $this->data[$this->name]['start'] == 0) {
+#            return !empty($this->data[$this->name]['stop']) || $this->data[$this->name]['stop'] == 0;
+#        }
+#        return false;
+#    }
 }
 ?>

@@ -92,7 +92,15 @@ class AppModel extends Model {
         if (isset($extra['unbindcount'])) {
             $this->recursive = -1;
         }
-        return $this->find('count', array('conditions' => $conditions));
+        if (isset($extra['countContains'])) {
+            $this->contain($extra['countContains']);
+        }
+        $options = array('conditions' => $conditions);
+        if (isset($extra['joins'])) {
+            $options['joins'] = $extra['joins'];
+        }
+
+        return $this->find('count', $options);
     }
 
 }

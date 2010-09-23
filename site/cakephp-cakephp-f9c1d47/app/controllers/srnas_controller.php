@@ -4,6 +4,7 @@ class SrnasController extends AppController {
 	var $name = 'Srnas';
     var $components = array('RequestHandler');
     var $helpers = array('Ajax', 'Jquery');
+    var $uses = array('Srna', 'Type', 'Chromosome', 'Experiment');
 
 	function index() {
         $this->paginate = array('Srna' => array('unbindcount' => 1));
@@ -62,6 +63,11 @@ class SrnasController extends AppController {
             #              [sequence_contains] => aaagt
             #          )
 
+            if (!$this->Srna->validates($this->data)) {
+                print 'FALSE';
+            }
+
+
             foreach ($this->data as $key => $values) {
                 $conditions[ $key ] = array_filter($values, create_function('$a', 'return ! empty($a) || $a == 0;'));
                 if (empty($conditions[ $key ])) {
@@ -88,30 +94,129 @@ class SrnasController extends AppController {
     }
 
     function results() {
-        $conditions = array();
-        foreach ($this->passedArgs as $key => $value) {
+        $options = $this->_setOptions();
+        $this->paginate = array('Srna' => $options);
+        $srnas = $this->paginate($this->Srna);
+        $this->set('srnas', $srnas);
+    }
+
+    function stats($model) {
+        $options = $this->_setOptions();
+
+        $model = strtolower($model);
+        $Model = ucfirst($model);
+
+        switch ($model) {
+        case 'experiment':
+        case 'chromosome':
+        case 'type':
+            # the 'normal' way of doing things takes up to 3 minutes
+            #$options['contain'] = array($Model);
+            #$options['fields'] = array('COUNT(*) AS cnt', "$Model.id", "$Model.name");
+            #$options['group']  = array('Srna.'.$model.'_id');
+            #$options['order']  = 'null'; # avoid the unnecessary filesort
+            #$stats = $this->Srna->find('all', $options);
+
+            # the 'complex optimized' way avoiding the tmp table
+            $all = $this->$Model->find('list', array('fields' => array('id', 'name')));
+            $options['contain'] = array(); # but what if it is a sequence in the conditions?
+            $options['fields'] = array();
+            foreach ($all as $id => $name) {
+                $options['fields'][] = "SUM(IF(`Srna`.`{$model}_id`=$id,1,0)) AS ID_$id";
+            }
+
+            $counts = $this->Srna->find('all', $options);
+            $counts = $counts[0][0];
+
+            # build the stats array by adding the name belonging to the id
+            $stats = array();
+            foreach ($counts as $id => $count) {
+                $id = substr($id, 3);
+                $name = $this->$Model->find('list', array('conditions' => array('id' => $id), 'fields' => array('id', 'name'), 'contain' => false));
+
+                $stats[] = array(
+                    'id'   => $id,
+                    'name' => $name[$id],
+                    'cnt'  => $count
+                );
+            }
+        }
+
+        $this->set(compact('stats'));
+    }
+
+    /**
+     * Sets $options array to use in pagination for the search and search stats. Gets all its information out of the $this->passedArgs array.
+     */
+    function _setOptions() {
+        $options = array('conditions' => array(), 'contain' => array('Chromosome', 'Type', 'Experiment'), 'countContains' => array());
+        foreach ($this->params['named'] as $key => $value) {
             switch ($key) {
             case 'Srna.strand':
                 $value = ($value == 0) ? '+' : '-';
             case 'Srna.chromosome_id':
             case 'Srna.type_id':
             case 'Srna.experiment_id':
-                $conditions[ $key ] = $value;
+                $options['conditions'][ $key ] = $value;
                 break;
             case 'Srna.start':
             case 'Srna.normalized_abundance_between':
-                $conditions[ "$key >=" ] = $value;
+                $options['conditions'][ "$key >=" ] = $value;
                 break;
             case 'Srna.stop':
             case 'Srna.normalized_abundance_stop':
-                $conditions[ "$key <=" ] = $value;
+                $options['conditions'][ "$key <=" ] = $value;
+                break;
+            case 'Srna.name':
+            case 'Sequence.seq':
+//            case 'Annotation.accession_nr':
+                $options['conditions'][ "$key LIKE" ] = "%$value%";
+                break;
+            default:
+            }
+
+            switch ($key) {
+            case 'Srna.strand':
+            case 'Srna.chromosome_id':
+            case 'Srna.type_id':
+            case 'Srna.experiment_id':
+            case 'Srna.start':
+            case 'Srna.normalized_abundance_between':
+            case 'Srna.stop':
+            case 'Srna.normalized_abundance_stop':
+            case 'Srna.name':
                 break;
             case 'Sequence.seq':
-                $conditions[ "$key LIKE" ] = "%$value%";
+                $options['countContains'][] = 'Sequence';
+                $options['contain'][] = 'Sequence';
+                break;
+            case 'Annotation.accession_nr':
+                $options['countContains'][] = 'Mapping.Annotation';
+                $options['conditions']["$key LIKE"] = '%'.$this->params['named'][$key].'%';
+                $options['joins'][] = array(
+                    'table' => 'mappings',
+                    'alias' => 'Mapping',
+                    'type'  => 'inner',
+                    'conditions' => array(
+                        'Srna.id = Mapping.srna_id'
+                    )
+                );
+                $options['joins'][] = array(
+                    'table' => 'annotations',
+                    'alias' => 'Annotation',
+                    'type' => 'inner',
+                    'conditions' => array(
+                        'Annotation.id = Mapping.annotation_id'
+                    )
+                );
+                break;
+            default:
             }
         }
-        $srnas = $this->paginate($this->Srna, $conditions, array(), true);
-        $this->set('srnas', $srnas);
+
+        $options['fields'] = array('Srna.id', 'Srna.name', 'Srna.start', 'Srna.stop', 'Srna.strand', 'Chromosome.id', 'Chromosome.name', 'Srna.score', 'Type.id', 'Type.name', 'Srna.abundance', 'Srna.normalized_abundance', 'Experiment.id', 'Experiment.name');
+
+        return $options;
     }
 
 	function add() {

@@ -48,5 +48,20 @@ class mapping extends AppModel {
    #     $recursive = 2;
    #     return $this->find('all', compact('conditions', 'fields', 'order', 'limit', 'page', 'recursive', 'group'));
    # }
+
+    /**
+     * Finds in one query the same as find('all', array('conditions' => $conds)); but it returns array('srna_id');
+     * This way we don't have to transform a gigantic array that the original would return to the array we really want.
+     */
+    function findSrnaIds($cond) {
+        $q = 'SELECT `Mapping`.`srna_id` FROM `mappings` AS `Mapping` LEFT JOIN `annotations` AS `Annotation` ON (`Mapping`.`annotation_id` = `Annotation`.`id`) WHERE ';
+        $c = array();
+        foreach ($cond as $key => $value) {
+            $c[] = $key . " '" . mysql_real_escape_string($value) . "'";
+        }
+        $q .= implode(' AND ', $c);
+
+        return $this->query($q);
+    }
 }
 ?>
