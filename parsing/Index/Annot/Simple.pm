@@ -1,4 +1,4 @@
-package SRNA::Querycount;
+package Index::Annot::Simple;
 
 use strict;
 use warnings;
