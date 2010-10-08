@@ -95,9 +95,14 @@ class SrnasController extends AppController {
 
     function results() {
         $options = $this->_setOptions();
+        if (!isset($options['only'])) {
+            $options['only'] = 'page'; # only give us the first page, not the pagination itself
+        }
         $this->paginate = array('Srna' => $options);
         $srnas = $this->paginate($this->Srna);
         $this->set('srnas', $srnas);
+
+        $this->render($this->renderAction());
     }
 
     function stats($model) {

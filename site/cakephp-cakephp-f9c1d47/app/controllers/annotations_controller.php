@@ -53,7 +53,11 @@ class AnnotationsController extends AppController {
         )));
         $this->set('srna_red_read_count', $this->Annotation->Species->Experiment->Srna->sum_abundancies($annot['Annotation']['id']));
         $this->paginate = array('Mapping' => array('contain' => array('Srna.Chromosome', 'Srna.Type', 'Srna.Experiment')));
-        $srnas = $this->paginate($this->Mapping, array('Mapping.annotation_id' => $annot['Annotation']['id']));
+        $options = array();
+        if (!isset($this->params['named']['only'])) {
+            $options['only'] = 'page';
+        }
+        $srnas = $this->paginate($this->Mapping, array('Mapping.annotation_id' => $annot['Annotation']['id']), $options);
         $this->set('srnas', $srnas);
         $this->set('annotation', $annot);
     }
@@ -72,11 +76,18 @@ class AnnotationsController extends AppController {
             $this->layout = 'ajax';
         }
         $this->paginate = array('Mapping' => array('contain' => array('Srna.Chromosome', 'Srna.Type', 'Srna.Experiment')));
-        $srnas = $this->paginate($this->Mapping, array('Mapping.annotation_id' => $id));
+        $options = array();
+        if (!isset($this->params['named']['only'])) {
+            $options['only'] = 'page';
+        }
+        $srnas = $this->paginate($this->Mapping, array('Mapping.annotation_id' => $id), $options);
+
         if (isset($this->params['requested'])){
             return $srnas;
         }
+
         $this->set('srnas', $srnas);
+        $this->render($this->renderAction());
     }
 
     function source($id = null) {

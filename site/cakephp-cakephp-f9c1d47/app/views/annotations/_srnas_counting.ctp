@@ -1,0 +1,1 @@
+../srnas/_view_counting.ctp

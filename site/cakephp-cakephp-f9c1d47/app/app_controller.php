@@ -133,7 +133,7 @@ class AppController extends Controller {
 				$options['order'][$alias . '.' . $field] = $value;
 			}
 		}
-		$vars = array('fields', 'order', 'limit', 'page', 'recursive');
+		$vars = array('fields', 'order', 'limit', 'page', 'recursive', 'only', 'update');
 		$keys = array_keys($options);
 		$count = count($keys);
 
@@ -180,35 +180,45 @@ class AppController extends Controller {
 		$extra = array_diff_key($defaults, compact(
 			'conditions', 'fields', 'order', 'limit', 'page', 'recursive'
 		));
+        $more_extras = array('only', 'update');
+        foreach ($more_extras as $e) {
+            if (isset($options[$e])) {
+                $extra[$e] = $options[$e];
+            }
+        }
 		if ($type !== 'all') {
 			$extra['type'] = $type;
 		}
 
-        ///// ADDED normalCount TOGGLE /////
-        $recursiveCount = $recursive;
-        if (!$normalCount) {
-            $recursiveCount = -1;
-        }
-		if (method_exists($object, 'paginateCount')) {
-			$count = $object->paginateCount($conditions, $recursiveCount, $extra);
-		} else {
-			$parameters = compact('conditions');
-			if ($recursiveCount != $object->recursive) {
-				$parameters['recursive'] = $recursive;
-			}
-			$count = $object->find('count', array_merge($parameters, $extra));
-		}
-		$pageCount = intval(ceil($count / $limit));
-        ///// END /////
+        if (!isset($extra['only']) || $extra['only'] == 'count') {
+            $recursiveCount = $recursive;
+            if (!$normalCount) {
+                $recursiveCount = -1;
+            }
+            if (method_exists($object, 'paginateCount')) {
+                $count = $object->paginateCount($conditions, $recursiveCount, $extra);
+            } else {
+                $parameters = compact('conditions');
+                if ($recursiveCount != $object->recursive) {
+                    $parameters['recursive'] = $recursive;
+                }
+                $count = $object->find('count', array_merge($parameters, $extra));
+            }
+            $pageCount = intval(ceil($count / $limit));
 
-		if ($page === 'last' || $page >= $pageCount) {
+        }
+        else {
+            $pageCount = 0;
+        }
+
+		if (isset($extra['only']) && $extra['only'] == 'count' && ($page === 'last' || $page >= $pageCount)) {
 			$options['page'] = $page = $pageCount;
 		} elseif (intval($page) < 1) {
 			$options['page'] = $page = 1;
 		}
 		$page = $options['page'] = (integer)$page;
 
-        if ($count !== 0) {
+        if ($count !== 0 || (isset($extra['only']) && $extra['only'] == 'page')) {
             if (method_exists($object, 'paginate')) {
                 $results = $object->paginate(
                     $conditions, $fields, $order, $limit, $page, $recursive, $extra
@@ -240,8 +250,44 @@ class AppController extends Controller {
 			$this->helpers[] = 'Paginator';
 		}
 
+        # decide on what to render
+        if (isset($extra['only'])) {
+            if ($extra['only'] == 'count') { # rendering only the pagination navigation links 
+                # remove the only param from the url somehow
+                $url =  $this->params;
+                # remove some unwanted thing for the creation of the new url
+                unset($url['named']['only']);
+                unset($url['named']['update']);
+                unset($url['url']['ext']);
+
+                # remove those things that we don't want to have merged back into the paging urls
+                unset($this->params['paging'][$object->alias]['options']['only']);
+                unset($this->params['paging'][$object->alias]['options']['update']);
+
+                #$paging_url = array_intersect_key(array('controller', 'action'), $url);
+                $url['named']['only'] = 'page'; # make sure that the links of the paging only do a page link
+                #$url = array_merge($paging_url, $url['named']);
+                $url = '/'.implode('/', array_slice(explode('/', Router::reverse($url)), 4)); # I don't understand why I need to cut off the controller/action part here :/
+                $this->set('paging_url', $url);
+                $this->set('update_id', $extra['update']);
+
+                $this->renderAction('_'.$this->params['action'].'_counting');
+            }
+            elseif ($extra['only'] == 'page' && $this->RequestHandler->isAjax()) { # rendering only the table
+                $this->renderAction('_'.$this->params['action']);
+            }
+        }
+
 		return $results;
 	}
+
+    function renderAction($action = null) {
+        if (!is_null($action)) {
+            $this->action = $action;
+        }
+
+        return $this->action;
+    }
 
 }
 ?>

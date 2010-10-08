@@ -233,6 +233,10 @@ table td.actions a {
 	color:#fff;
 }
 
+span.disabled {
+    color: #ddd;
+}
+
 /** Paging **/
 div.paging {
 	background:#fff;

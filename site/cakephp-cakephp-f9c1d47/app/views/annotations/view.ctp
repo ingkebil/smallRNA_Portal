@@ -121,4 +121,4 @@
     "); ?>
 </div>
 <h3>Related small RNAs <span><?php echo $html->link('Download as GFF', '/annotations/srnas/limit:100000/'.$annotation['Annotation']['id'].'.gff', array('style' => '-moz-border-radius:8px 8px 8px 8px; background:-moz-linear-gradient(center top , #F1F1D4, #E6E49F) repeat scroll 0 0 #E6E49F; border:1px solid #AAAC62; color:#333333; font-weight:normal; min-width:0; padding:4px 8px; text-decoration:none; text-shadow:0 1px 0 #FFFFFF;')); ?></span></h3>
-<?php echo $this->Jquery->page('../annotations/srnas', compact('srnas'), array('url' => array('controller' => 'annotations', 'action' => 'srnas', $annotation['Annotation']['id']))); ?>
+<?php echo $this->Jquery->lazy_page('../annotations/srnas', compact('srnas'), array('url' => array('controller' => 'annotations', 'action' => 'srnas', $annotation['Annotation']['id']))); ?>
