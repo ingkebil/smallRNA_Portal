@@ -9,4 +9,4 @@ use constant DB   => 'smallrna_arath';
 
 use Exporter qw/import/;
 our @EXPORT_OK = qw/ USER PASS DB /;
-our %EXPORT_TAGS = ( DB => [ @EXPORT_OK ] );
+our %EXPORT_TAGS = ( DB => [qw/ USER PASS DB/ ]);
