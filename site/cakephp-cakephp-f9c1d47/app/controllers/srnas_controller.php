@@ -95,7 +95,7 @@ class SrnasController extends AppController {
 
     function results() {
         $options = $this->_setOptions();
-        if (!isset($options['only'])) {
+        if (!isset($this->params['named']['only'])) {
             $options['only'] = 'page'; # only give us the first page, not the pagination itself
         }
         $this->paginate = array('Srna' => $options);
@@ -125,6 +125,9 @@ class SrnasController extends AppController {
             # the 'complex optimized' way avoiding the tmp table
             $all = $this->$Model->find('list', array('fields' => array('id', 'name')));
             $options['contain'] = array(); # but what if it is a sequence in the conditions?
+            if (isset($options['conditions']['Sequence.seq LIKE'])) {
+                $options['contain'] = array('Sequence');
+            }
             $options['fields'] = array();
             foreach ($all as $id => $name) {
                 $options['fields'][] = "SUM(IF(`Srna`.`{$model}_id`=$id,1,0)) AS ID_$id";
@@ -136,7 +139,7 @@ class SrnasController extends AppController {
             # build the stats array by adding the name belonging to the id
             $stats = array();
             foreach ($counts as $id => $count) {
-                $id = substr($id, 3);
+                $id = substr($id, 3); # remove the added ID_ prefix in the query
                 $name = $this->$Model->find('list', array('conditions' => array('id' => $id), 'fields' => array('id', 'name'), 'contain' => false));
 
                 $stats[] = array(
@@ -165,12 +168,16 @@ class SrnasController extends AppController {
                 $options['conditions'][ $key ] = $value;
                 break;
             case 'Srna.start':
-            case 'Srna.normalized_abundance_between':
                 $options['conditions'][ "$key >=" ] = $value;
                 break;
+            case 'Srna.normalized_abundance_between':
+                $options['conditions'][ 'Srna.normalized_abundance >=' ] = $value;
+                break;
             case 'Srna.stop':
-            case 'Srna.normalized_abundance_stop':
                 $options['conditions'][ "$key <=" ] = $value;
+                break;
+            case 'Srna.normalized_abundance_stop':
+                $options['conditions'][ 'Srna.normalized_abundance <=' ] = $value;
                 break;
             case 'Srna.name':
             case 'Sequence.seq':
