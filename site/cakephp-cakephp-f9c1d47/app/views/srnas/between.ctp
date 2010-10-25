@@ -39,7 +39,6 @@
 	</tr>
 <?php endforeach; ?>
 	</table>
-	<p>
     <?php echo $this->Jquery->paginate_counter('related_srnas'); ?>
 </div>
 <?php echo $this->Jquery->end_paginate(); ?>

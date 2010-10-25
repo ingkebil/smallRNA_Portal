@@ -22,13 +22,16 @@ class AppController extends Controller {
             $menu = $this->Species->find_species_types_exps();
             file_put_contents(CACHE . 'menu.array', serialize($menu));
         }
+        else {
+            $menu = unserialize(file_get_contents(CACHE . 'menu.array'));
+        }
 
-        $menu = unserialize(file_get_contents(CACHE . 'menu.array'));
         $this->set('site_menu', $menu);
     }
 
 
     function paginate_only($object = null, $scope = array(), $whitelist = array(), $normalCount = 0) {
+        $options = array();
         if (!isset($this->params['named']['only'])) {
             $options['only'] = 'page'; # only give us the first page, not the pagination itself
         }
@@ -42,9 +45,14 @@ class AppController extends Controller {
 
         if (is_array($this->paginate)) {
             if (array_key_exists($model_name, $this->paginate)) {
+                $this->paginate[$model_name] = array_merge($this->paginate[$model_name], $options);
+            }
+            else {
                 $this->paginate = array_merge($this->paginate, $options);
             }
         }
+
+        return $this->paginate($object, $scope, $whitelist, $normalCount);
     }
 
 

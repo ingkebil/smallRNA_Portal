@@ -108,7 +108,7 @@ class SrnasController extends AppController {
             $options['only'] = 'page'; # only give us the first page, not the pagination itself
         }
         $this->paginate = array('Srna' => $options);
-        $srnas = $this->paginate($this->Srna);
+        $srnas = $this->paginate_only($this->Srna);
         $this->set('srnas', $srnas);
 
         # because this view has more than only the pagination, the pagination 
