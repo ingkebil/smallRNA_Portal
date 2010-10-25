@@ -104,9 +104,6 @@ class SrnasController extends AppController {
 
     function results() {
         $options = $this->_setOptions();
-        if (!$this->Paginator->isLazy()) {
-            $options['only'] = 'page'; # only give us the first page, not the pagination itself
-        }
         $this->paginate = array('Srna' => $options);
         $srnas = $this->paginate_only($this->Srna);
         $this->set('srnas', $srnas);
@@ -257,13 +254,13 @@ class SrnasController extends AppController {
     function blasted() {
         $options = $this->_setBlastOptions();
         $session_name = md5(implode('-', $options));
-        if ($this->Session->check($session_name)) {
-            $result = $this->Session->read($session_name);
-            $this->Blast->data($result);
-        }
-        else {
-            $result = $this->Blast->run($options);
-        }
+#        if ($this->Session->check($session_name)) {
+#            $result = $this->Session->read($session_name);
+#            $this->Blast->data($result);
+#        }
+#        else {
+            $result = $this->Blast->run($options, true);
+#        }
 
         $all_srnas = array();
         $all_degrs = array();
@@ -280,7 +277,7 @@ class SrnasController extends AppController {
             }
         }
 
-        $this->Session->write($session_name, $result);
+#        $this->Session->write($session_name, $result);
         $srnas = $this->paginate($this->Blast);
         $this->set(compact('options', 'result', 'all_srnas', 'all_degrs', 'srnas'));
     }

@@ -15,7 +15,7 @@ class Blast extends AppModel {
         'experiment_id' => array('type' => 'integer')
     );
 
-    function run($options) {
+    function run($options, $cache = false) {
         $cmd_args = array();
         $cmd_args[] = '/usr/bin/blastall -p blastn';
         $cmd_args[] = "-d {$this->blastdb}";
@@ -43,10 +43,29 @@ class Blast extends AppModel {
         }
 
         $cmd = implode(' ', $cmd_args);
-        exec($cmd, $res);
 
-        $res = implode("\n", $res);
-        $hits = $this->hits2srna($this->parse($res));
+        $filename = TMP . 'blasts' . DS . md5($cmd);
+        # check the cache
+        if ($cache) {
+            if (file_exists($filename)) {
+                $opts = file_get_contents($filename, unserialize($filename));
+
+                # make sure we have the right file
+                if ($options['Sequence'] == $opts['Sequence']) {
+                    $run_anyway = false;
+                    $hits = $opts['hits'];
+                }
+            }
+        }
+        if (!$hits) {
+            exec($cmd, $res);
+            $res = implode("\n", $res);
+            $hits = $this->hits2srna($this->parse($res));
+            if ($cache) {
+                $options['hits'] = $hits;
+                file_put_contents($filename, serialize($options));
+            }
+        }
 
         $this->data = array('Command' => $cmd, 'Hit' => $hits);
 
