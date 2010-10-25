@@ -1,15 +1,15 @@
 <?php
 class SrnasController extends AppController {
 
-	var $name = 'Srnas';
-    var $components = array('RequestHandler');
+    var $name = 'Srnas';
+    var $components = array('RequestHandler', 'Session');
     var $helpers = array('Ajax', 'Jquery');
-    var $uses = array('Srna', 'Type', 'Chromosome', 'Experiment');
+    var $uses = array('Srna', 'Type', 'Chromosome', 'Experiment', 'Blast');
 
-	function index() {
+    function index() {
         $this->paginate = array('Srna' => array('unbindcount' => 1));
-		$this->set('srnas', $this->paginate());
-	}
+        $this->set('srnas', $this->paginate());
+    }
 
     function show(/*$species, $type, $exp*/) {
     }
@@ -19,17 +19,17 @@ class SrnasController extends AppController {
         $this->set('srnas', $this->paginate($this->Srna, array('Experiment_id' => $id)));
     }
 
-	function view($id = null) {
-		if (!$id) {
-			$this->Session->setFlash(__('Invalid srna', true));
-			$this->redirect(array('action' => 'index'));
-		}
+    function view($id = null) {
+        if (!$id) {
+            $this->Session->setFlash(__('Invalid srna', true));
+            $this->redirect(array('action' => 'index'));
+        }
         $srna = $this->Srna->read(null, $id);
         $this->paginate = array('Annotation' => array('recursive' => 0));
         $annotations = $this->paginate($this->Srna->Experiment->Species->Annotation, array('Annotation.start <=' => $srna['Srna']['start'], 'Annotation.stop >=' => $srna['Srna']['stop'], 'chromosome_id' => $srna['Srna']['chromosome_id']));
         $this->set('annotations', $annotations);
-		$this->set('srna', $srna);
-	}
+        $this->set('srna', $srna);
+    }
 
     function between($start = 0, $stop = 0, $chr_id = null) {
         if ($this->RequestHandler->isAjax()) {
@@ -63,34 +63,38 @@ class SrnasController extends AppController {
             #              [sequence_contains] => aaagt
             #          )
 
-            if (!$this->Srna->validates($this->data)) {
-                print 'FALSE';
-            }
-
-
-            foreach ($this->data as $key => $values) {
-                $conditions[ $key ] = array_filter($values, create_function('$a', 'return ! empty($a) || $a == 0;'));
-                if (empty($conditions[ $key ])) {
-                    unset($conditions[ $key ]);
-                }
-            }
-            $named = array();
-            foreach ($conditions as $model => $keys) {
-                $url_model = urlencode($model);
-                foreach ($keys as $key => $value) {
-                    $url_key   = urlencode($key);
-                    $url_value = urlencode($value);
-                    $named[ "$url_model.$url_key" ] = $url_value;
-                }
-            }
+            #if (!$this->Srna->validates($this->data)) {
+            #    print 'FALSE';
+            #}
+            $named = $this->_postToGet();
             $named['action'] = 'results';
 
             $this->redirect($named);
         }
-		$types = $this->Srna->Type->find('list');
-		$experiments = $this->Srna->Experiment->find('list');
+        $types = $this->Srna->Type->find('list');
+        $experiments = $this->Srna->Experiment->find('list');
         $chromosomes = $this->Srna->Chromosome->find('list', array('order' => array('name' => 'ASC')));
-		$this->set(compact('types', 'experiments', 'chromosomes'));
+        $this->set(compact('types', 'experiments', 'chromosomes'));
+    }
+
+    function _postToGet($include_model = true) {
+        foreach ($this->data as $key => $values) {
+            $conditions[ $key ] = array_filter($values, create_function('$a', 'return ! empty($a) || $a == 0;'));
+            if (empty($conditions[ $key ])) {
+                unset($conditions[ $key ]);
+            }
+        }
+        $named = array();
+        foreach ($conditions as $model => $keys) {
+            $url_model = $include_model ? urlencode($model) . '.' : '';
+            foreach ($keys as $key => $value) {
+                $value = preg_replace('/(\s*|\\n|\\r)/', '', $value);
+                $url_key   = urlencode($key);
+                $url_value = urlencode($value);
+                $named[ "$url_model$url_key" ] = $url_value;
+            }
+        }
+        return $named;
     }
 
     function results() {
@@ -181,7 +185,7 @@ class SrnasController extends AppController {
                 break;
             case 'Srna.name':
             case 'Sequence.seq':
-//            case 'Annotation.accession_nr':
+                //            case 'Annotation.accession_nr':
                 $options['conditions'][ "$key LIKE" ] = "%$value%";
                 break;
             default:
@@ -231,56 +235,141 @@ class SrnasController extends AppController {
         return $options;
     }
 
-	function add() {
-		if (!empty($this->data)) {
-			$this->Srna->create();
-			if ($this->Srna->save($this->data)) {
-				$this->Session->setFlash(__('The srna has been saved', true));
-				$this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash(__('The srna could not be saved. Please, try again.', true));
-			}
-		}
-		#$sequences = $this->Srna->Sequence->find('list');
-		$types = $this->Srna->Type->find('list');
-		$experiments = $this->Srna->Experiment->find('list');
-		$this->set(compact('sequences', 'types', 'experiments'));
-	}
+    function blast() {
+        if (!empty($this->data)) {
+            $named = $this->_postToGet(false);
+            $named['action'] = 'blasted';
 
-	function edit($id = null) {
-		if (!$id && empty($this->data)) {
-			$this->Session->setFlash(__('Invalid srna', true));
-			$this->redirect(array('action' => 'index'));
-		}
-		if (!empty($this->data)) {
-			if ($this->Srna->save($this->data)) {
-				$this->Session->setFlash(__('The srna has been saved', true));
-				$this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash(__('The srna could not be saved. Please, try again.', true));
-			}
-		}
-		if (empty($this->data)) {
-			$this->data = $this->Srna->read(null, $id);
-		}
-		$sequences = $this->Srna->Sequence->find('list');
-		$types = $this->Srna->Type->find('list');
-		$experiments = $this->Srna->Experiment->find('list');
-		$this->set(compact('sequences', 'types', 'experiments'));
-	}
+            $this->redirect($named);
+        }
+    }
 
-	function delete($id = null) {
+    function blasted() {
+        $options = $this->_setBlastOptions();
+        $session_name = md5(implode('-', $options));
+        if ($this->Session->check($session_name)) {
+            $result = $this->Session->read($session_name);
+            $this->Blast->data($result);
+        }
+        else {
+            $result = $this->Blast->run($options);
+        }
+
+        $all_srnas = array();
+        $all_degrs = array();
+        foreach ($result['Hit'] as $r) {
+            $s = array('Srna' => array());
+            $s['Srna']['start'] = $r['Srna']['start'];
+            $s['Srna']['stop']  = $r['Srna']['stop'];
+            $s['Srna']['id']    = $r['Srna']['id'];
+            if ($r['Type']['id'] == 1) {
+                $all_srnas[] = $s;
+            }
+            if ($r['Type']['id'] == 2) {
+                $all_degrs[] = $s;
+            }
+        }
+
+        $this->Session->write($session_name, $result);
+        $srnas = $this->paginate($this->Blast);
+        $this->set(compact('options', 'result', 'all_srnas', 'all_degrs', 'srnas'));
+    }
+
+    function blastedsrnas() {
+        $options = $this->_setBlastOptions();
+        $session_name = md5(implode('-', $options));
+        if ($this->Session->check($session_name)) {
+            $result = $this->Session->read($session_name);
+            $this->Blast->data($result);
+        }
+#        else {
+#            $result = $this->Blast->run($options);
+#        }
+
+        $srnas = $this->paginate($this->Blast);
+        $this->set(compact('srnas'));
+    }
+
+    function _setBlastOptions() {
+        $options = array();
+        foreach ($this->params['named'] as $key => $value) {
+            switch ($key) {
+            case 'Sequence': 
+                $options[ $key ] = $value;
+                break;
+            case 'Expect':
+                $wl = array('1e-10', '1e-05', '1e-03', '1e-01', 1, 10, 100); # whilelist
+                if (!in_array($value, $wl)) {
+                    $value = 10;
+                }
+                $options[ $key ] = $value;
+                break;
+            case 'Gapped': 
+                $options[ $key ] = $value === 1 ? 'T' : 'F';
+                break;
+            #case 'sort':
+            #case 'direction':
+            #    $options[ $key ] = $value;
+            #    break;
+            }
+
+        }
+
+        return $options;
+    }
+
+    # some CRUD #
+
+    function add() {
+        if (!empty($this->data)) {
+            $this->Srna->create();
+            if ($this->Srna->save($this->data)) {
+                $this->Session->setFlash(__('The srna has been saved', true));
+                $this->redirect(array('action' => 'index'));
+            } else {
+                $this->Session->setFlash(__('The srna could not be saved. Please, try again.', true));
+            }
+        }
+        #$sequences = $this->Srna->Sequence->find('list');
+        $types = $this->Srna->Type->find('list');
+        $experiments = $this->Srna->Experiment->find('list');
+        $this->set(compact('sequences', 'types', 'experiments'));
+    }
+
+    function edit($id = null) {
+        if (!$id && empty($this->data)) {
+            $this->Session->setFlash(__('Invalid srna', true));
+            $this->redirect(array('action' => 'index'));
+        }
+        if (!empty($this->data)) {
+            if ($this->Srna->save($this->data)) {
+                $this->Session->setFlash(__('The srna has been saved', true));
+                $this->redirect(array('action' => 'index'));
+            } else {
+                $this->Session->setFlash(__('The srna could not be saved. Please, try again.', true));
+            }
+        }
+        if (empty($this->data)) {
+            $this->data = $this->Srna->read(null, $id);
+        }
+        $sequences = $this->Srna->Sequence->find('list');
+        $types = $this->Srna->Type->find('list');
+        $experiments = $this->Srna->Experiment->find('list');
+        $this->set(compact('sequences', 'types', 'experiments'));
+    }
+
+    function delete($id = null) {
         return;
-		if (!$id) {
-			$this->Session->setFlash(__('Invalid id for srna', true));
-			$this->redirect(array('action'=>'index'));
-		}
-		if ($this->Srna->delete($id)) {
-			$this->Session->setFlash(__('Srna deleted', true));
-			$this->redirect(array('action'=>'index'));
-		}
-		$this->Session->setFlash(__('Srna was not deleted', true));
-		$this->redirect(array('action' => 'index'));
-	}
+        if (!$id) {
+            $this->Session->setFlash(__('Invalid id for srna', true));
+            $this->redirect(array('action'=>'index'));
+        }
+        if ($this->Srna->delete($id)) {
+            $this->Session->setFlash(__('Srna deleted', true));
+            $this->redirect(array('action'=>'index'));
+        }
+        $this->Session->setFlash(__('Srna was not deleted', true));
+        $this->redirect(array('action' => 'index'));
+    }
 }
 ?>

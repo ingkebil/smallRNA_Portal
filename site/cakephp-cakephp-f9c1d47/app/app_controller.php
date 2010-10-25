@@ -27,6 +27,27 @@ class AppController extends Controller {
         $this->set('site_menu', $menu);
     }
 
+
+    function paginate_only($object = null, $scope = array(), $whitelist = array(), $normalCount = 0) {
+        if (!isset($this->params['named']['only'])) {
+            $options['only'] = 'page'; # only give us the first page, not the pagination itself
+        }
+
+        $model_name = '';
+        if (is_object($object)) {
+            $model_name = $object->name;
+        } elseif (is_string($object)) {
+            $model_name = $object;
+        }
+
+        if (is_array($this->paginate)) {
+            if (array_key_exists($model_name, $this->paginate)) {
+                $this->paginate = array_merge($this->paginate, $options);
+            }
+        }
+    }
+
+
 /**
  * Handles automatic pagination of model records.
  * Added the skipping of the actual paginating query when the count is zero.
@@ -148,7 +169,7 @@ class AppController extends Controller {
 			}
 		}
 		$conditions = $fields = $order = $limit = $page = $recursive = null;
-
+        
 		if (!isset($defaults['conditions'])) {
 			$defaults['conditions'] = array();
 		}
@@ -253,9 +274,9 @@ class AppController extends Controller {
         # decide on what to render
         if (isset($extra['only'])) {
             if ($extra['only'] == 'count') { # rendering only the pagination navigation links 
-                # remove the only param from the url somehow
+                # remove the only 'param' from the url somehow
                 $url =  $this->params;
-                # remove some unwanted thing for the creation of the new url
+                # remove some unwanted things for the creation of the new url
                 unset($url['named']['only']);
                 unset($url['named']['update']);
                 unset($url['url']['ext']);
@@ -271,7 +292,13 @@ class AppController extends Controller {
                 $this->set('paging_url', $url);
                 $this->set('update_id', $extra['update']);
 
-                $this->renderAction('_'.$this->params['action'].'_counting');
+                $view_paths = App::path('views');
+                if (file_exists($view_paths[0] . $this->name . '/_' . $this->params['action'] . '_counting.ctp')) {
+                    $this->renderAction('_'.$this->params['action'].'_counting');
+                }
+                else {
+                    $this->renderAction('../paginate/default_counting');
+                }
             }
             elseif ($extra['only'] == 'page' && $this->RequestHandler->isAjax()) { # rendering only the table
                 $this->renderAction('_'.$this->params['action']);

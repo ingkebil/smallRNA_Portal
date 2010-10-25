@@ -1,4 +1,4 @@
-<?php echo $this->Jquery->paginate_only('related_srnas'); ?>
+<?php echo $this->Jquery->paginate('related_srnas'); ?>
 <div class="srnas">
 	<table cellpadding="0" cellspacing="0">
 	<tr>
@@ -9,8 +9,6 @@
 			<th><?php echo $this->Paginator->sort('chromosome', 'Chromosome.name');?></th>
 			<th><?php echo $this->Paginator->sort('score', 'Srna.score');?></th>
 			<th><?php echo $this->Paginator->sort('type', 'Srna.type_id');?></th>
-			<th><?php echo $this->Paginator->sort('abundance', 'Srna.abundance');?></th>
-			<th><?php echo $this->Paginator->sort('normalized_abundance', 'Srna.normalized_abundance');?></th>
 			<th><?php echo $this->Paginator->sort('experiment', 'Experiment.name');?></th>
 	</tr>
 	<?php
@@ -27,18 +25,16 @@
 		<td><?php echo $srna['Srna']['stop']; ?>&nbsp;</td>
 		<td><?php echo $srna['Srna']['strand']; ?>&nbsp;</td>
 		<td><?php echo $srna['Chromosome']['name']; ?>&nbsp;</td>
-		<td><?php echo $srna['Srna']['score']; ?>&nbsp;</td>
+		<td><?php echo $srna['Hit']['bitscore']; ?>&nbsp;</td>
 		<td>
 			<?php echo $this->Html->link($srna['Type']['name'], array('controller' => 'types', 'action' => 'view', $srna['Type']['id'])); ?>
 		</td>
-		<td><?php echo $srna['Srna']['abundance']; ?>&nbsp;</td>
-		<td><?php echo $srna['Srna']['normalized_abundance']; ?>&nbsp;</td>
 		<td>
 			<?php echo $this->Html->link($srna['Experiment']['name'], array('controller' => 'experiments', 'action' => 'view', $srna['Experiment']['id'])); ?>
 		</td>
 	</tr>
 <?php endforeach; ?>
 	</table>
-<?php echo $this->Jquery->paginate_counter('related_srnas'); ?>
+    <?php echo $this->Jquery->paginate_counter('related_srnas'); ?>
 </div>
 <?php echo $this->Jquery->end_paginate(); ?>
