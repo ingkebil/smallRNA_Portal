@@ -18,7 +18,7 @@ class PaginatorComponent extends Object {
     }
 
     function isLazy() {
-        return $this->controller->params['named']['only'];
+        return isset($this->controller->params['named']['only']);
     }
 
 }

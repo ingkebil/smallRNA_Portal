@@ -29,6 +29,11 @@ class SrnasController extends AppController {
         $annotations = $this->paginate($this->Srna->Experiment->Species->Annotation, array('Annotation.start <=' => $srna['Srna']['start'], 'Annotation.stop >=' => $srna['Srna']['stop'], 'chromosome_id' => $srna['Srna']['chromosome_id']));
         $this->set('annotations', $annotations);
         $this->set('srna', $srna);
+
+        # only render part of the page when requesting it in ajax (only give the related annotions)
+        if ($this->RequestHandler->isAjax()) {
+            $this->render('_'.$this->renderAction());
+        }
     }
 
     function between($start = 0, $stop = 0, $chr_id = null) {

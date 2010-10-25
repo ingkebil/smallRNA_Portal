@@ -59,4 +59,4 @@
 	</dl>
 </div>
 <h3>Related Annotations</h3>
-<?php echo $this->Jquery->page('../annotations/between', compact('annotations'), array('url' => array('controller' => 'annotations', 'action' => 'between', $srna['Srna']['start'], $srna['Srna']['stop']))); ?>
+<?php echo $this->Jquery->page('../annotations/between', compact('annotations'), array('url' => array('controller' => 'srnas', 'action' => 'view', $srna['Srna']['id']))); ?>
