@@ -6,6 +6,7 @@ class Blast extends AppModel {
     var $blastdb = '/home/billiau/tmp/arath/srnasblastdb';
 
     var $_schema = array(
+        'name' => array('type' => 'text'),
         'start' => array('type' => 'integer'),
         'stop'  => array('type' => 'integer'),
         'strand' => array('type' => 'string', 'length' => '1'),

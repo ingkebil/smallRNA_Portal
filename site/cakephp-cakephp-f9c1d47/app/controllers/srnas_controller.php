@@ -2,7 +2,7 @@
 class SrnasController extends AppController {
 
     var $name = 'Srnas';
-    var $components = array('RequestHandler', 'Session');
+    var $components = array('RequestHandler', 'Session', 'Paginator');
     var $helpers = array('Ajax', 'Jquery');
     var $uses = array('Srna', 'Type', 'Chromosome', 'Experiment', 'Blast');
 
@@ -99,14 +99,19 @@ class SrnasController extends AppController {
 
     function results() {
         $options = $this->_setOptions();
-        if (!isset($this->params['named']['only'])) {
+        if (!$this->Paginator->isLazy()) {
             $options['only'] = 'page'; # only give us the first page, not the pagination itself
         }
         $this->paginate = array('Srna' => $options);
         $srnas = $this->paginate($this->Srna);
         $this->set('srnas', $srnas);
 
-        $this->render($this->renderAction());
+        # because this view has more than only the pagination, the pagination 
+        # code is put into a different view which should only be rendered when we 
+        # are displaying the lazy paging part
+        if ($this->Paginator->isLazyPage()) {
+            $this->render('_' . $this->renderAction());
+        }
     }
 
     function stats($model) {

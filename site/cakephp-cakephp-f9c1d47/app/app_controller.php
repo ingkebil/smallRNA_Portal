@@ -300,9 +300,6 @@ class AppController extends Controller {
                     $this->renderAction('../paginate/default_counting');
                 }
             }
-            elseif ($extra['only'] == 'page' && $this->RequestHandler->isAjax()) { # rendering only the table
-                $this->renderAction('_'.$this->params['action']);
-            }
         }
 
 		return $results;
