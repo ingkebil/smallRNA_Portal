@@ -6,7 +6,7 @@
 			<th><?php echo $this->Paginator->sort('start', 'Srna.start');?></th>
 			<th><?php echo $this->Paginator->sort('stop', 'Srna.stop');?></th>
 			<th><?php echo $this->Paginator->sort('strand', 'Srna.strand');?></th>
-			<th><?php echo $this->Paginator->sort('score', 'Srna.score');?></th>
+			<th><?php echo $this->Paginator->sort('score', 'Hit.bitscore');?></th>
 			<th><?php echo $this->Paginator->sort('type', 'Srna.type_id');?></th>
 			<th><?php echo $this->Paginator->sort('experiment', 'Experiment.name');?></th>
 	</tr>

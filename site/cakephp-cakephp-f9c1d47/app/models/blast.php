@@ -10,18 +10,19 @@ class Blast extends AppModel {
         'start' => array('type' => 'integer'),
         'stop'  => array('type' => 'integer'),
         'strand' => array('type' => 'string', 'length' => '1'),
-        'score' => array('type' => 'double'),
+        'bitscore' => array('type' => 'float'),
         'type_id' => array('type' => 'integer'),
         'experiment_id' => array('type' => 'integer')
     );
 
-    function run($options, $cache = false) {
+    function runext($options, $cache = false) {
         $cmd_args = array();
         $cmd_args[] = '/usr/bin/blastall -p blastn';
         $cmd_args[] = "-d {$this->blastdb}";
         $cmd_args[] = '-m 7'; # xml output
         
         foreach ($options as $key => $value) {
+            $value = str_replace(array("\n", "\r"), '', $value);
             switch ($key) {
             case 'Sequence': 
                 $filename = tempnam(TMP, 'srnablast');
@@ -45,14 +46,13 @@ class Blast extends AppModel {
         $cmd = implode(' ', $cmd_args);
 
         $filename = TMP . 'blasts' . DS . md5($cmd);
-        # check the cache
-        if ($cache) {
+        $hits = null;
+        if ($cache) { # check the cache ?
             if (file_exists($filename)) {
                 $opts = file_get_contents($filename, unserialize($filename));
 
-                # make sure we have the right file
+                # make sure we have the right file with the right sequence
                 if ($options['Sequence'] == $opts['Sequence']) {
-                    $run_anyway = false;
                     $hits = $opts['hits'];
                 }
             }
@@ -142,6 +142,7 @@ class Blast extends AppModel {
 
     function paginate($conditions, $fields, $order, $limit = 20, $page = 1, $recursive = null, $extra = array()) {
         if ($this->data) {
+            $alias = 'Srna';
             if (is_null($order)) {
                 $order = array();
             }
@@ -160,7 +161,7 @@ class Blast extends AppModel {
                 $order_sort = strtolower($order[$order_key]) == 'desc' ? '>' : '<';
             }
 
-            $funsort = create_function('$a,$b', 'return ($a["Srna"]["'.$field.'"] == $b["Srna"]["'.$field.'"]) ? 0 : ($a["Srna"]["'.$field.'"] '.$order_sort.' $b["Srna"]["'.$field.'"]) ? -1 : 1;');
+            $funsort = create_function('$a,$b', 'return ($a["'.$alias.'"]["'.$field.'"] == $b["'.$alias.'"]["'.$field.'"]) ? 0 : ($a["'.$alias.'"]["'.$field.'"] '.$order_sort.' $b["'.$alias.'"]["'.$field.'"]) ? -1 : 1;');
             $srnas = $this->data['Hit'];
             usort($srnas, $funsort);
             $offset = $page * $limit - $limit;
