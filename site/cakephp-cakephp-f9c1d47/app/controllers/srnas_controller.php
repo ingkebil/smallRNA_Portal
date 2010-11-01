@@ -52,6 +52,16 @@ class SrnasController extends AppController {
         $this->set('srnas', $srnas);
     }
 
+    /*
+     * Give an overview of ALL experiments for a species versus the annotation. At the x you get the abundance for that annotation
+     */
+    function overview($species = null) {
+        $this->Srna->Mapping->belongsTo['Srna']['order'] = false; # remove annoying table sort
+        $this->paginate = array('Mapping' => array('contain' => array('Srna', 'Annotation'), 'group' => array('Mapping.annotation_id'), 'fields' => array('SUM(Srna.normalized_abundance) AS norm_abundance_count', 'SUM(Srna.abundance) AS abundance_count', 'count(Mapping.srna_id) AS cnt', 'Annotation.accession_nr', 'Annotation.model_nr')));
+        $srnas = $this->paginate_only($this->Srna->Mapping);
+
+        $this->set(compact('srnas'));
+    }
     function search() {
         $this->cacheAction = false;
         if (! empty($this->data)) {
@@ -193,7 +203,15 @@ class SrnasController extends AppController {
             case 'Srna.name':
             case 'Sequence.seq':
                 //            case 'Annotation.accession_nr':
-                $options['conditions'][ "$key LIKE" ] = "%$value%";
+                #$options['conditions'][ "$key LIKE" ] = "%$value%";
+                $hits = $this->Blast->run(array('Sequence' => $key, 'Gapped' => false, 'Expect' => 1));
+                $srna_ids = array();
+                foreach ($hits['Hit'] as $hit) {
+                    foreach ($hit['Srna'] as $srna) {
+                        $srna_ids[] = $srna['id'];
+                    }
+                }
+                $options['conditions']['Srna.id'] = $srna_ids;
                 break;
             default:
             }

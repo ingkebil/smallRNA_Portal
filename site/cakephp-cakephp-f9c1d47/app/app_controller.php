@@ -43,6 +43,8 @@ class AppController extends Controller {
             $model_name = $object;
         }
 
+        $model_name = ucfirst($model_name);
+
         if (is_array($this->paginate)) {
             if (array_key_exists($model_name, $this->paginate)) {
                 $this->paginate[$model_name] = array_merge($this->paginate[$model_name], $options);
@@ -54,7 +56,6 @@ class AppController extends Controller {
 
         return $this->paginate($object, $scope, $whitelist, $normalCount);
     }
-
 
 /**
  * Handles automatic pagination of model records.

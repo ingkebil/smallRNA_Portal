@@ -15,7 +15,7 @@ class Blast extends AppModel {
         'experiment_id' => array('type' => 'integer')
     );
 
-    function runext($options, $cache = false) {
+    function run($options, $cache = false) {
         $cmd_args = array();
         $cmd_args[] = '/usr/bin/blastall -p blastn';
         $cmd_args[] = "-d {$this->blastdb}";
@@ -60,7 +60,7 @@ class Blast extends AppModel {
         if (!$hits) {
             exec($cmd, $res);
             $res = implode("\n", $res);
-            $hits = $this->hits2srna($this->parse($res));
+            $hits = $this->parse($res);
             if ($cache) {
                 $options['hits'] = $hits;
                 file_put_contents($filename, serialize($options));
@@ -68,6 +68,14 @@ class Blast extends AppModel {
         }
 
         $this->data = array('Command' => $cmd, 'Hit' => $hits);
+
+        return $this->data;
+    }
+
+    function runext($options, $cache = false) {
+        $this->run($options, $cache);
+
+        $this->data['Hit'] = $this->hits2srna($this->data['Hit']);
 
         return $this->data;
     }
