@@ -3,7 +3,8 @@
 class AppController extends Controller {
 
     var $uses = array('Experiment', 'Species', 'Types');
-    var $helpers = array('Jquery', 'Session', 'Cache');
+    var $components = array('RequestHandler');
+    var $helpers = array('Jquery', 'Session', 'Cache', 'Ajax');
     var $cacheAction = '1 hour';
 
     function beforeFilter() {
@@ -248,7 +249,7 @@ class AppController extends Controller {
 		}
 		$page = $options['page'] = (integer)$page;
 
-        if ($count !== 0 || (isset($extra['only']) && $extra['only'] == 'page')) {
+        if (($count !== 0 && (isset($extra['only']) && !$extra['only'] == 'count')) || (isset($extra['only']) && $extra['only'] == 'page') || !isset($extra['only'])) {
             if (method_exists($object, 'paginate')) {
                 $results = $object->paginate(
                     $conditions, $fields, $order, $limit, $page, $recursive, $extra

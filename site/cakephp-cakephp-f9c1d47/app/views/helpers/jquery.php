@@ -43,7 +43,7 @@ class JqueryHelper extends AppHelper {
             $options['format'] = "<span class=\"disabled\">%s Counting results ...</span>";
         }
 
-        $url = $this->Paginator->options['url'];
+        $url = @$this->Paginator->options['url'];
 
         $url['only'] = 'count';
         $url['update'] = $id;

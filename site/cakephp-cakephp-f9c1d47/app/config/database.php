@@ -6,7 +6,7 @@ class DATABASE_CONFIG {
 		'persistent' => false,
 		'host' => 'localhost',
 		'login' => 'kebil',
-		'password' => 'kebil',
+        'password' => '',
 		'database' => 'smallrna_arath',
 		'encoding' => 'UTF-8'
 	);

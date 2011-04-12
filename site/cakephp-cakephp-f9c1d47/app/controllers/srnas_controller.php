@@ -4,7 +4,7 @@ class SrnasController extends AppController {
     var $name = 'Srnas';
     var $components = array('RequestHandler', 'Session', 'Paginator');
     var $helpers = array('Ajax', 'Jquery');
-    var $uses = array('Srna', 'Type', 'Chromosome', 'Experiment', 'Blast');
+    var $uses = array('Srna', 'Type', 'Chromosome', 'Experiment', 'Blast', 'Abundancy');
 
     function index() {
         $this->paginate = array('Srna' => array('unbindcount' => 1));
@@ -36,7 +36,7 @@ class SrnasController extends AppController {
         }
     }
 
-    function between($start = 0, $stop = 0, $chr_id = null) {
+    function between($start = 0, $stop = 0, $chr_id = null, $strand = null) {
         if ($this->RequestHandler->isAjax()) {
             $this->layout = 'ajax';
         }
@@ -45,7 +45,11 @@ class SrnasController extends AppController {
         if (!is_null($chr_id)) {
             $conds['Srna.chromosome_id'] = $chr_id;
         }
-        $srnas = $this->paginate($this->Srna->Mapping, $conds);
+        if (!is_null($strand)) {
+            $strand = $strand == 1 ? '-' : '+';
+            $conds['Srna.strand'] = $strand;
+        }
+        $srnas = $this->paginate_only($this->Srna->Mapping, $conds);
         if (isset($this->params['requested'])){
             return $srnas;
         }
@@ -56,12 +60,37 @@ class SrnasController extends AppController {
      * Give an overview of ALL experiments for a species versus the annotation. At the x you get the abundance for that annotation
      */
     function overview($species = null) {
-        $this->Srna->Mapping->belongsTo['Srna']['order'] = false; # remove annoying table sort
-        $this->paginate = array('Mapping' => array('contain' => array('Srna', 'Annotation'), 'group' => array('Mapping.annotation_id'), 'fields' => array('SUM(Srna.normalized_abundance) AS norm_abundance_count', 'SUM(Srna.abundance) AS abundance_count', 'count(Mapping.srna_id) AS cnt', 'Annotation.accession_nr', 'Annotation.model_nr')));
-        $srnas = $this->paginate_only($this->Srna->Mapping);
+        #$this->Srna->Mapping->belongsTo['Srna']['order'] = false; # remove annoying table sort
+        #$this->paginate = array('Mapping' => array('contain' => array('Srna', 'Annotation'), 'group' => array('Mapping.annotation_id', 'Srna.experiment_id'), 'fields' => array('SUM(Srna.normalized_abundance) AS norm_abundance_count', 'SUM(Srna.abundance) AS abundance_count', 'count(Mapping.srna_id) AS cnt', 'Annotation.accession_nr', 'Annotation.model_nr')));
+        #$srnas = $this->paginate_only($this->Srna->Mapping);
 
-        $this->set(compact('srnas'));
+        # get the annotations and perform the counts yourself
+#        $this->paginate = array('Annotation' => array('contain' => false, 'fields' => array('Annotation.accession_nr', 'Annotation.model_nr', 'Annotation.id', 'Annotation.type')));
+#        $annots = $this->paginate_only($this->Srna->Mapping->Annotation);
+#
+#        # get the srna counts
+#        $srnas = array();
+#        foreach ($annots as $annot) {
+#            $srna_cnts = $this->Srna->Mapping->find('all', array(
+#                'conditions' => array('Mapping.annotation_id' => $annot['Annotation']['id']),
+#                'fields' => array('SUM(Srna.normalized_abundance) AS norm_abundance_count', 'SUM(Srna.abundance) AS abundance_count', 'count(Mapping.srna_id) AS cnt', 'Srna.experiment_id'),
+#                'contain' => array('Srna'),
+#                'group' => array('Srna.experiment_id'),
+#                'order' => null 
+#            ));
+#            foreach ($srna_cnts as $srna) {
+#                $srna['Annotation'] = $annot['Annotation'];
+#                $srnas[] = $srna;
+#            }
+#        }
+#
+#        $this->set('experiments', $this->Srna->Experiment->find('list', array('fields' => array('Experiment.id', 'Experiment.name'))));
+#        $this->set(compact('srnas'));
+
+        $this->paginate = array('Abundancy' => array('fields' => array('Annotation.accession_nr', 'Annotation.model_nr', 'Experiment.name', 'Experiment.id', 'Abundancy.normalized_abundance', 'Abundancy.abundance', 'Abundancy.count', 'Annotation.id')));
+        $this->set('abundancies', $this->paginate_only($this->Abundancy));
     }
+
     function search() {
         $this->cacheAction = false;
         if (! empty($this->data)) {

@@ -15,3 +15,4 @@ echo $this->Paginator->counter(array(
 		<?php echo $this->Paginator->next(__('next', true) . ' >>', array(), null, array('class' => 'disabled'));?>
 </div>
 <?php echo $this->Js->writeBuffer(); ?>
+	<?php echo $this->element('sql_dump'); ?>

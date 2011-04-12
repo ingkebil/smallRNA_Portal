@@ -32,6 +32,8 @@
  */
 class AppModel extends Model {
 
+    var $additionalFields = array();
+
     function findInformationSchema($table = null) {
         $db =& ConnectionManager::getDataSource('default');
         $db_name = $db->config['database'];
@@ -100,7 +102,19 @@ class AppModel extends Model {
             $options['joins'] = $extra['joins'];
         }
 
+        if (isset($extra['group'])) {
+        }
+
         return $this->find('count', $options);
+    }
+
+    function hasField($name) {
+        $hf = parent::hasField($name);
+        if ($hf) {
+            return $hf;
+        }
+
+        return in_array($name, $this->additionalFields);
     }
 
 }
