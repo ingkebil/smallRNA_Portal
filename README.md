@@ -8,5 +8,5 @@ Do you want to ... ... search for smallRNAs? ... blast against smallRNAs? ... vi
 Parsing
 -------
 
-A whole perl based framework to parse cDNA, FASTA, GFF, TPLOT as well as testing of MySQL index speed is available in the 'parsing' directory.
+A whole perl based framework to parse cDNA, FASTA, GFF, TPLOT as well as testing of MySQL index speed and UnitTests are available in the 'parsing' directory.
 
