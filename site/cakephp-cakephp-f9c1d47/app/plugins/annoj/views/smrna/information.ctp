@@ -1,1 +1,1 @@
-syndicate.ctp
+<?php echo $javascript->object($response); ?>
