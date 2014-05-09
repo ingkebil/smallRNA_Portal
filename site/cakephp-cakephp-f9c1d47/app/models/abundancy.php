@@ -74,6 +74,9 @@ class Abundancy extends AppModel {
 		)
 	);
 
+    /*
+     * Only used for the overview in abundancies controller
+     */
     function paginate($conditions, $fields, $order, $limit, $page = 1, $recursive = null, $extra = array()) {
         if ($order && is_array($order)) {
             $joy_division = array();

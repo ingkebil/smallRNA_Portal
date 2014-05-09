@@ -11,6 +11,7 @@ class AbundanciesController extends AppController {
     /**
      * The kind of the same as index, but a different view
      * TODO the count still is wrong!
+     * This is how the DB got filled: insert into abundancies select annotation_id, experiment_id, sum(normalized_abundance), sum(abundance), count(s.id) from mappings m join srnas s on m.srna_id = s.id group by annotation_id, experiment_id order by m.annotation_id ASC
      */
     function overview($experiment_id = null) {
         if ($experiment_id) {
@@ -55,7 +56,7 @@ class AbundanciesController extends AppController {
             ),
         ));
 
-        # add the extra fields so we get a exp on the x-axis and annotation on the right one
+        # add the extra fields so we get a exp on the x-axis and annotation on the y-axis
         foreach ($experiments as $id => $name) {
             $this->paginate['Abundancy']['fields'][] = "(select normalized_abundance from abundancies where experiment_id = $id and annotation_id = Abundancy.annotation_id) as f_$id";
             $this->Abundancy->additionalFields[] = "f_$id";

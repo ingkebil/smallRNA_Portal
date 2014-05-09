@@ -91,6 +91,27 @@ class SrnasController extends AppController {
         $this->set('abundancies', $this->paginate_only($this->Abundancy));
     }
 
+    /**
+        give a list of reads with their abundances and the count of mapped positions
+     */
+    function chart($exp_id = null) {
+        $exp_id = isset($this->data['Experiment']['experiments']) ? $this->data['Experiment']['experiments'] : $exp_id;
+        if ($exp_id) {
+            $this->paginate = array(
+                'Mapping' => array(
+                    'fields' => array('Srna.id', 'Srna.name', 'Srna.start', 'Srna.stop', 'Srna.strand', 'Srna.normalized_abundance', 'count(Mapping.srna_id) AS mapping_count'),
+                    'contain' => array('Srna'),
+                    'countContains' => array('Srna'),
+                    'conditions' => array('Srna.experiment_id' => $exp_id),
+                    'group' => array('Srna.id', 'Srna.name', 'Srna.start', 'Srna.stop', 'Srna.strand', 'Srna.normalized_abundance'),
+                ),
+            );
+            $this->set('charts', $this->paginate_only($this->Srna->Mapping));
+        }
+
+        $this->set('experiments', $this->Srna->Experiment->find('list'));
+    }
+
     function search() {
         $this->cacheAction = false;
         if (! empty($this->data)) {

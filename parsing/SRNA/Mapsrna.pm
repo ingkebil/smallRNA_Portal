@@ -56,3 +56,11 @@ sub fprint {
 1;
 
 __END__
+
+=head1 SYNOPSIS
+
+This is a slow version of the mapping script. As soon as the DB becomes so
+large that indexes don't fit in mem anylonger, then the range query becomes
+extremely slow.
+
+Use Smapsrna.pm instead!

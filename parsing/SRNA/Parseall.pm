@@ -6,7 +6,7 @@ use DBI;
 use Getopt::Long;
 use Pod::Usage;
 use File::Path qw/ make_path /;
-use Settings q/:DB/;
+use Settings qw/:DB/;
 use Data::Dumper;
 
 our $dbh = DBI->connect('dbi:mysql:database='.DB, USER, PASS);
